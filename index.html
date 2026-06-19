@@ -41,6 +41,7 @@
       }
 
       body {
+        margin: 0;
         background:
           radial-gradient(circle at 15% 10%, rgba(193, 18, 31, 0.24), transparent 26rem),
           radial-gradient(circle at 88% 0%, rgba(102, 155, 188, 0.2), transparent 30rem),
@@ -52,26 +53,39 @@
       }
 
       .hero-title {
-        animation: titleRise 900ms ease-out both;
+        animation: none;
       }
 
       .hero-line {
-        animation: lineIn 900ms 280ms ease-out both;
+        animation: none;
       }
 
       .marquee-track {
-        animation: marquee 22s linear infinite;
+        animation: none;
       }
 
       .reveal {
-        opacity: 0;
-        transform: translateY(28px);
-        transition: opacity 700ms ease, transform 700ms ease;
+        opacity: 1;
+        transform: none;
+        transition: none;
       }
 
       .reveal.is-visible {
         opacity: 1;
         transform: translateY(0);
+      }
+
+      .hero-video-shell {
+        width: 100%;
+        margin-left: 0;
+      }
+
+      .hero-video {
+        min-height: clamp(420px, 78vh, 860px);
+      }
+
+      .dispatch-card {
+        transform: none;
       }
 
       .grain::before {
@@ -195,11 +209,11 @@
     </div>
 
     <main id="home">
-      <section class="relative overflow-hidden bg-[#030a0f] px-5 pb-10 pt-24 lg:px-8">
-        <div class="mx-auto max-w-7xl">
-          <div class="reveal overflow-hidden rounded-[1.75rem] border border-white/10 bg-black shadow-editorial">
+      <section class="relative overflow-hidden bg-[#030a0f] pb-10 pt-20">
+        <div class="hero-video-shell">
+          <div class="hero-video-wrap reveal relative overflow-hidden border-y border-white/10 bg-black shadow-editorial">
             <video
-              class="aspect-video w-full bg-black object-cover"
+              class="hero-video w-full bg-black object-cover"
               autoplay
               muted
               loop
@@ -211,7 +225,10 @@
               <source src="media/aditi-hero-video.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#030a0f]/70 via-transparent to-[#030a0f]/20"></div>
           </div>
+        </div>
+        <div class="mx-auto max-w-7xl px-5 lg:px-8">
           <div class="mt-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <p class="hero-line inline-flex w-fit rounded-full border border-aditi-blue/40 bg-aditi-navy/40 px-4 py-2 text-xs font-black uppercase tracking-[0.28em] text-aditi-blue">
               ADITI Intro Film
@@ -395,26 +412,44 @@
             <div class="reveal self-start rounded-[2rem] border border-white/10 bg-aditi-navy/70 p-6 text-aditi-cream shadow-editorial backdrop-blur">
               <p class="text-sm font-black uppercase tracking-[0.26em] text-aditi-blue">Free Dispatches</p>
               <div class="mt-6 grid gap-4">
-                <article class="rounded-2xl border border-white/10 bg-white/[0.06] p-5 transition hover:border-aditi-blue/40 hover:bg-white/[0.09]">
-                  <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Free Briefing</p>
-                  <h3 class="mt-3 text-2xl font-black text-white">Why Strategy Is Not A News Cycle</h3>
-                  <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A short editorial note on reading war, capability, and intent without chasing noise.</p>
-                  <!-- TODO: Replace with /articles/why-strategy-is-not-a-news-cycle when article route exists. -->
-                  <a href="#home" class="mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue hover:text-white">Read Free</a>
+                <article class="dispatch-card group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] transition hover:border-aditi-blue/40 hover:bg-white/[0.09]">
+                  <div class="relative h-44 overflow-hidden">
+                    <img src="media/optimized/brand-card-900.jpg" alt="ADITI strategic briefing artwork" class="h-full w-full object-cover" loading="lazy" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#030a0f] via-[#030a0f]/20 to-transparent"></div>
+                    <p class="absolute bottom-4 left-4 z-10 text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Free Briefing</p>
+                  </div>
+                  <div class="relative z-10 p-5 pt-4">
+                    <h3 class="text-2xl font-black text-white">Why Strategy Is Not A News Cycle</h3>
+                    <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A short editorial note on reading war, capability, and intent without chasing noise.</p>
+                    <!-- TODO: Replace with /articles/why-strategy-is-not-a-news-cycle when article route exists. -->
+                    <a href="#home" class="mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue hover:text-white">Read Free</a>
+                  </div>
                 </article>
-                <article class="rounded-2xl border border-white/10 bg-white/[0.06] p-5 transition hover:border-aditi-blue/40 hover:bg-white/[0.09]">
-                  <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Free Dispatch</p>
-                  <h3 class="mt-3 text-2xl font-black text-white">The Five Lenses of ADITI</h3>
-                  <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A public guide to Armament, Doctrine, Initiative, Terrain, and Integration.</p>
-                  <!-- TODO: Replace with /articles/five-lenses-of-aditi when article route exists. -->
-                  <a href="#framework" class="mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue hover:text-white">Read Free</a>
+                <article class="dispatch-card group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] transition hover:border-aditi-blue/40 hover:bg-white/[0.09]">
+                  <div class="relative h-44 overflow-hidden">
+                    <img src="media/optimized/cover-float-900.jpg" alt="ADITI cover floating above a dark desk" class="h-full w-full object-cover" loading="lazy" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#030a0f] via-[#030a0f]/20 to-transparent"></div>
+                    <p class="absolute bottom-4 left-4 z-10 text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Free Dispatch</p>
+                  </div>
+                  <div class="relative z-10 p-5 pt-4">
+                    <h3 class="text-2xl font-black text-white">The Five Lenses of ADITI</h3>
+                    <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A public guide to Armament, Doctrine, Initiative, Terrain, and Integration.</p>
+                    <!-- TODO: Replace with /articles/five-lenses-of-aditi when article route exists. -->
+                    <a href="#framework" class="mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue hover:text-white">Read Free</a>
+                  </div>
                 </article>
-                <article class="rounded-2xl border border-white/10 bg-white/[0.06] p-5 transition hover:border-aditi-blue/40 hover:bg-white/[0.09]">
-                  <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Field Note</p>
-                  <h3 class="mt-3 text-2xl font-black text-white">Reading Terrain Beyond Maps</h3>
-                  <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A compact note on why geography, infrastructure, and politics must be read together.</p>
-                  <!-- TODO: Replace with /articles/reading-terrain-beyond-maps when article route exists. -->
-                  <a href="#framework" class="mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue hover:text-white">Read Free</a>
+                <article class="dispatch-card group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] transition hover:border-aditi-blue/40 hover:bg-white/[0.09]">
+                  <div class="relative h-44 overflow-hidden">
+                    <img src="media/optimized/brand-bg-1600.jpg" alt="ADITI terrain and strategic map texture" class="h-full w-full object-cover" loading="lazy" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#030a0f] via-[#030a0f]/20 to-transparent"></div>
+                    <p class="absolute bottom-4 left-4 z-10 text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Field Note</p>
+                  </div>
+                  <div class="relative z-10 p-5 pt-4">
+                    <h3 class="text-2xl font-black text-white">Reading Terrain Beyond Maps</h3>
+                    <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A compact note on why geography, infrastructure, and politics must be read together.</p>
+                    <!-- TODO: Replace with /articles/reading-terrain-beyond-maps when article route exists. -->
+                    <a href="#framework" class="mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue hover:text-white">Read Free</a>
+                  </div>
                 </article>
               </div>
             </div>
@@ -488,7 +523,7 @@
           </div>
           <div class="reveal">
             <div class="rounded-[2rem] border border-white/15 bg-white/[0.06] p-6 shadow-editorial backdrop-blur">
-              <img src="media/optimized/brand-card-900.jpg" alt="ADITI brand card" class="mb-6 h-48 w-full rounded-2xl object-cover" loading="lazy" />
+              <img src="media/optimized/cover-desk-1200.jpg" alt="ADITI brand card" class="mb-6 h-48 w-full rounded-2xl object-cover" loading="lazy" />
               <div class="grid gap-4">
                 <div class="flex items-center justify-between border-b border-white/10 pb-4">
                   <span class="font-black text-white">Inaugural Issue</span><span class="text-aditi-blue">Available</span>
@@ -624,19 +659,22 @@
         });
       });
 
-      const revealObserver = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("is-visible");
-              revealObserver.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.16 }
-      );
+      const heroVideo = document.querySelector(".hero-video");
 
-      document.querySelectorAll(".reveal").forEach((item) => revealObserver.observe(item));
+      function playHeroVideo() {
+        if (!heroVideo) return;
+
+        heroVideo.muted = true;
+        heroVideo.playsInline = true;
+        const playAttempt = heroVideo.play();
+        if (playAttempt && typeof playAttempt.catch === "function") {
+          playAttempt.catch(() => {});
+        }
+      }
+
+      playHeroVideo();
+      window.addEventListener("load", playHeroVideo, { once: true });
+      document.addEventListener("pointerdown", playHeroVideo, { once: true });
     </script>
   </body>
 </html>
