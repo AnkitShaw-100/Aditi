@@ -9,6 +9,8 @@
     />
     <title>ADITI Magazine | Strategy of War, Not Defence News</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="vendor/gsap/gsap.min.js"></script>
+    <script src="vendor/gsap/ScrollTrigger.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -42,6 +44,7 @@
 
       body {
         margin: 0;
+        overflow-x: hidden;
         background:
           radial-gradient(circle at 15% 10%, rgba(193, 18, 31, 0.24), transparent 26rem),
           radial-gradient(circle at 88% 0%, rgba(102, 155, 188, 0.2), transparent 30rem),
@@ -61,7 +64,7 @@
       }
 
       .marquee-track {
-        animation: none;
+        animation: marquee 22s linear infinite;
       }
 
       .reveal {
@@ -84,8 +87,74 @@
         min-height: clamp(420px, 78vh, 860px);
       }
 
+      @media (max-width: 640px) {
+        .hero-video {
+          min-height: 260px;
+        }
+      }
+
       .dispatch-card {
-        transform: none;
+        transform-style: preserve-3d;
+        will-change: transform;
+      }
+
+      .interactive-card {
+        position: relative;
+        isolation: isolate;
+        transform-style: preserve-3d;
+        will-change: transform;
+      }
+
+      .interactive-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        opacity: 0;
+        border-radius: inherit;
+        background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(102, 155, 188, 0.25), transparent 34%);
+        transition: opacity 220ms ease;
+      }
+
+      .interactive-card:hover::before {
+        opacity: 1;
+      }
+
+      .magnetic {
+        will-change: transform;
+      }
+
+      .cursor-dot,
+      .cursor-ring {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 100;
+        pointer-events: none;
+        opacity: 0;
+        transform: translate(-50%, -50%);
+      }
+
+      .cursor-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #FDF0D5;
+      }
+
+      .cursor-ring {
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(102, 155, 188, 0.7);
+        border-radius: 999px;
+        mix-blend-mode: screen;
+      }
+
+      @media (max-width: 768px), (pointer: coarse) {
+        .cursor-dot,
+        .cursor-ring {
+          display: none;
+        }
       }
 
       .grain::before {
@@ -136,6 +205,8 @@
     </style>
   </head>
   <body class="font-sans text-aditi-cream antialiased">
+    <div class="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" aria-hidden="true"></div>
     <header
       class="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-[#030a0f]/72 backdrop-blur-xl"
     >
@@ -240,7 +311,7 @@
         </div>
       </section>
 
-      <section class="grain relative overflow-hidden border-y border-white/10 bg-[#030a0f] py-20 text-aditi-cream sm:py-28">
+      <section class="grain relative overflow-hidden border-y border-white/10 bg-[#030a0f] py-14 text-aditi-cream sm:py-20 lg:py-24">
         <div class="absolute inset-0 bg-gradient-to-b from-[#030a0f] via-aditi-navy/80 to-[#030a0f]"></div>
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_72%_15%,rgba(193,18,31,.24),transparent_30rem)]"></div>
         <div class="absolute left-[13%] top-10 h-8 w-8 rounded-full bg-aditi-cream"></div>
@@ -250,14 +321,14 @@
           <p class="hero-line mb-6 inline-flex rounded-full border border-aditi-blue/40 bg-aditi-navy/40 px-4 py-2 text-xs font-black uppercase tracking-[0.28em] text-aditi-blue">
             Volume 1 - Issue 1 - February 2026
           </p>
-          <h1 class="hero-title font-sans text-[5.8rem] font-black uppercase leading-[0.78] tracking-normal text-aditi-red sm:text-[9rem] lg:text-[14.5rem]">
+          <h1 class="hero-title font-sans text-[3.35rem] font-black uppercase leading-[0.9] tracking-normal text-aditi-red sm:text-[5.4rem] lg:text-[8rem] xl:text-[9rem]">
             ADITI
           </h1>
-          <p class="hero-line mt-10 max-w-3xl text-2xl leading-snug text-aditi-cream/82 sm:text-3xl">
+          <p class="hero-line mt-5 max-w-3xl text-base leading-7 text-aditi-cream/82 sm:mt-7 sm:text-xl sm:leading-8 lg:text-2xl">
             India's only magazine built around the strategy of war, not the news of it.
             Deliberately contrarian. Rigorously analytical. Proudly Indian.
           </p>
-          <div class="hero-line mt-10 flex flex-col gap-4 sm:flex-row">
+          <div class="hero-line mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:gap-4">
             <!-- TODO: Replace with /issue/inaugural-issue and /checkout?product=aditi-issue-1 when those routes exist. -->
             <a href="#dispatches" class="rounded-full bg-aditi-red px-7 py-4 text-center text-sm font-black uppercase tracking-[0.18em] text-white shadow-xl shadow-aditi-red/20 transition hover:-translate-y-1 hover:bg-[#d51b28]">
               Read the inaugural issue →
@@ -396,110 +467,134 @@
         </div>
       </section>
 
-      <section id="dispatches" class="py-24 sm:py-32">
-        <div class="mx-auto max-w-7xl px-5 lg:px-8">
+      <section id="dispatches" class="relative overflow-hidden py-20 sm:py-28">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(102,155,188,.16),transparent_26rem)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_92%_55%,rgba(193,18,31,.18),transparent_30rem)]"></div>
+        <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
           <div class="reveal flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <div>
+            <div class="max-w-3xl">
               <p class="mb-4 text-sm font-black uppercase tracking-[0.3em] text-aditi-blue">Read ADITI</p>
-              <h2 class="font-serif text-4xl font-black leading-tight text-white sm:text-6xl">Dispatches and premium essays.</h2>
+              <h2 class="font-serif text-3xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">Start free. Buy the essays worth keeping.</h2>
             </div>
-            <p class="max-w-md text-white/65">
-              Start with free dispatches, then move into the inaugural issue and long-form essays priced clearly at &#8377;350.
+            <p class="max-w-md text-sm leading-7 text-white/68 sm:text-base">
+              Free dispatches show the method. Premium articles deliver the full strategic argument, edited as durable reading rather than a feed.
             </p>
           </div>
 
-          <div class="mt-12 grid gap-6 lg:grid-cols-[.85fr_1.15fr]">
-            <div class="reveal self-start rounded-[2rem] border border-white/10 bg-aditi-navy/70 p-6 text-aditi-cream shadow-editorial backdrop-blur">
-              <p class="text-sm font-black uppercase tracking-[0.26em] text-aditi-blue">Free Dispatches</p>
-              <div class="mt-6 grid gap-4">
-                <article class="dispatch-card group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] transition hover:border-aditi-blue/40 hover:bg-white/[0.09]">
-                  <div class="relative h-44 overflow-hidden">
-                    <img src="media/optimized/brand-card-900.jpg" alt="ADITI strategic briefing artwork" class="h-full w-full object-cover" loading="lazy" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#030a0f] via-[#030a0f]/20 to-transparent"></div>
-                    <p class="absolute bottom-4 left-4 z-10 text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Free Briefing</p>
-                  </div>
-                  <div class="relative z-10 p-5 pt-4">
-                    <h3 class="text-2xl font-black text-white">Why Strategy Is Not A News Cycle</h3>
+          <div class="mt-10 grid gap-6 text-sm text-white/68 sm:grid-cols-3">
+            <div class="reveal rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
+              <p class="text-2xl font-black text-white">01</p>
+              <p class="mt-2 font-bold text-aditi-cream">Read the free lens</p>
+              <p class="mt-2">Understand the ADITI approach before paying.</p>
+            </div>
+            <div class="reveal rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
+              <p class="text-2xl font-black text-white">02</p>
+              <p class="mt-2 font-bold text-aditi-cream">Choose the essay</p>
+              <p class="mt-2">Pick focused long-form analysis at a clear price.</p>
+            </div>
+            <div class="reveal rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
+              <p class="text-2xl font-black text-white">03</p>
+              <p class="mt-2 font-bold text-aditi-cream">Keep the argument</p>
+              <p class="mt-2">Designed for serious reading, notes, and return visits.</p>
+            </div>
+          </div>
+
+          <div class="mt-12 grid gap-10">
+            <div class="reveal rounded-3xl border border-aditi-blue/25 bg-aditi-navy/72 p-4 text-aditi-cream shadow-editorial backdrop-blur sm:p-6">
+              <div class="flex flex-col justify-between gap-3 border-b border-white/10 pb-5 sm:flex-row sm:items-center">
+                <div>
+                  <p class="text-sm font-black uppercase tracking-[0.26em] text-aditi-blue">Free Previews</p>
+                  <p class="mt-2 text-sm leading-6 text-white/62">Quick public reads that explain ADITI's method before the premium work.</p>
+                </div>
+                <span class="rounded-full border border-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white/60">No paywall</span>
+              </div>
+              <div class="mt-6 grid gap-5 md:grid-cols-2">
+                <article class="dispatch-card interactive-card group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06]">
+                  <img src="media/optimized/brand-card-900.jpg" alt="ADITI strategic briefing artwork" class="h-40 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-44" loading="lazy" />
+                  <div class="p-5">
+                    <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Free Briefing</p>
+                    <h3 class="mt-3 text-xl font-black text-white sm:text-2xl">Why Strategy Is Not A News Cycle</h3>
                     <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A short editorial note on reading war, capability, and intent without chasing noise.</p>
-                    <!-- TODO: Replace with /articles/why-strategy-is-not-a-news-cycle when article route exists. -->
-                    <a href="#home" class="mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue hover:text-white">Read Free</a>
+                    <a href="#home" class="magnetic mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue">Read Free</a>
                   </div>
                 </article>
-                <article class="dispatch-card group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] transition hover:border-aditi-blue/40 hover:bg-white/[0.09]">
-                  <div class="relative h-44 overflow-hidden">
-                    <img src="media/optimized/cover-float-900.jpg" alt="ADITI cover floating above a dark desk" class="h-full w-full object-cover" loading="lazy" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#030a0f] via-[#030a0f]/20 to-transparent"></div>
-                    <p class="absolute bottom-4 left-4 z-10 text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Free Dispatch</p>
-                  </div>
-                  <div class="relative z-10 p-5 pt-4">
-                    <h3 class="text-2xl font-black text-white">The Five Lenses of ADITI</h3>
+                <article class="dispatch-card interactive-card group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06]">
+                  <img src="media/optimized/cover-float-900.jpg" alt="ADITI cover floating above a dark desk" class="h-40 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-44" loading="lazy" />
+                  <div class="p-5">
+                    <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Free Dispatch</p>
+                    <h3 class="mt-3 text-xl font-black text-white sm:text-2xl">The Five Lenses of ADITI</h3>
                     <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A public guide to Armament, Doctrine, Initiative, Terrain, and Integration.</p>
-                    <!-- TODO: Replace with /articles/five-lenses-of-aditi when article route exists. -->
-                    <a href="#framework" class="mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue hover:text-white">Read Free</a>
-                  </div>
-                </article>
-                <article class="dispatch-card group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] transition hover:border-aditi-blue/40 hover:bg-white/[0.09]">
-                  <div class="relative h-44 overflow-hidden">
-                    <img src="media/optimized/brand-bg-1600.jpg" alt="ADITI terrain and strategic map texture" class="h-full w-full object-cover" loading="lazy" />
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#030a0f] via-[#030a0f]/20 to-transparent"></div>
-                    <p class="absolute bottom-4 left-4 z-10 text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Field Note</p>
-                  </div>
-                  <div class="relative z-10 p-5 pt-4">
-                    <h3 class="text-2xl font-black text-white">Reading Terrain Beyond Maps</h3>
-                    <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A compact note on why geography, infrastructure, and politics must be read together.</p>
-                    <!-- TODO: Replace with /articles/reading-terrain-beyond-maps when article route exists. -->
-                    <a href="#framework" class="mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue hover:text-white">Read Free</a>
+                    <a href="#framework" class="magnetic mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue">Read Free</a>
                   </div>
                 </article>
               </div>
             </div>
 
-            <div class="grid items-start gap-6 md:grid-cols-2">
-              <article class="reveal flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.06] backdrop-blur transition hover:-translate-y-2 hover:bg-white/[0.09]">
-                <img src="media/optimized/magazine-landing-1800.jpg" alt="ADITI inaugural issue on a table" class="h-64 w-full object-cover" loading="lazy" />
-                <div class="flex flex-1 flex-col p-6">
-                  <div class="flex items-center justify-between gap-4">
-                    <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Premium Issue</p>
-                    <span class="rounded-full bg-aditi-red px-3 py-1 text-sm font-black text-white">&#8377;350</span>
-                  </div>
-                  <h3 class="mt-4 text-2xl font-black text-white">Cognitive Dissonance in Indian Strategy?</h3>
-                  <p class="mt-3 text-sm leading-6 text-white/65">The inaugural ADITI issue on India's strategic paradoxes, doctrine, air power, cyber strength, and grand strategy.</p>
-                  <!-- TODO: Replace with /checkout?product=aditi-issue-1 when checkout route exists. -->
-                  <div class="mt-auto pt-6">
-                    <a href="#final-cta" class="inline-flex rounded-full bg-aditi-red px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#d51b28]">Buy for &#8377;350</a>
-                  </div>
-                </div>
-              </article>
-
-              <article class="reveal flex h-full flex-col rounded-[2rem] border border-white/10 bg-aditi-navy p-6 transition hover:-translate-y-2 hover:border-aditi-blue/40">
+            <div class="rounded-3xl border border-aditi-red/35 bg-[#030a0f]/72 p-4 shadow-editorial backdrop-blur sm:p-6">
+              <div class="reveal flex flex-col justify-between gap-3 border-b border-aditi-red/20 pb-5 sm:flex-row sm:items-center">
                 <div>
-                  <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Premium Essay</p>
-                  <h3 class="mt-5 text-3xl font-black leading-tight text-white">India's Grand Strategy With Respect To China</h3>
-                  <p class="mt-4 text-sm leading-6 text-white/65">Long-form strategic analysis for readers who need arguments, not summaries.</p>
+                  <p class="text-sm font-black uppercase tracking-[0.26em] text-aditi-red">Paid Articles</p>
+                  <p class="mt-2 text-sm leading-6 text-white/62">The full strategic arguments, priced clearly and built for serious reading.</p>
                 </div>
-                <div class="mt-8 grid gap-3 border-t border-white/10 pt-5 text-sm text-aditi-cream/62">
-                  <div class="flex items-center justify-between"><span>Format</span><span class="font-bold text-white">Premium essay</span></div>
-                  <div class="flex items-center justify-between"><span>Access</span><span class="font-bold text-white">Digital</span></div>
-                  <div class="flex items-center justify-between"><span>Status</span><span class="font-bold text-aditi-blue">Available</span></div>
+                <span class="rounded-full bg-aditi-red px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white">Premium</span>
+              </div>
+
+              <div class="mt-6 grid gap-6">
+              <article class="premium-card interactive-card reveal overflow-hidden rounded-3xl border border-aditi-red/45 bg-[#06111a] shadow-editorial lg:grid lg:grid-cols-[0.95fr_1.05fr]">
+                <div class="relative min-h-[280px] overflow-hidden">
+                  <img src="media/optimized/magazine-landing-1800.jpg" alt="ADITI inaugural issue on a table" class="h-full min-h-[280px] w-full object-cover" loading="lazy" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-[#030a0f] via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-[#06111a]"></div>
+                  <span class="absolute left-5 top-5 rounded-full bg-aditi-red px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white">Best Start</span>
                 </div>
-                <div class="mt-auto flex items-center justify-between border-t border-white/10 pt-5">
-                  <span class="text-3xl font-black text-aditi-cream">&#8377;350</span>
-                  <!-- TODO: Replace with /checkout?product=grand-strategy-china when product route exists. -->
-                  <a href="#final-cta" class="rounded-full bg-aditi-red px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#d51b28]">Buy for &#8377;350</a>
+                <div class="flex flex-col p-6 sm:p-8">
+                  <div class="flex flex-wrap items-center gap-3">
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-aditi-blue">Premium Issue</p>
+                    <span class="rounded-full border border-aditi-blue/40 px-3 py-1 text-xs font-bold text-aditi-cream">Digital access</span>
+                  </div>
+                  <h3 class="mt-5 text-3xl font-black leading-tight text-white sm:text-4xl">Cognitive Dissonance in Indian Strategy?</h3>
+                  <p class="mt-4 text-sm leading-7 text-white/68 sm:text-base">The inaugural ADITI issue on strategic paradoxes, doctrine, air power, cyber strength, and grand strategy.</p>
+                  <div class="mt-6 grid gap-3 text-sm text-white/70 sm:grid-cols-3">
+                    <div class="rounded-2xl bg-white/[0.06] p-4"><span class="block text-lg font-black text-white">5</span>Pillars</div>
+                    <div class="rounded-2xl bg-white/[0.06] p-4"><span class="block text-lg font-black text-white">Issue 1</span>Foundational</div>
+                    <div class="rounded-2xl bg-white/[0.06] p-4"><span class="block text-lg font-black text-white">PDF</span>Digital</div>
+                  </div>
+                  <div class="mt-auto flex flex-col gap-4 pt-7 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p class="text-xs font-black uppercase tracking-[0.22em] text-white/45">One-time price</p>
+                      <p class="text-4xl font-black text-aditi-cream">&#8377;350</p>
+                    </div>
+                    <a href="#final-cta" class="magnetic inline-flex justify-center rounded-full bg-aditi-red px-7 py-3.5 text-sm font-black uppercase tracking-[0.16em] text-white shadow-xl shadow-aditi-red/25 transition hover:bg-[#d51b28]">Buy Issue</a>
+                  </div>
                 </div>
               </article>
 
-              <article class="reveal rounded-[2rem] border border-white/10 bg-white/[0.06] p-6 backdrop-blur md:col-span-2">
-                <div class="grid gap-6 md:grid-cols-[.75fr_1fr] md:items-center">
-                  <img src="media/optimized/cover-desk-1200.jpg" alt="ADITI magazine cover mockup" class="h-72 w-full rounded-2xl object-cover" loading="lazy" />
-                  <div>
+              <div class="grid gap-6 md:grid-cols-2">
+                <article class="premium-card interactive-card reveal flex min-h-full flex-col rounded-3xl border border-white/10 bg-white/[0.07] p-6 backdrop-blur">
+                  <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Premium Essay</p>
+                  <h3 class="mt-4 text-2xl font-black leading-tight text-white">India's Grand Strategy With Respect To China</h3>
+                  <p class="mt-4 text-sm leading-6 text-white/66">Long-form strategic analysis for readers who need arguments, not summaries.</p>
+                  <div class="mt-6 grid gap-3 border-y border-white/10 py-5 text-sm text-aditi-cream/64">
+                    <div class="flex items-center justify-between"><span>Format</span><span class="font-bold text-white">Premium essay</span></div>
+                    <div class="flex items-center justify-between"><span>Access</span><span class="font-bold text-white">Digital</span></div>
+                    <div class="flex items-center justify-between"><span>Status</span><span class="font-bold text-aditi-blue">Available</span></div>
+                  </div>
+                  <div class="mt-auto flex items-center justify-between gap-4 pt-5">
+                    <span class="text-3xl font-black text-aditi-cream">&#8377;350</span>
+                    <a href="#final-cta" class="magnetic rounded-full bg-aditi-red px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#d51b28]">Buy Essay</a>
+                  </div>
+                </article>
+
+                <article class="interactive-card reveal overflow-hidden rounded-3xl border border-white/10 bg-white/[0.06] backdrop-blur">
+                  <img src="media/optimized/cover-desk-1200.jpg" alt="ADITI magazine cover mockup" class="h-52 w-full object-cover" loading="lazy" />
+                  <div class="p-6">
                     <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Next Issue</p>
-                    <h3 class="mt-4 text-3xl font-black text-white">Terrain, Technology, and the Future Border</h3>
-                    <p class="mt-4 text-sm leading-6 text-white/65">A forthcoming issue on mountain warfare, surveillance, unmanned systems, and the logic of contested geography.</p>
+                    <h3 class="mt-4 text-2xl font-black text-white">Terrain, Technology, and the Future Border</h3>
+                    <p class="mt-4 text-sm leading-6 text-white/65">Mountain warfare, surveillance, unmanned systems, and contested geography.</p>
                     <button class="mt-6 rounded-full border border-white/20 px-5 py-2.5 text-sm font-black text-white/70" disabled>Coming Soon</button>
                   </div>
-                </div>
-              </article>
+                </article>
+              </div>
+              </div>
             </div>
           </div>
         </div>
@@ -665,6 +760,7 @@
         if (!heroVideo) return;
 
         heroVideo.muted = true;
+        heroVideo.defaultMuted = true;
         heroVideo.playsInline = true;
         const playAttempt = heroVideo.play();
         if (playAttempt && typeof playAttempt.catch === "function") {
@@ -674,7 +770,140 @@
 
       playHeroVideo();
       window.addEventListener("load", playHeroVideo, { once: true });
+      heroVideo?.addEventListener("loadedmetadata", playHeroVideo, { once: true });
+      heroVideo?.addEventListener("canplay", playHeroVideo, { once: true });
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) playHeroVideo();
+      });
       document.addEventListener("pointerdown", playHeroVideo, { once: true });
+
+      if (window.gsap && window.ScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger);
+        document.documentElement.dataset.motion = "gsap";
+
+        gsap.set(".reveal", { autoAlpha: 0, y: 42 });
+        gsap.set(".dispatch-card, .premium-card", {
+          autoAlpha: 0,
+          y: 56,
+          scale: 0.96,
+          rotateX: 7,
+          transformPerspective: 900,
+        });
+
+        gsap.to(".reveal", {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.9,
+          stagger: 0.08,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: "main",
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+        });
+
+        document.querySelectorAll("section").forEach((section) => {
+          const items = section.querySelectorAll(".reveal, .dispatch-card, .premium-card");
+          if (!items.length) return;
+
+          gsap.to(items, {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            rotateX: 0,
+            duration: 0.85,
+            stagger: 0.09,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 74%",
+              once: true,
+            },
+          });
+        });
+
+        gsap.fromTo(
+          "#dispatches h2",
+          { y: 34, autoAlpha: 0, filter: "blur(8px)" },
+          {
+            y: 0,
+            autoAlpha: 1,
+            filter: "blur(0px)",
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: "#dispatches",
+              start: "top 78%",
+              once: true,
+            },
+          }
+        );
+
+        gsap.to(".premium-card img", {
+          yPercent: 8,
+          ease: "none",
+          scrollTrigger: {
+            trigger: "#dispatches",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+
+        document.querySelectorAll(".interactive-card").forEach((card) => {
+          card.addEventListener("mousemove", (event) => {
+            const rect = card.getBoundingClientRect();
+            const relX = event.clientX - rect.left;
+            const relY = event.clientY - rect.top;
+            const x = (relX / rect.width - 0.5) * 12;
+            const y = (relY / rect.height - 0.5) * -10;
+
+            card.style.setProperty("--mx", `${(relX / rect.width) * 100}%`);
+            card.style.setProperty("--my", `${(relY / rect.height) * 100}%`);
+            gsap.to(card, { rotateY: x, rotateX: y, y: -8, duration: 0.35, ease: "power2.out" });
+          });
+
+          card.addEventListener("mouseleave", () => {
+            gsap.to(card, { rotateY: 0, rotateX: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.65)" });
+          });
+        });
+
+        document.querySelectorAll(".magnetic").forEach((item) => {
+          item.addEventListener("mousemove", (event) => {
+            const rect = item.getBoundingClientRect();
+            const x = (event.clientX - rect.left - rect.width / 2) * 0.25;
+            const y = (event.clientY - rect.top - rect.height / 2) * 0.35;
+            gsap.to(item, { x, y, duration: 0.3, ease: "power2.out" });
+          });
+
+          item.addEventListener("mouseleave", () => {
+            gsap.to(item, { x: 0, y: 0, duration: 0.45, ease: "elastic.out(1, 0.55)" });
+          });
+        });
+
+        if (matchMedia("(pointer: fine)").matches) {
+          const dot = document.querySelector(".cursor-dot");
+          const ring = document.querySelector(".cursor-ring");
+          const moveDot = gsap.quickTo(dot, "x", { duration: 0.12, ease: "power3.out" });
+          const moveDotY = gsap.quickTo(dot, "y", { duration: 0.12, ease: "power3.out" });
+          const moveRing = gsap.quickTo(ring, "x", { duration: 0.38, ease: "power3.out" });
+          const moveRingY = gsap.quickTo(ring, "y", { duration: 0.38, ease: "power3.out" });
+
+          window.addEventListener("mousemove", (event) => {
+            gsap.to([dot, ring], { autoAlpha: 1, duration: 0.2 });
+            moveDot(event.clientX);
+            moveDotY(event.clientY);
+            moveRing(event.clientX);
+            moveRingY(event.clientY);
+          });
+
+          document.querySelectorAll("a, button, .interactive-card").forEach((item) => {
+            item.addEventListener("mouseenter", () => gsap.to(ring, { scale: 1.65, borderColor: "#FDF0D5", duration: 0.25 }));
+            item.addEventListener("mouseleave", () => gsap.to(ring, { scale: 1, borderColor: "rgba(102, 155, 188, 0.7)", duration: 0.25 }));
+          });
+        }
+      }
     </script>
   </body>
 </html>
