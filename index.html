@@ -1,909 +1,265 @@
-﻿<!doctype html>
-<html lang="en" class="scroll-smooth">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ADITI | India's Own Strategy Magazine</title>
     <meta
       name="description"
-      content="ADITI is India's own strategy magazine: serious essays on war, doctrine, terrain, integration, and geopolitical decision-making."
+      content="ADITI is an Indian strategic and geopolitical publication built on Armament, Doctrine, Initiative, Terrain, and Integration."
     />
-    <title>ADITI Magazine | Strategy of War, Not Defence News</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="vendor/gsap/gsap.min.js"></script>
-    <script src="vendor/gsap/ScrollTrigger.min.js"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              aditi: {
-                maroon: "#780000",
-                red: "#C1121F",
-                cream: "#FDF0D5",
-                navy: "#003049",
-                blue: "#669BBC",
-              },
-            },
-            fontFamily: {
-              sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-              serif: ["Georgia", "Cambria", "Times New Roman", "serif"],
-            },
-            boxShadow: {
-              editorial: "0 28px 80px rgba(0, 48, 73, 0.42)",
-            },
-          },
-        },
-      };
-    </script>
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
-
-      :root {
-        color-scheme: dark;
-      }
-
-      body {
-        margin: 0;
-        overflow-x: hidden;
-        background:
-          radial-gradient(circle at 15% 10%, rgba(193, 18, 31, 0.24), transparent 26rem),
-          radial-gradient(circle at 88% 0%, rgba(102, 155, 188, 0.2), transparent 30rem),
-          #030a0f;
-      }
-
-      .text-balance {
-        text-wrap: balance;
-      }
-
-      .hero-title {
-        animation: none;
-      }
-
-      .hero-line {
-        animation: none;
-      }
-
-      .marquee-track {
-        animation: marquee 22s linear infinite;
-      }
-
-      .reveal {
-        opacity: 1;
-        transform: none;
-        transition: none;
-      }
-
-      .reveal.is-visible {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .hero-video-shell {
-        width: 100%;
-        margin-left: 0;
-      }
-
-      .hero-video {
-        min-height: clamp(420px, 78vh, 860px);
-      }
-
-      @media (max-width: 640px) {
-        .hero-video {
-          min-height: 260px;
-        }
-      }
-
-      .dispatch-card {
-        transform-style: preserve-3d;
-        will-change: transform;
-      }
-
-      .interactive-card {
-        position: relative;
-        isolation: isolate;
-        transform-style: preserve-3d;
-        will-change: transform;
-      }
-
-      .interactive-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        opacity: 0;
-        border-radius: inherit;
-        background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(102, 155, 188, 0.25), transparent 34%);
-        transition: opacity 220ms ease;
-      }
-
-      .interactive-card:hover::before {
-        opacity: 1;
-      }
-
-      .magnetic {
-        will-change: transform;
-      }
-
-      .cursor-dot,
-      .cursor-ring {
-        position: fixed;
-        left: 0;
-        top: 0;
-        z-index: 100;
-        pointer-events: none;
-        opacity: 0;
-        transform: translate(-50%, -50%);
-      }
-
-      .cursor-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 999px;
-        background: #FDF0D5;
-      }
-
-      .cursor-ring {
-        width: 42px;
-        height: 42px;
-        border: 1px solid rgba(102, 155, 188, 0.7);
-        border-radius: 999px;
-        mix-blend-mode: screen;
-      }
-
-      @media (max-width: 768px), (pointer: coarse) {
-        .cursor-dot,
-        .cursor-ring {
-          display: none;
-        }
-      }
-
-      .grain::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-        opacity: 0.16;
-        background-image:
-          linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-        background-size: 38px 38px;
-        mask-image: linear-gradient(to bottom, black, transparent 84%);
-      }
-
-      @keyframes titleRise {
-        from {
-          opacity: 0;
-          transform: translateY(28px) scale(0.98);
-          letter-spacing: 0.18em;
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-          letter-spacing: 0.06em;
-        }
-      }
-
-      @keyframes lineIn {
-        from {
-          opacity: 0;
-          transform: translateY(18px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes marquee {
-        from {
-          transform: translateX(0);
-        }
-        to {
-          transform: translateX(-50%);
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css" />
   </head>
-  <body class="font-sans text-aditi-cream antialiased">
-    <div class="cursor-dot" aria-hidden="true"></div>
-    <div class="cursor-ring" aria-hidden="true"></div>
-    <header
-      class="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-[#030a0f]/72 backdrop-blur-xl"
-    >
-      <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
-        <a href="#home" class="group flex items-center gap-3" aria-label="ADITI home">
-          <span class="grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-white/30 bg-white p-0.5">
-            <img
-              src="media/optimized/aditi-logo-mark.png"
-              alt=""
-              class="h-[96%] w-[96%] object-contain"
-            />
-          </span>
-          <span>
-            <span class="block text-sm font-black uppercase tracking-[0.34em] text-white">ADITI</span>
-            <span class="block text-[10px] uppercase tracking-[0.22em] text-aditi-blue">India's own strategy magazine</span>
-          </span>
+  <body>
+    <div class="mobile-canvas">
+      <header class="site-header">
+        <a class="brand" href="#home" aria-label="ADITI home">
+          <img src="media/optimized/aditi-logo-mark.png" alt="" />
+          <span>ADITI</span>
         </a>
-
-        <nav class="hidden items-center gap-8 text-sm font-semibold text-white/72 lg:flex">
-          <a class="transition hover:text-white" href="#framework">Framework</a>
-          <a class="transition hover:text-white" href="#dispatches">Dispatches</a>
-          <a class="transition hover:text-white" href="#editions">Editions</a>
-          <a class="transition hover:text-white" href="#faq">FAQ</a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+          <span></span>
+          <span></span>
+        </button>
+        <nav class="site-nav" id="site-nav">
+          <a href="#framework">Framework</a>
+          <a href="#issue">Issue</a>
+          <a href="#dispatches">Dispatches</a>
+          <a href="#subscribe">Subscribe</a>
         </nav>
+      </header>
 
-        <div class="flex items-center gap-3">
-          <!-- TODO: Replace with /checkout?product=aditi-issue-1 once payment route is live. -->
-          <a
-            href="#dispatches"
-            class="hidden rounded-full bg-aditi-red px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-aditi-red/25 transition hover:-translate-y-0.5 hover:bg-[#d51b28] sm:inline-flex"
-          >
-            Buy Issue &#8377;350
-          </a>
-          <button
-            id="menuButton"
-            class="grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/10 text-2xl leading-none text-white transition hover:bg-white/15"
-            aria-label="Open menu"
-            aria-expanded="false"
-          >
-            +
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <div
-      id="menuOverlay"
-      class="fixed inset-0 z-[60] hidden bg-aditi-navy/96 px-6 py-6 text-aditi-cream backdrop-blur-2xl"
-    >
-      <div class="mx-auto flex h-full max-w-5xl flex-col">
-        <div class="flex items-center justify-between">
-          <p class="text-sm font-black uppercase tracking-[0.34em]">ADITI Menu</p>
-          <button
-            id="closeMenu"
-            class="grid h-11 w-11 place-items-center rounded-full border border-white/20 bg-white/10 text-3xl leading-none"
-            aria-label="Close menu"
-          >
-            Ã—
-          </button>
-        </div>
-        <nav class="my-auto grid gap-5 text-4xl font-black sm:text-6xl">
-          <a class="menu-link transition hover:text-aditi-blue" href="#framework">Framework</a>
-          <a class="menu-link transition hover:text-aditi-blue" href="#dispatches">Dispatches</a>
-          <a class="menu-link transition hover:text-aditi-blue" href="#editions">Editions</a>
-          <a class="menu-link transition hover:text-aditi-blue" href="#faq">FAQ</a>
-        </nav>
-        <a href="#dispatches" class="mb-8 inline-flex w-fit rounded-full bg-aditi-red px-6 py-3 font-bold text-white">
-          Read / Buy Issue
-        </a>
-      </div>
-    </div>
-
-    <main id="home">
-      <section class="relative overflow-hidden bg-[#030a0f] pb-10 pt-20">
-        <div class="hero-video-shell">
-          <div class="hero-video-wrap reveal relative overflow-hidden border-y border-white/10 bg-black shadow-editorial">
-            <video
-              class="hero-video w-full bg-black object-cover"
-              autoplay
-              muted
-              loop
-              playsinline
-              controls
-              preload="auto"
-              poster="media/Copy of Untitled (1920 x 1080 px).png"
-            >
-              <source src="media/aditi-hero-video.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#030a0f]/70 via-transparent to-[#030a0f]/20"></div>
+      <main id="home">
+        <section class="hero">
+          <video class="hero-video" autoplay muted loop playsinline preload="auto">
+            <source src="media/aditi-hero-video.mp4" type="video/mp4" />
+            Your browser does not support the homepage video.
+          </video>
+          <div class="video-loader" aria-label="Loading homepage video">
+            <span></span>
+            <p>Loading ADITI</p>
           </div>
-        </div>
-        <div class="mx-auto max-w-7xl px-5 lg:px-8">
-          <div class="mt-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-            <p class="hero-line inline-flex w-fit rounded-full border border-aditi-blue/40 bg-aditi-navy/40 px-4 py-2 text-xs font-black uppercase tracking-[0.28em] text-aditi-blue">
-              ADITI Intro Film
+        </section>
+
+        <section class="editorial-panel" id="framework">
+          <div class="editorial-copy">
+            <p class="kicker">The Publication</p>
+            <h2>ADITI is not a defence news website.</h2>
+            <p>
+              It does not report what happened. It asks why it happened, what it
+              means strategically, and what India should think about it.
             </p>
-            <p class="hero-line text-sm font-semibold uppercase tracking-[0.22em] text-white/50">
-              Strategy of war, not defence news.
+            <p>
+              The name is the framework: Armament, Doctrine, Initiative, Terrain,
+              and Integration. Every dispatch is examined through these five pillars.
             </p>
           </div>
-        </div>
-      </section>
-
-      <section class="grain relative overflow-hidden border-y border-white/10 bg-[#030a0f] py-14 text-aditi-cream sm:py-20 lg:py-24">
-        <div class="absolute inset-0 bg-gradient-to-b from-[#030a0f] via-aditi-navy/80 to-[#030a0f]"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_72%_15%,rgba(193,18,31,.24),transparent_30rem)]"></div>
-        <div class="absolute left-[13%] top-10 h-8 w-8 rounded-full bg-aditi-cream"></div>
-        <div class="absolute bottom-0 right-0 h-64 w-64 rounded-full bg-aditi-red/10 blur-3xl"></div>
-
-        <div class="relative mx-auto max-w-5xl px-5 lg:px-8">
-          <p class="hero-line mb-6 inline-flex rounded-full border border-aditi-blue/40 bg-aditi-navy/40 px-4 py-2 text-xs font-black uppercase tracking-[0.28em] text-aditi-blue">
-            Volume 1 - Issue 1 - February 2026
-          </p>
-          <h1 class="hero-title font-sans text-[3.35rem] font-black uppercase leading-[0.9] tracking-normal text-aditi-red sm:text-[5.4rem] lg:text-[8rem] xl:text-[9rem]">
-            ADITI
-          </h1>
-          <p class="hero-line mt-5 max-w-3xl text-base leading-7 text-aditi-cream/82 sm:mt-7 sm:text-xl sm:leading-8 lg:text-2xl">
-            India's only magazine built around the strategy of war, not the news of it.
-            Deliberately contrarian. Rigorously analytical. Proudly Indian.
-          </p>
-          <div class="hero-line mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:gap-4">
-            <!-- TODO: Replace with /issue/inaugural-issue and /checkout?product=aditi-issue-1 when those routes exist. -->
-            <a href="#dispatches" class="rounded-full bg-aditi-red px-7 py-4 text-center text-sm font-black uppercase tracking-[0.18em] text-white shadow-xl shadow-aditi-red/20 transition hover:-translate-y-1 hover:bg-[#d51b28]">
-              Read the inaugural issue →
-            </a>
-            <a href="#framework" class="rounded-full border border-aditi-cream/30 bg-white/10 px-7 py-4 text-center text-sm font-black uppercase tracking-[0.18em] text-white backdrop-blur transition hover:-translate-y-1 hover:bg-white/15">
-              The framework
-            </a>
+          <div class="magazine-frame">
+            <img src="media/optimized/magazine-landing-1800.jpg" alt="ADITI magazine displayed on a desk" />
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="overflow-hidden border-y border-aditi-navy/10 bg-[#FDF0D5] py-4 text-aditi-navy">
-        <div class="marquee-track flex w-max gap-8 whitespace-nowrap text-sm font-black uppercase tracking-[0.28em]">
-          <span>Armament</span><span>Doctrine</span><span>Initiative</span><span>Terrain</span><span>Integration</span>
-          <span class="text-aditi-red">India's strategic mind deserves a serious magazine</span>
-          <span>Armament</span><span>Doctrine</span><span>Initiative</span><span>Terrain</span><span>Integration</span>
-          <span class="text-aditi-red">India's strategic mind deserves a serious magazine</span>
-        </div>
-      </section>
-
-      <section class="relative overflow-hidden py-24 sm:py-32">
-        <img
-          src="media/optimized/brand-bg-1600.jpg"
-          alt=""
-          class="absolute inset-0 h-full w-full object-cover opacity-10"
-          loading="lazy"
-        />
-        <div class="relative mx-auto grid max-w-7xl gap-10 px-5 lg:grid-cols-[.75fr_1fr] lg:px-8">
-          <div class="reveal">
-            <p class="mb-4 text-sm font-black uppercase tracking-[0.3em] text-aditi-blue">Brand Statement</p>
-            <h2 class="text-balance font-serif text-4xl font-black leading-tight text-white sm:text-6xl">
-              ADITI is not defence news. It is strategic thinking for India.
-            </h2>
+        <section class="media-desk">
+          <div class="section-title">
+            <p class="kicker">The ADITI Lens</p>
+            <h2>Five pillars. One Indian frame.</h2>
           </div>
-          <div class="reveal rounded-[2rem] border border-white/10 bg-white/[0.06] p-7 backdrop-blur md:p-10">
-            <p class="text-xl leading-9 text-aditi-cream/86">
-              The magazine examines the paradoxes behind power: why countries acquire capability but fail to integrate it,
-              why doctrine lags technology, why geography still bends ambition, and why India's strategic culture must be
-              argued with seriousness rather than performed for attention.
-            </p>
-            <div class="mt-8 grid gap-4 sm:grid-cols-3">
-              <div class="border-l border-aditi-red pl-4">
-                <p class="text-3xl font-black text-white">6</p>
-                <p class="text-sm text-white/60">issues per year</p>
-              </div>
-              <div class="border-l border-aditi-red pl-4">
-                <p class="text-3xl font-black text-white">5</p>
-                <p class="text-sm text-white/60">pillars per issue</p>
-              </div>
-              <div class="border-l border-aditi-red pl-4">
-                <p class="text-3xl font-black text-white">1</p>
-                <p class="text-sm text-white/60">central paradox</p>
-              </div>
+
+          <div class="pillar-carousel-wrap">
+            <button class="pillar-nav prev" type="button" aria-label="Previous pillar">&lsaquo;</button>
+            <div class="pillar-carousel" aria-label="ADITI five pillars">
+              <article>
+                <span>A</span>
+                <h3>Armament</h3>
+                <p>Capabilities, force structure, industry, and deterrent power.</p>
+              </article>
+              <article>
+                <span>D</span>
+                <h3>Doctrine</h3>
+                <p>The concepts that decide when power is held, signalled, or used.</p>
+              </article>
+              <article>
+                <span>I</span>
+                <h3>Initiative</h3>
+                <p>Political will, tempo, escalation choices, and strategic timing.</p>
+              </article>
+              <article>
+                <span>T</span>
+                <h3>Terrain</h3>
+                <p>Geography, borders, seas, societies, and contested depth.</p>
+              </article>
+              <article>
+                <span>I</span>
+                <h3>Integration</h3>
+                <p>Jointness across theatres, technology, institutions, and national power.</p>
+              </article>
             </div>
+            <button class="pillar-nav next" type="button" aria-label="Next pillar">&rsaquo;</button>
           </div>
-        </div>
-      </section>
-
-      <section id="framework" class="relative overflow-hidden bg-aditi-navy py-20 text-aditi-cream sm:py-28">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_12%_0%,rgba(193,18,31,.18),transparent_28rem)]"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-[#030a0f]/35 via-transparent to-[#030a0f]/35"></div>
-        <div class="mx-auto max-w-6xl px-5 lg:px-8">
-          <div class="reveal relative border-b border-white/12 pb-8">
-            <p class="mb-4 text-sm font-black uppercase tracking-[0.3em] text-aditi-blue">The ADITI Framework</p>
-            <h2 class="max-w-4xl text-balance font-sans text-4xl font-black leading-[0.92] tracking-normal text-aditi-cream sm:text-6xl">
-              Most defence media catalogues capability. ADITI interrogates choice.
-            </h2>
+          <div class="pillar-dots" aria-hidden="true">
+            <span class="active"></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
+        </section>
 
-          <div class="relative divide-y divide-white/12">
-            <article class="reveal grid gap-5 py-8 sm:grid-cols-[72px_1fr_120px] sm:gap-7 md:py-10">
-              <p class="text-5xl font-black leading-none text-aditi-red">A</p>
-              <div>
-                <h3 class="text-3xl font-black leading-none text-white">Armament</h3>
-                <p class="mt-3 max-w-2xl text-sm leading-6 text-aditi-cream/68">
-                  The means of war: weapons, platforms, logistics, industrial capacity, supply chains, and sustainment.
-                </p>
-              </div>
-              <p class="self-start font-mono text-[11px] uppercase tracking-[0.24em] text-aditi-blue sm:justify-self-end sm:pt-5">
-                Pillar / A
-              </p>
-            </article>
+        <section class="issue-field" id="issue">
+          <img class="field-image" src="media/gunman.jpeg" alt="Soldiers and helicopter in rugged terrain" />
+          <div class="field-shade"></div>
 
-            <article class="reveal grid gap-5 py-8 sm:grid-cols-[72px_1fr_120px] sm:gap-7 md:py-10">
-              <p class="text-5xl font-black leading-none text-aditi-red">D</p>
-              <div>
-                <h3 class="text-3xl font-black leading-none text-white">Doctrine</h3>
-                <p class="mt-3 max-w-2xl text-sm leading-6 text-aditi-cream/68">
-                  The ideas of war: how force is conceived, organised, and employed to achieve political ends.
-                </p>
-              </div>
-              <p class="self-start font-mono text-[11px] uppercase tracking-[0.24em] text-aditi-blue sm:justify-self-end sm:pt-5">
-                Pillar / D
-              </p>
-            </article>
-
-            <article class="reveal grid gap-5 py-8 sm:grid-cols-[72px_1fr_120px] sm:gap-7 md:py-10">
-              <p class="text-5xl font-black leading-none text-aditi-red">I</p>
-              <div>
-                <h3 class="text-3xl font-black leading-none text-white">Initiative</h3>
-                <p class="mt-3 max-w-2xl text-sm leading-6 text-aditi-cream/68">
-                  Agency under uncertainty: who sets the agenda, controls escalation, and dictates tempo.
-                </p>
-              </div>
-              <p class="self-start font-mono text-[11px] uppercase tracking-[0.24em] text-aditi-blue sm:justify-self-end sm:pt-5">
-                Pillar / I
-              </p>
-            </article>
-
-            <article class="reveal grid gap-5 py-8 sm:grid-cols-[72px_1fr_120px] sm:gap-7 md:py-10">
-              <p class="text-5xl font-black leading-none text-aditi-red">T</p>
-              <div>
-                <h3 class="text-3xl font-black leading-none text-white">Terrain</h3>
-                <p class="mt-3 max-w-2xl text-sm leading-6 text-aditi-cream/68">
-                  The environment of conflict: physical, political, technological, informational, legal, or cognitive.
-                </p>
-              </div>
-              <p class="self-start font-mono text-[11px] uppercase tracking-[0.24em] text-aditi-blue sm:justify-self-end sm:pt-5">
-                Pillar / T
-              </p>
-            </article>
-
-            <article class="reveal grid gap-5 py-8 sm:grid-cols-[72px_1fr_120px] sm:gap-7 md:py-10">
-              <p class="text-5xl font-black leading-none text-aditi-red">I</p>
-              <div>
-                <h3 class="text-3xl font-black leading-none text-white">Integration</h3>
-                <p class="mt-3 max-w-2xl text-sm leading-6 text-aditi-cream/68">
-                  The joining of parts: civil-military fusion, inter-service jointness, and whole-of-nation effort.
-                </p>
-              </div>
-              <p class="self-start font-mono text-[11px] uppercase tracking-[0.24em] text-aditi-blue sm:justify-self-end sm:pt-5">
-                Pillar / I
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section id="dispatches" class="relative overflow-hidden py-20 sm:py-28">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(102,155,188,.16),transparent_26rem)]"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_92%_55%,rgba(193,18,31,.18),transparent_30rem)]"></div>
-        <div class="relative mx-auto max-w-7xl px-5 lg:px-8">
-          <div class="reveal flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <div class="max-w-3xl">
-              <p class="mb-4 text-sm font-black uppercase tracking-[0.3em] text-aditi-blue">Read ADITI</p>
-              <h2 class="font-serif text-3xl font-black leading-tight text-white sm:text-5xl lg:text-6xl">Start free. Buy the essays worth keeping.</h2>
-            </div>
-            <p class="max-w-md text-sm leading-7 text-white/68 sm:text-base">
-              Free dispatches show the method. Premium articles deliver the full strategic argument, edited as durable reading rather than a feed.
+          <div class="issue-intro">
+            <p class="kicker">Current Issue / Volume I</p>
+            <h2>One paradox. Five strategic lenses.</h2>
+            <p>
+              Each ADITI issue begins with a contradiction in Indian strategic thinking
+              and examines it through Armament, Doctrine, Initiative, Terrain, and Integration.
             </p>
           </div>
 
-          <div class="mt-10 grid gap-6 text-sm text-white/68 sm:grid-cols-3">
-            <div class="reveal rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
-              <p class="text-2xl font-black text-white">01</p>
-              <p class="mt-2 font-bold text-aditi-cream">Read the free lens</p>
-              <p class="mt-2">Understand the ADITI approach before paying.</p>
-            </div>
-            <div class="reveal rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
-              <p class="text-2xl font-black text-white">02</p>
-              <p class="mt-2 font-bold text-aditi-cream">Choose the essay</p>
-              <p class="mt-2">Pick focused long-form analysis at a clear price.</p>
-            </div>
-            <div class="reveal rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur">
-              <p class="text-2xl font-black text-white">03</p>
-              <p class="mt-2 font-bold text-aditi-cream">Keep the argument</p>
-              <p class="mt-2">Designed for serious reading, notes, and return visits.</p>
-            </div>
+          <article class="issue-brief">
+            <span>Issue 01</span>
+            <h3>Cognitive Dissonance in Indian Strategy?</h3>
+            <p>
+              A study of the distance between India's strategic ambition,
+              institutional method, and operational choices.
+            </p>
+            <a href="#dispatches">Explore the issue</a>
+          </article>
+
+          <div class="issue-actions">
+            <a class="issue-link issue-link-left" href="articles/chinas-cognitive-warfare-and-india.html">Read free dispatch</a>
+            <a class="issue-link issue-link-right" href="#dispatches">Browse all dispatches</a>
           </div>
 
-          <div class="mt-12 grid gap-10">
-            <div class="reveal rounded-3xl border border-aditi-blue/25 bg-aditi-navy/72 p-4 text-aditi-cream shadow-editorial backdrop-blur sm:p-6">
-              <div class="flex flex-col justify-between gap-3 border-b border-white/10 pb-5 sm:flex-row sm:items-center">
-                <div>
-                  <p class="text-sm font-black uppercase tracking-[0.26em] text-aditi-blue">Free Previews</p>
-                  <p class="mt-2 text-sm leading-6 text-white/62">Quick public reads that explain ADITI's method before the premium work.</p>
-                </div>
-                <span class="rounded-full border border-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-white/60">No paywall</span>
-              </div>
-              <div class="mt-6 grid gap-5 md:grid-cols-2">
-                <article class="dispatch-card interactive-card group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06]">
-                  <img src="media/optimized/brand-card-900.jpg" alt="ADITI strategic briefing artwork" class="h-40 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-44" loading="lazy" />
-                  <div class="p-5">
-                    <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Free Briefing</p>
-                    <h3 class="mt-3 text-xl font-black text-white sm:text-2xl">Why Strategy Is Not A News Cycle</h3>
-                    <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A short editorial note on reading war, capability, and intent without chasing noise.</p>
-                    <a href="#home" class="magnetic mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue">Read Free</a>
-                  </div>
-                </article>
-                <article class="dispatch-card interactive-card group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06]">
-                  <img src="media/optimized/cover-float-900.jpg" alt="ADITI cover floating above a dark desk" class="h-40 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-44" loading="lazy" />
-                  <div class="p-5">
-                    <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Free Dispatch</p>
-                    <h3 class="mt-3 text-xl font-black text-white sm:text-2xl">The Five Lenses of ADITI</h3>
-                    <p class="mt-3 text-sm leading-6 text-aditi-cream/68">A public guide to Armament, Doctrine, Initiative, Terrain, and Integration.</p>
-                    <a href="#framework" class="magnetic mt-5 inline-flex rounded-full border border-aditi-blue/40 px-5 py-2 text-sm font-black text-white transition hover:bg-aditi-blue">Read Free</a>
-                  </div>
-                </article>
-              </div>
+          <div class="soldier-shield" aria-hidden="true">
+            <div class="soldier-crop">
+              <img src="media/operator-portrait.png" alt="" />
             </div>
+          </div>
+        </section>
 
-            <div class="rounded-3xl border border-aditi-red/35 bg-[#030a0f]/72 p-4 shadow-editorial backdrop-blur sm:p-6">
-              <div class="reveal flex flex-col justify-between gap-3 border-b border-aditi-red/20 pb-5 sm:flex-row sm:items-center">
-                <div>
-                  <p class="text-sm font-black uppercase tracking-[0.26em] text-aditi-red">Paid Articles</p>
-                  <p class="mt-2 text-sm leading-6 text-white/62">The full strategic arguments, priced clearly and built for serious reading.</p>
-                </div>
-                <span class="rounded-full bg-aditi-red px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white">Premium</span>
-              </div>
+        <section class="dispatch-store" id="dispatches">
+          <div class="section-title">
+            <p class="kicker">Article Store</p>
+            <h2>Buy one complete argument. Or start with a free dispatch.</h2>
+          </div>
 
-              <div class="mt-6 grid gap-6">
-              <article class="premium-card interactive-card reveal overflow-hidden rounded-3xl border border-aditi-red/45 bg-[#06111a] shadow-editorial lg:grid lg:grid-cols-[0.95fr_1.05fr]">
-                <div class="relative min-h-[280px] overflow-hidden">
-                  <img src="media/optimized/magazine-landing-1800.jpg" alt="ADITI inaugural issue on a table" class="h-full min-h-[280px] w-full object-cover" loading="lazy" />
-                  <div class="absolute inset-0 bg-gradient-to-t from-[#030a0f] via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-[#06111a]"></div>
-                  <span class="absolute left-5 top-5 rounded-full bg-aditi-red px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white">Best Start</span>
-                </div>
-                <div class="flex flex-col p-6 sm:p-8">
-                  <div class="flex flex-wrap items-center gap-3">
-                    <p class="text-xs font-black uppercase tracking-[0.22em] text-aditi-blue">Premium Issue</p>
-                    <span class="rounded-full border border-aditi-blue/40 px-3 py-1 text-xs font-bold text-aditi-cream">Digital access</span>
-                  </div>
-                  <h3 class="mt-5 text-3xl font-black leading-tight text-white sm:text-4xl">Cognitive Dissonance in Indian Strategy?</h3>
-                  <p class="mt-4 text-sm leading-7 text-white/68 sm:text-base">The inaugural ADITI issue on strategic paradoxes, doctrine, air power, cyber strength, and grand strategy.</p>
-                  <div class="mt-6 grid gap-3 text-sm text-white/70 sm:grid-cols-3">
-                    <div class="rounded-2xl bg-white/[0.06] p-4"><span class="block text-lg font-black text-white">5</span>Pillars</div>
-                    <div class="rounded-2xl bg-white/[0.06] p-4"><span class="block text-lg font-black text-white">Issue 1</span>Foundational</div>
-                    <div class="rounded-2xl bg-white/[0.06] p-4"><span class="block text-lg font-black text-white">PDF</span>Digital</div>
-                  </div>
-                  <div class="mt-auto flex flex-col gap-4 pt-7 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p class="text-xs font-black uppercase tracking-[0.22em] text-white/45">One-time price</p>
-                      <p class="text-4xl font-black text-aditi-cream">&#8377;350</p>
-                    </div>
-                    <a href="#final-cta" class="magnetic inline-flex justify-center rounded-full bg-aditi-red px-7 py-3.5 text-sm font-black uppercase tracking-[0.16em] text-white shadow-xl shadow-aditi-red/25 transition hover:bg-[#d51b28]">Buy Issue</a>
-                  </div>
+          <div class="filter-tabs" aria-label="Filter dispatches">
+            <button class="active" type="button" data-filter="all">All</button>
+            <button type="button" data-filter="free">Free</button>
+            <button type="button" data-filter="paid">Paid</button>
+          </div>
+
+          <div class="dispatch-carousel-wrap">
+            <button class="dispatch-nav prev" type="button" aria-label="Previous dispatch">&lsaquo;</button>
+            <div class="dispatch-list" aria-label="Dispatch carousel">
+              <article class="dispatch-card featured" data-tier="free">
+                <img src="media/image2.webp" alt="Map showing Chinese theatre commands near India" />
+                <div class="dispatch-content">
+                  <div class="meta"><span>Free</span><em>Doctrine</em></div>
+                  <h3>China's Cognitive Warfare and India</h3>
+                  <p class="author">Srikanth Kondapalli</p>
+                  <p>
+                    China's cognitive warfare attempts to influence perception, morale,
+                    strategic narratives, media, and decision-making before kinetic conflict.
+                  </p>
+                  <a class="card-action" href="articles/chinas-cognitive-warfare-and-india.html">Read free</a>
                 </div>
               </article>
 
-              <div class="grid gap-6 md:grid-cols-2">
-                <article class="premium-card interactive-card reveal flex min-h-full flex-col rounded-3xl border border-white/10 bg-white/[0.07] p-6 backdrop-blur">
-                  <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Premium Essay</p>
-                  <h3 class="mt-4 text-2xl font-black leading-tight text-white">India's Grand Strategy With Respect To China</h3>
-                  <p class="mt-4 text-sm leading-6 text-white/66">Long-form strategic analysis for readers who need arguments, not summaries.</p>
-                  <div class="mt-6 grid gap-3 border-y border-white/10 py-5 text-sm text-aditi-cream/64">
-                    <div class="flex items-center justify-between"><span>Format</span><span class="font-bold text-white">Premium essay</span></div>
-                    <div class="flex items-center justify-between"><span>Access</span><span class="font-bold text-white">Digital</span></div>
-                    <div class="flex items-center justify-between"><span>Status</span><span class="font-bold text-aditi-blue">Available</span></div>
-                  </div>
-                  <div class="mt-auto flex items-center justify-between gap-4 pt-5">
-                    <span class="text-3xl font-black text-aditi-cream">&#8377;350</span>
-                    <a href="#final-cta" class="magnetic rounded-full bg-aditi-red px-5 py-2.5 text-sm font-black text-white transition hover:bg-[#d51b28]">Buy Essay</a>
-                  </div>
-                </article>
-
-                <article class="interactive-card reveal overflow-hidden rounded-3xl border border-white/10 bg-white/[0.06] backdrop-blur">
-                  <img src="media/optimized/cover-desk-1200.jpg" alt="ADITI magazine cover mockup" class="h-52 w-full object-cover" loading="lazy" />
-                  <div class="p-6">
-                    <p class="text-xs font-black uppercase tracking-[0.2em] text-aditi-blue">Next Issue</p>
-                    <h3 class="mt-4 text-2xl font-black text-white">Terrain, Technology, and the Future Border</h3>
-                    <p class="mt-4 text-sm leading-6 text-white/65">Mountain warfare, surveillance, unmanned systems, and contested geography.</p>
-                    <button class="mt-6 rounded-full border border-white/20 px-5 py-2.5 text-sm font-black text-white/70" disabled>Coming Soon</button>
-                  </div>
-                </article>
-              </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="editions" class="relative overflow-hidden bg-[#030a0f] py-24 text-aditi-cream sm:py-32">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(102,155,188,.18),transparent_30rem)]"></div>
-        <div class="absolute inset-0 bg-[linear-gradient(120deg,rgba(0,48,73,.92),rgba(3,10,15,.94)_58%,rgba(120,0,0,.26))]"></div>
-        <div class="relative mx-auto grid max-w-7xl gap-10 px-5 lg:grid-cols-2 lg:px-8">
-          <div class="reveal">
-            <p class="mb-4 text-sm font-black uppercase tracking-[0.3em] text-aditi-blue">Editions</p>
-            <h2 class="font-serif text-4xl font-black leading-tight text-white sm:text-6xl">Built as a serious reading ritual.</h2>
-            <p class="mt-6 max-w-xl text-lg leading-8 text-aditi-cream/68">
-              Each edition is designed around a central strategic paradox, then explored through ADITI's five pillars.
-            </p>
-            <div class="mt-10 grid gap-4 sm:grid-cols-3">
-              <div class="rounded-2xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur"><p class="text-4xl font-black text-aditi-red">6</p><p class="text-sm font-bold text-white">issues/year</p></div>
-              <div class="rounded-2xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur"><p class="text-4xl font-black text-aditi-red">5</p><p class="text-sm font-bold text-white">pillars/issue</p></div>
-              <div class="rounded-2xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur"><p class="text-4xl font-black text-aditi-red">1</p><p class="text-sm font-bold text-white">paradox/issue</p></div>
-            </div>
-          </div>
-          <div class="reveal">
-            <div class="rounded-[2rem] border border-white/15 bg-white/[0.06] p-6 shadow-editorial backdrop-blur">
-              <img src="media/optimized/cover-desk-1200.jpg" alt="ADITI brand card" class="mb-6 h-48 w-full rounded-2xl object-cover" loading="lazy" />
-              <div class="grid gap-4">
-                <div class="flex items-center justify-between border-b border-white/10 pb-4">
-                  <span class="font-black text-white">Inaugural Issue</span><span class="text-aditi-blue">Available</span>
+              <article class="dispatch-card" data-tier="free">
+                <img src="media/image1.webp" alt="Indian naval ship underway at sea" />
+                <div class="dispatch-content">
+                  <div class="meta"><span>Free</span><em>Terrain</em></div>
+                  <h3>Inside the Government's North East Security Strategy</h3>
+                  <p class="author">Brigadier Brijesh Dhiman (Retd.)</p>
+                  <p>
+                    The North East has moved beyond a single insurgency frame; the task
+                    now is political legitimacy and social cohesion.
+                  </p>
+                  <a class="card-action" href="articles/north-east-security-strategy.html">Read free</a>
                 </div>
-                <div class="flex items-center justify-between border-b border-white/10 pb-4">
-                  <span class="font-black text-white">Digital Essay Access</span><span class="text-aditi-blue">&#8377;350</span>
+              </article>
+
+              <article class="dispatch-card" data-tier="paid">
+                <img src="media/image1.webp" alt="Indian naval ship underway at sea" />
+                <div class="dispatch-content">
+                  <div class="meta paid"><span>&#8377;350</span><em>Integration</em></div>
+                  <h3>India's Maritime Deterrence Problem</h3>
+                  <p class="author">ADITI Editorial Desk</p>
+                  <p>
+                    Sea power is not only about hulls. It is theatre awareness,
+                    industrial rhythm, and the will to impose costs.
+                  </p>
+                  <a class="card-action buy" href="logon.html">Buy dispatch</a>
                 </div>
-                <div class="flex items-center justify-between">
-                  <span class="font-black text-white">Membership Plans</span><span class="text-white/55">Coming soon</span>
+              </article>
+
+              <article class="dispatch-card" data-tier="paid">
+                <img src="media/image2.webp" alt="Strategic map of border theatres" />
+                <div class="dispatch-content">
+                  <div class="meta paid"><span>&#8377;350</span><em>Doctrine</em></div>
+                  <h3>The Border Theatre India Has Not Named</h3>
+                  <p class="author">ADITI Research Cell</p>
+                  <p>
+                    India cannot treat terrain, logistics, information, and political
+                    signalling as separate problems.
+                  </p>
+                  <a class="card-action buy" href="logon.html">Buy dispatch</a>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+              </article>
 
-      <section class="py-24 sm:py-32">
-        <div class="mx-auto grid max-w-7xl gap-10 px-5 lg:grid-cols-[.75fr_1fr] lg:px-8">
-          <div class="reveal">
-            <p class="mb-4 text-sm font-black uppercase tracking-[0.3em] text-aditi-blue">Credentials</p>
-            <h2 class="font-serif text-4xl font-black leading-tight text-white sm:text-6xl">Credibility without fake theatre.</h2>
+              <article class="dispatch-card" data-tier="paid">
+                <img src="media/image3.webp" alt="Vials moving through a pharmaceutical production line" />
+                <div class="dispatch-content">
+                  <div class="meta paid"><span>&#8377;350</span><em>Initiative</em></div>
+                  <h3>Biosecurity as Strategic Infrastructure</h3>
+                  <p class="author">ADITI Analysis Unit</p>
+                  <p>
+                    Vaccine capacity, labs, supply chains, and export credibility are
+                    instruments of national resilience.
+                  </p>
+                  <a class="card-action buy" href="logon.html">Buy dispatch</a>
+                </div>
+              </article>
+            </div>
+            <button class="dispatch-nav next" type="button" aria-label="Next dispatch">&rsaquo;</button>
           </div>
-          <div class="reveal rounded-[2rem] border border-white/10 bg-white/[0.06] p-8 backdrop-blur">
-            <p class="text-2xl font-black text-aditi-cream">Contributors and editorial advisors will be announced soon.</p>
-            <p class="mt-5 leading-8 text-white/65">
-              ADITI will publish credentials transparently as its contributor network is finalized. No placeholder
-              endorsements, no borrowed authority, no invented applause.
+          <div class="dispatch-dots" aria-hidden="true">
+            <span class="active"></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </section>
+
+        <section class="subscribe-panel" id="subscribe">
+          <div class="subscribe-box">
+            <p class="kicker">Built For Depth</p>
+            <h2>For readers who already think seriously about strategy.</h2>
+            <p>
+              Officers, analysts, researchers, students of strategy, and policymakers:
+              read ADITI when the news cycle is not enough.
             </p>
+            <form class="signup-form">
+              <label for="email">Get issue alerts</label>
+              <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+              <button type="submit">Notify me</button>
+            </form>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      <section id="faq" class="relative overflow-hidden bg-[#030a0f] py-24 sm:py-32">
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(102,155,188,.18),transparent_28rem)]"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_88%_74%,rgba(193,18,31,.16),transparent_28rem)]"></div>
-        <div class="relative mx-auto max-w-5xl px-5 lg:px-8">
-          <div class="reveal text-center">
-            <p class="mb-4 text-sm font-black uppercase tracking-[0.3em] text-aditi-blue">FAQ</p>
-            <h2 class="font-serif text-4xl font-black leading-tight text-white sm:text-6xl">Before you read.</h2>
-            <p class="mx-auto mt-5 max-w-2xl text-aditi-cream/62">
-              Quick answers for readers deciding where to begin with ADITI.
-            </p>
-          </div>
-          <div class="mt-12 grid gap-4">
-            <div class="faq-item overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur transition hover:border-aditi-blue/35">
-              <button class="faq-button flex w-full items-center justify-between gap-6 p-6 text-left text-lg font-black text-white">
-                Is ADITI a news site? <span class="grid h-9 w-9 place-items-center rounded-full border border-aditi-blue/35 text-2xl text-aditi-blue">+</span>
-              </button>
-              <div class="faq-panel hidden px-6 pb-6 text-aditi-cream/68">No. ADITI is an editorial magazine for strategy, doctrine, geopolitics, and military thought.</div>
-            </div>
-            <div class="faq-item overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur transition hover:border-aditi-blue/35">
-              <button class="faq-button flex w-full items-center justify-between gap-6 p-6 text-left text-lg font-black text-white">
-                What does one premium issue cost? <span class="grid h-9 w-9 place-items-center rounded-full border border-aditi-blue/35 text-2xl text-aditi-blue">+</span>
-              </button>
-              <div class="faq-panel hidden px-6 pb-6 text-aditi-cream/68">The inaugural premium issue is priced at &#8377;350.</div>
-            </div>
-            <div class="faq-item overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur transition hover:border-aditi-blue/35">
-              <button class="faq-button flex w-full items-center justify-between gap-6 p-6 text-left text-lg font-black text-white">
-                Will free articles be available? <span class="grid h-9 w-9 place-items-center rounded-full border border-aditi-blue/35 text-2xl text-aditi-blue">+</span>
-              </button>
-              <div class="faq-panel hidden px-6 pb-6 text-aditi-cream/68">Yes. Free dispatches build trust and introduce the ADITI framework before readers buy premium essays or issues.</div>
-            </div>
-            <div class="faq-item overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur transition hover:border-aditi-blue/35">
-              <button class="faq-button flex w-full items-center justify-between gap-6 p-6 text-left text-lg font-black text-white">
-                Are membership plans live? <span class="grid h-9 w-9 place-items-center rounded-full border border-aditi-blue/35 text-2xl text-aditi-blue">+</span>
-              </button>
-              <div class="faq-panel hidden px-6 pb-6 text-aditi-cream/68">Membership plans are planned, but the immediate conversion path focuses on individual premium issues and essays.</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <footer class="site-footer">
+        <img src="media/optimized/aditi-logo-mark.png" alt="" />
+        <p>Armament / Doctrine / Initiative / Terrain / Integration</p>
+      </footer>
+    </div>
 
-      <section id="final-cta" class="relative overflow-hidden py-24 sm:py-32">
-        <img src="media/optimized/magazine-landing-1800.jpg" alt="" class="absolute inset-0 h-full w-full object-cover opacity-20" loading="lazy" />
-        <div class="absolute inset-0 bg-gradient-to-r from-[#030a0f] via-[#030a0f]/88 to-aditi-maroon/80"></div>
-        <div class="relative mx-auto max-w-5xl px-5 text-center lg:px-8">
-          <p class="reveal mb-4 text-sm font-black uppercase tracking-[0.3em] text-aditi-blue">Start Here</p>
-          <h2 class="reveal text-balance font-serif text-5xl font-black leading-tight text-white sm:text-7xl">
-            Start with the inaugural issue.
-          </h2>
-          <p class="reveal mx-auto mt-6 max-w-2xl text-lg leading-8 text-white/70">
-            Read ADITI when you want strategy with memory, seriousness, and a point of view.
-          </p>
-          <!-- TODO: Replace with /checkout?product=aditi-issue-1 when payment route is live. -->
-          <a href="#dispatches" class="reveal mt-9 inline-flex rounded-full bg-aditi-red px-8 py-4 font-black text-white shadow-xl shadow-aditi-red/25 transition hover:-translate-y-1 hover:bg-[#d51b28]">
-            Read / Buy Issue
-          </a>
-        </div>
-      </section>
-    </main>
-
-    <footer class="border-t border-white/10 bg-[#030a0f] px-5 py-10 lg:px-8">
-      <div class="mx-auto flex max-w-7xl flex-col justify-between gap-6 text-sm text-white/55 md:flex-row md:items-center">
-        <p class="font-black uppercase tracking-[0.3em] text-white">ADITI</p>
-        <p>India's own strategy magazine. Strategy of war, not defence news.</p>
-        <div class="flex gap-5">
-          <a href="#framework" class="hover:text-white">Framework</a>
-          <a href="#dispatches" class="hover:text-white">Dispatches</a>
-          <a href="#faq" class="hover:text-white">FAQ</a>
-        </div>
-      </div>
-    </footer>
-
-    <script>
-      const menuButton = document.getElementById("menuButton");
-      const menuOverlay = document.getElementById("menuOverlay");
-      const closeMenu = document.getElementById("closeMenu");
-      const menuLinks = document.querySelectorAll(".menu-link");
-
-      function setMenu(open) {
-        menuOverlay.classList.toggle("hidden", !open);
-        menuButton.setAttribute("aria-expanded", String(open));
-        document.body.classList.toggle("overflow-hidden", open);
-      }
-
-      menuButton.addEventListener("click", () => setMenu(true));
-      closeMenu.addEventListener("click", () => setMenu(false));
-      menuLinks.forEach((link) => link.addEventListener("click", () => setMenu(false)));
-
-      document.querySelectorAll(".faq-button").forEach((button) => {
-        button.addEventListener("click", () => {
-          const panel = button.parentElement.querySelector(".faq-panel");
-          const icon = button.querySelector("span");
-          const isOpen = !panel.classList.contains("hidden");
-
-          document.querySelectorAll(".faq-panel").forEach((item) => item.classList.add("hidden"));
-          document.querySelectorAll(".faq-button span").forEach((item) => (item.textContent = "+"));
-
-          if (!isOpen) {
-            panel.classList.remove("hidden");
-            icon.textContent = "-";
-          }
-        });
-      });
-
-      const heroVideo = document.querySelector(".hero-video");
-
-      function playHeroVideo() {
-        if (!heroVideo) return;
-
-        heroVideo.muted = true;
-        heroVideo.defaultMuted = true;
-        heroVideo.playsInline = true;
-        const playAttempt = heroVideo.play();
-        if (playAttempt && typeof playAttempt.catch === "function") {
-          playAttempt.catch(() => {});
-        }
-      }
-
-      playHeroVideo();
-      window.addEventListener("load", playHeroVideo, { once: true });
-      heroVideo?.addEventListener("loadedmetadata", playHeroVideo, { once: true });
-      heroVideo?.addEventListener("canplay", playHeroVideo, { once: true });
-      document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) playHeroVideo();
-      });
-      document.addEventListener("pointerdown", playHeroVideo, { once: true });
-
-      if (window.gsap && window.ScrollTrigger) {
-        gsap.registerPlugin(ScrollTrigger);
-        document.documentElement.dataset.motion = "gsap";
-
-        gsap.set(".reveal", { autoAlpha: 0, y: 42 });
-        gsap.set(".dispatch-card, .premium-card", {
-          autoAlpha: 0,
-          y: 56,
-          scale: 0.96,
-          rotateX: 7,
-          transformPerspective: 900,
-        });
-
-        gsap.to(".reveal", {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.9,
-          stagger: 0.08,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: "main",
-            start: "top 80%",
-            toggleActions: "play none none none",
-          },
-        });
-
-        document.querySelectorAll("section").forEach((section) => {
-          const items = section.querySelectorAll(".reveal, .dispatch-card, .premium-card");
-          if (!items.length) return;
-
-          gsap.to(items, {
-            autoAlpha: 1,
-            y: 0,
-            scale: 1,
-            rotateX: 0,
-            duration: 0.85,
-            stagger: 0.09,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: section,
-              start: "top 74%",
-              once: true,
-            },
-          });
-        });
-
-        gsap.fromTo(
-          "#dispatches h2",
-          { y: 34, autoAlpha: 0, filter: "blur(8px)" },
-          {
-            y: 0,
-            autoAlpha: 1,
-            filter: "blur(0px)",
-            duration: 1,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: "#dispatches",
-              start: "top 78%",
-              once: true,
-            },
-          }
-        );
-
-        gsap.to(".premium-card img", {
-          yPercent: 8,
-          ease: "none",
-          scrollTrigger: {
-            trigger: "#dispatches",
-            start: "top bottom",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
-
-        document.querySelectorAll(".interactive-card").forEach((card) => {
-          card.addEventListener("mousemove", (event) => {
-            const rect = card.getBoundingClientRect();
-            const relX = event.clientX - rect.left;
-            const relY = event.clientY - rect.top;
-            const x = (relX / rect.width - 0.5) * 12;
-            const y = (relY / rect.height - 0.5) * -10;
-
-            card.style.setProperty("--mx", `${(relX / rect.width) * 100}%`);
-            card.style.setProperty("--my", `${(relY / rect.height) * 100}%`);
-            gsap.to(card, { rotateY: x, rotateX: y, y: -8, duration: 0.35, ease: "power2.out" });
-          });
-
-          card.addEventListener("mouseleave", () => {
-            gsap.to(card, { rotateY: 0, rotateX: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.65)" });
-          });
-        });
-
-        document.querySelectorAll(".magnetic").forEach((item) => {
-          item.addEventListener("mousemove", (event) => {
-            const rect = item.getBoundingClientRect();
-            const x = (event.clientX - rect.left - rect.width / 2) * 0.25;
-            const y = (event.clientY - rect.top - rect.height / 2) * 0.35;
-            gsap.to(item, { x, y, duration: 0.3, ease: "power2.out" });
-          });
-
-          item.addEventListener("mouseleave", () => {
-            gsap.to(item, { x: 0, y: 0, duration: 0.45, ease: "elastic.out(1, 0.55)" });
-          });
-        });
-
-        if (matchMedia("(pointer: fine)").matches) {
-          const dot = document.querySelector(".cursor-dot");
-          const ring = document.querySelector(".cursor-ring");
-          const moveDot = gsap.quickTo(dot, "x", { duration: 0.12, ease: "power3.out" });
-          const moveDotY = gsap.quickTo(dot, "y", { duration: 0.12, ease: "power3.out" });
-          const moveRing = gsap.quickTo(ring, "x", { duration: 0.38, ease: "power3.out" });
-          const moveRingY = gsap.quickTo(ring, "y", { duration: 0.38, ease: "power3.out" });
-
-          window.addEventListener("mousemove", (event) => {
-            gsap.to([dot, ring], { autoAlpha: 1, duration: 0.2 });
-            moveDot(event.clientX);
-            moveDotY(event.clientY);
-            moveRing(event.clientX);
-            moveRingY(event.clientY);
-          });
-
-          document.querySelectorAll("a, button, .interactive-card").forEach((item) => {
-            item.addEventListener("mouseenter", () => gsap.to(ring, { scale: 1.65, borderColor: "#FDF0D5", duration: 0.25 }));
-            item.addEventListener("mouseleave", () => gsap.to(ring, { scale: 1, borderColor: "rgba(102, 155, 188, 0.7)", duration: 0.25 }));
-          });
-        }
-      }
-    </script>
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
   </body>
 </html>
