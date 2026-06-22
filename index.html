@@ -14,37 +14,49 @@
     <div class="mobile-canvas">
       <header class="site-header">
         <a class="brand" href="#home" aria-label="ADITI home">
-          <img src="media/optimized/aditi-logo-mark.png" alt="" />
+          <img src="media/Copy of TM (6).png" alt="" />
           <span>ADITI</span>
         </a>
-        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation menu">
+          <span></span>
           <span></span>
           <span></span>
         </button>
-        <nav class="site-nav" id="site-nav">
-          <a href="#framework">Framework</a>
-          <a href="#issue">Issue</a>
-          <a href="#dispatches">Dispatches</a>
-          <a href="#subscribe">Subscribe</a>
-        </nav>
       </header>
+      <nav class="site-nav" id="site-nav" aria-label="Primary">
+        <a href="#framework">Framework</a>
+        <a href="#issue">Issue</a>
+        <a href="#dispatches">Dispatches</a>
+        <a href="#subscribe">Subscribe</a>
+      </nav>
 
       <main id="home">
         <section class="hero">
-          <video class="hero-video" autoplay muted loop playsinline preload="auto">
-            <source src="media/aditi-hero-video.mp4" type="video/mp4" />
+          <video
+            class="hero-video"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="none"
+            poster="media/optimized/brand-bg-1600.jpg"
+          >
+            <source data-src="media/aditi-hero-video.mp4" type="video/mp4" />
             Your browser does not support the homepage video.
           </video>
           <div class="video-loader" aria-label="Loading homepage video">
             <span></span>
             <p>Loading ADITI</p>
           </div>
+          <button class="hero-sound-toggle" type="button" aria-pressed="false">
+            Sound off
+          </button>
         </section>
 
         <section class="editorial-panel" id="framework">
           <div class="editorial-copy">
             <p class="kicker">The Publication</p>
-            <h2>ADITI is not a defence news website.</h2>
+            <h2 class="type-reveal" data-reveal="ADITI is not a defence news website.">ADITI is not a defence news website.</h2>
             <p>
               It does not report what happened. It asks why it happened, what it
               means strategically, and what India should think about it.
@@ -53,60 +65,86 @@
               The name is the framework: Armament, Doctrine, Initiative, Terrain,
               and Integration. Every dispatch is examined through these five pillars.
             </p>
+            <a class="editorial-cta" href="#issue">Read the inaugural issue</a>
           </div>
           <div class="magazine-frame">
-            <img src="media/optimized/magazine-landing-1800.jpg" alt="ADITI magazine displayed on a desk" />
+            <img src="media/optimized/cover-float-900.jpg" alt="ADITI inaugural issue magazine cover" />
           </div>
         </section>
 
-        <section class="media-desk">
-          <div class="section-title">
+        <section class="media-desk framework-section">
+          <div class="section-title framework-intro" style="text-align: center;">
             <p class="kicker">The ADITI Lens</p>
             <h2>Five pillars. One Indian frame.</h2>
+<p >
+  ADITI is built as a method, not a feed. The framework is the brand:
+  a repeatable way of reading power, place, tempo, and national will.
+</p>
           </div>
 
-          <div class="pillar-carousel-wrap">
-            <button class="pillar-nav prev" type="button" aria-label="Previous pillar">&lsaquo;</button>
-            <div class="pillar-carousel" aria-label="ADITI five pillars">
-              <article>
+          <div class="framework-system" aria-label="ADITI five pillars">
+            <!-- <div class="framework-core">
+              <p class="kicker">Method / Sequence</p>
+              <h3>ADITI is the frame.</h3>
+              <p>
+                Every dispatch begins with a strategic question and resolves through
+                the same five lenses so the framework itself becomes the brand.
+              </p>
+            </div> -->
+            <div class="framework-track">
+              <article class="framework-step">
                 <span>A</span>
-                <h3>Armament</h3>
-                <p>Capabilities, force structure, industry, and deterrent power.</p>
+                <div>
+                  <h3>Armament</h3>
+                  <p>Capabilities, force structure, industry, and deterrent power.</p>
+                </div>
               </article>
-              <article>
+              <article class="framework-step">
                 <span>D</span>
-                <h3>Doctrine</h3>
-                <p>The concepts that decide when power is held, signalled, or used.</p>
+                <div>
+                  <h3>Doctrine</h3>
+                  <p>The concepts that decide when power is held, signalled, or used.</p>
+                </div>
               </article>
-              <article>
+              <article class="framework-step">
                 <span>I</span>
-                <h3>Initiative</h3>
-                <p>Political will, tempo, escalation choices, and strategic timing.</p>
+                <div>
+                  <h3>Initiative</h3>
+                  <p>Political will, tempo, escalation choices, and strategic timing.</p>
+                </div>
               </article>
-              <article>
+              <article class="framework-step">
                 <span>T</span>
-                <h3>Terrain</h3>
-                <p>Geography, borders, seas, societies, and contested depth.</p>
+                <div>
+                  <h3>Terrain</h3>
+                  <p>Geography, borders, seas, societies, and contested depth.</p>
+                </div>
               </article>
-              <article>
+              <article class="framework-step">
                 <span>I</span>
-                <h3>Integration</h3>
-                <p>Jointness across theatres, technology, institutions, and national power.</p>
+                <div>
+                  <h3>Integration</h3>
+                  <p>Jointness across theatres, technology, institutions, and national power.</p>
+                </div>
               </article>
             </div>
-            <button class="pillar-nav next" type="button" aria-label="Next pillar">&rsaquo;</button>
-          </div>
-          <div class="pillar-dots" aria-hidden="true">
-            <span class="active"></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
+
+            <div class="framework-reveal" aria-hidden="true">
+              <div class="framework-reveal-line"></div>
+              <div class="framework-reveal-letters">
+                <span>A</span>
+                <span>D</span>
+                <span>I</span>
+                <span>T</span>
+                <span>I</span>
+              </div>
+              <p>The framework is the brand.</p>
+            </div>
           </div>
         </section>
 
         <section class="issue-field" id="issue">
-          <img class="field-image" src="media/gunman.jpeg" alt="Soldiers and helicopter in rugged terrain" />
+          <img class="field-image" src="media/middle-section.jpeg" alt="Soldiers and helicopter in rugged terrain" />
           <div class="field-shade"></div>
 
           <div class="issue-intro">
@@ -133,11 +171,11 @@
             <a class="issue-link issue-link-right" href="#dispatches">Browse all dispatches</a>
           </div>
 
-          <div class="soldier-shield" aria-hidden="true">
+          <!-- <div class="soldier-shield" aria-hidden="true">
             <div class="soldier-crop">
               <img src="media/operator-portrait.png" alt="" />
             </div>
-          </div>
+          </div> -->
         </section>
 
         <section class="dispatch-store" id="dispatches">
@@ -260,6 +298,6 @@
     </div>
 
     <div class="toast" role="status" aria-live="polite"></div>
-    <script src="script.js"></script>
+    <script src="script.js?v=2"></script>
   </body>
 </html>
