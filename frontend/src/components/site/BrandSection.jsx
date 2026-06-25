@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { BRAND_STATS } from "@/data/siteContent";
+import rightCardImg from "../../../media/optimized/cover-float-900.jpg";
 
 export default function BrandSection() {
   return (
@@ -28,9 +29,14 @@ export default function BrandSection() {
                 <h2 className="mt-4 max-w-[11ch] font-rajdhani text-[clamp(2rem,6.4vw,3.6rem)] font-bold leading-[0.95] text-void text-balance">
                   Strategy of war. Not defence news.
                 </h2>
-                <p className="brand-intro-text copy-width mt-8 max-w-[34rem] font-plex text-[clamp(0.96rem,1.7vw,1.12rem)] font-light leading-[1.75] text-steel">
-                  ADITI studies power where terrain, technology, doctrine and political will collide. It is written for readers who want arguments, not noise.
+                <p className="brand-intro-text copy-width mt-8 max-w-[34rem] font-lora text-[1.02rem] italic leading-relaxed text-chalk">
+                  Buy the analysis you need without a subscription.
                 </p>
+                <ul className="reading-card-list mt-4">
+                  <li>Premium essays at {"\u20B9"}350</li>
+                  <li>Open-access primers to preview the method</li>
+                  <li>Built for mobile and desktop reading</li>
+                </ul>
               </div>
 
               <div className="brand-stats-row brand-stats-row--inside">
@@ -58,7 +64,12 @@ export default function BrandSection() {
 
           <div className="brand-side-layout flex flex-col gap-5">
             <Card className="brand-box brand-box--reading brand-card-equal h-full min-h-[320px] gap-0 overflow-hidden rounded-2xl p-0 shadow-[0_0_45px_rgba(200,133,58,0.16)]">
-              <div className="brand-reading-shell flex h-full flex-col justify-between">
+              <img
+                src={rightCardImg}
+                alt="Reading preview"
+                className="w-full h-40 md:h-56 object-cover rounded-t-2xl"
+              />
+              <div className="brand-reading-shell flex h-full flex-col justify-between p-6 md:p-8">
                 <div>
                   <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-chalk">
                     Start Reading
@@ -66,23 +77,17 @@ export default function BrandSection() {
                   <h3 className="reading-card-title mt-6 font-rajdhani font-bold">
                     One dispatch. One complete argument.
                   </h3>
-                  <p className="mt-4 font-lora text-[1.02rem] italic leading-relaxed text-chalk">
-                    Buy the analysis you need without a subscription.
-                  </p>
-                  <ul className="reading-card-list">
-                    <li>Premium essays at {"\u20B9"}350</li>
-                    <li>Open-access primers to preview the method</li>
-                    <li>Built for mobile and desktop reading</li>
-                  </ul>
                 </div>
-                <Button
-                  asChild
-                  className="mt-8 h-12 w-full rounded-full bg-ember px-6 py-3 font-rajdhani text-base font-bold text-void transition hover:bg-[#ddb255] sm:w-fit"
-                >
-                  <a href="#read">
-                    Browse Dispatches <ArrowRight className="size-4" />
-                  </a>
-                </Button>
+                <div className="mt-4 md:mt-6">
+                  <Button
+                    asChild
+                    className="mt-2 h-12 w-full rounded-full bg-ember px-6 py-3 font-rajdhani text-base font-bold text-void transition hover:bg-[#ddb255] sm:w-fit"
+                  >
+                    <a href="#read">
+                      Browse Dispatches <ArrowRight className="size-4" />
+                    </a>
+                  </Button>
+                </div>
               </div>
             </Card>
           </div>
