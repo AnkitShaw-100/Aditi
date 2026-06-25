@@ -1,17 +1,13 @@
-﻿import SiteHeader from "@/components/site/Header";
-import HeroSection from "@/components/site/HeroSection";
-import MissionSection from "@/components/site/MissionSection";
-import BrandSection from "@/components/site/BrandSection";
-import AuthorsSection from "@/components/site/AuthorsSection";
-import ShowcaseStrip from "@/components/site/ShowcaseStrip";
-import FrameworkSection from "@/components/site/FrameworkSection";
-import DispatchesSection from "@/components/site/DispatchesSection";
-import EditionsSection from "@/components/site/EditionsSection";
-import OjasSection from "@/components/site/OjasSection";
-import FaqSection from "@/components/site/FaqSection";
-import ReaderFeedbackSection from "@/components/site/ReaderFeedbackSection";
+import { Route, Routes } from "react-router-dom";
+
+import SiteHeader from "@/components/site/Header";
 import SiteFooter from "@/components/site/SiteFooter";
 import { RadarCursor } from "@/components/site/shared";
+import LandingPage from "@/pages/LandingPage";
+import ProfilePage from "@/pages/ProfilePage";
+import CheckoutPage from "@/pages/CheckoutPage";
+import AdminLoginPage from "@/pages/AdminLoginPage";
+import AdminDashboardPage from "@/pages/AdminDashboardPage";
 
 function App() {
   return (
@@ -20,17 +16,13 @@ function App() {
       <SiteHeader />
 
       <main>
-        <HeroSection />
-        <MissionSection />
-        <BrandSection />
-        <AuthorsSection />
-        <ShowcaseStrip />
-        <FrameworkSection />
-        <DispatchesSection />
-        <EditionsSection />
-        <OjasSection />
-        <FaqSection />
-        <ReaderFeedbackSection />
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin" element={<AdminDashboardPage />} />
+        </Routes>
       </main>
 
       <SiteFooter />

@@ -188,7 +188,8 @@ export const DISPATCHES = [
   },
   {
     type: "premium",
-    href: "login.html",
+    href: "/checkout",
+    slug: "ladakh-question-after-buffer-zones",
     image: dispatchImage3,
     tag: "Northern Theatre",
     title: "The Ladakh Question After the Buffer Zones",
@@ -201,7 +202,8 @@ export const DISPATCHES = [
   },
   {
     type: "premium",
-    href: "login.html",
+    href: "/checkout",
+    slug: "indias-maritime-dilemma-middle-ocean",
     image: dispatchImage4,
     tag: "Maritime",
     title: "India's Maritime Dilemma in the Middle Ocean",
@@ -214,7 +216,8 @@ export const DISPATCHES = [
   },
   {
     type: "premium",
-    href: "login.html",
+    href: "/checkout",
+    slug: "drones-attrition-return-of-mass",
     image: dispatchImage5,
     tag: "Technology",
     title: "Drones, Attrition and the Return of Mass",

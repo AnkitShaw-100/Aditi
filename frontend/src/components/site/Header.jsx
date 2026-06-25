@@ -6,6 +6,7 @@ import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/s
 import { cn } from "@/lib/utils";
 import { useScrollSpy } from "@/hooks/use-scroll-spy";
 import { MENU_ITEMS, NAV_ITEMS, SECTION_IDS, logoMark } from "@/data/siteContent";
+import AuthNavButton from "@/components/site/AuthNavButton";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -22,7 +23,7 @@ export default function SiteHeader() {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[rgba(17,22,15,0.55)] shadow-[0_16px_55px_rgba(0,0,0,0.2)] backdrop-blur-2xl supports-[backdrop-filter]:bg-[rgba(17,22,15,0.4)]">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-10">
         <a
-          href="#intro"
+          href="/#intro"
           className="flex items-center gap-3 font-rajdhani text-xl font-bold tracking-[0.16em] text-chalk md:text-[1.7rem]"
           aria-label="ADITI home"
         >
@@ -50,7 +51,7 @@ export default function SiteHeader() {
                   "nav-link relative font-plex text-sm font-medium text-fog transition hover:text-chalk",
                   activeSection === item.id && "active text-chalk"
                 )}
-                href={`#${item.id}`}
+                href={`/#${item.id}`}
                 aria-current={activeSection === item.id ? "page" : undefined}
                 data-section={item.id}
               >
@@ -58,6 +59,10 @@ export default function SiteHeader() {
               </a>
             ))}
           </nav>
+
+          <div className="hidden md:block">
+            <AuthNavButton />
+          </div>
 
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
@@ -95,7 +100,7 @@ export default function SiteHeader() {
                 {MENU_ITEMS.map((item) => (
                   <SheetClose asChild key={item.id}>
                     <a
-                      href={`#${item.id}`}
+                      href={`/#${item.id}`}
                       className="overlay-row grid min-h-[18vh] grid-cols-[56px_1fr] items-center border-b border-steel px-4 md:grid-cols-[96px_1fr_220px] md:px-8"
                     >
                       <span className="font-plex text-sm font-light text-ember">
@@ -110,6 +115,9 @@ export default function SiteHeader() {
                     </a>
                   </SheetClose>
                 ))}
+                <div className="px-4 py-5 md:px-8">
+                  <AuthNavButton mobile />
+                </div>
               </div>
             </SheetContent>
           </Sheet>

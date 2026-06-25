@@ -2657,6 +2657,133 @@ body.menu-open {
   color: #c99a4a !important;
 }
 
+.account-page {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(201, 154, 74, 0.16), transparent 24rem),
+    radial-gradient(circle at 88% 16%, rgba(128, 135, 83, 0.14), transparent 26rem),
+    linear-gradient(180deg, #11160e 0%, #090b08 100%);
+}
+
+.account-panel {
+  border: 1px solid rgba(168, 170, 157, 0.24);
+  background: linear-gradient(155deg, rgba(28, 33, 26, 0.86), rgba(9, 11, 8, 0.94));
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+}
+
+.account-field {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.account-field span {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c99a4a;
+}
+
+.account-field input,
+.account-field textarea {
+  width: 100%;
+  border: 1px solid rgba(168, 170, 157, 0.34);
+  background: rgba(9, 11, 8, 0.58);
+  color: #f2eada;
+  padding: 0.85rem 0.95rem;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.account-field textarea {
+  resize: vertical;
+}
+
+.account-field input:focus,
+.account-field textarea:focus {
+  border-color: rgba(201, 154, 74, 0.78);
+  background: rgba(9, 11, 8, 0.78);
+}
+
+.account-mini-row,
+.cart-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid rgba(168, 170, 157, 0.18);
+  background: rgba(242, 234, 218, 0.025);
+  padding: 0.9rem 1rem;
+}
+
+.account-mini-row span {
+  min-width: 0;
+  color: #d8d2c0;
+}
+
+.account-mini-row b {
+  color: #c99a4a;
+  font-family: "Rajdhani", sans-serif;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+}
+
+.cart-row {
+  align-items: flex-start;
+}
+
+.admin-table {
+  border-collapse: collapse;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.85rem;
+}
+
+.admin-table th,
+.admin-table td {
+  border: 1px solid rgba(168, 170, 157, 0.22);
+  padding: 0.9rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-table th {
+  color: #c99a4a;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: rgba(9, 11, 8, 0.5);
+}
+
+.admin-table td {
+  color: #d8d2c0;
+  background: rgba(242, 234, 218, 0.025);
+}
+
+.admin-table b,
+.admin-table span {
+  display: block;
+}
+
+.admin-table b {
+  color: #f2eada;
+  font-weight: 600;
+}
+
+.admin-table span {
+  margin-top: 0.25rem;
+  color: #a8aa9d;
+  word-break: break-word;
+}
+
+@media (max-width: 767px) {
+  .cart-row {
+    display: grid;
+  }
+}
+
 .article-card {
   cursor: pointer;
   display: flex;

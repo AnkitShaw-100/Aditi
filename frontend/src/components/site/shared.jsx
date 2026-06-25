@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
+import { SignInButton, useAuth } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { apiRequest } from "@/lib/api";
 
 export function RadarCursor() {
   const canvasRef = useRef(null);
@@ -414,6 +417,8 @@ export function AuthorCard({ author }) {
 }
 
 export function ArticleCard({ article }) {
+  const isPremium = article.type === "premium";
+
   return (
     <Card
       role="link"
@@ -459,19 +464,73 @@ export function ArticleCard({ article }) {
             <b className="font-plex text-xs font-light text-fog">
               {article.priceLabel}
             </b>
-            <Button
-              asChild
-              variant="ghost"
-              className="inline-flex min-h-11 items-center py-3 font-plex text-sm font-medium text-ember hover:bg-transparent hover:text-chalk"
-            >
-              <a href={article.href} onClick={(event) => event.stopPropagation()}>
-                {article.cta} <ArrowRight className="size-4" />
-              </a>
-            </Button>
+            {isPremium ? (
+              <AddToCartButton article={article} />
+            ) : (
+              <Button
+                asChild
+                variant="ghost"
+                className="inline-flex min-h-11 items-center py-3 font-plex text-sm font-medium text-ember hover:bg-transparent hover:text-chalk"
+              >
+                <a href={article.href} onClick={(event) => event.stopPropagation()}>
+                  {article.cta} <ArrowRight className="size-4" />
+                </a>
+              </Button>
+            )}
           </span>
         </div>
       </div>
     </Card>
+  );
+}
+
+function AddToCartButton({ article }) {
+  const { getToken, isSignedIn } = useAuth();
+  const navigate = useNavigate();
+  const [status, setStatus] = useState("idle");
+
+  async function addToCart(event) {
+    event.stopPropagation();
+    setStatus("adding");
+
+    try {
+      await apiRequest(getToken, "/api/cart", {
+        method: "POST",
+        body: JSON.stringify({ magazine_slug: article.slug }),
+      });
+      setStatus("idle");
+      navigate("/checkout");
+    } catch (error) {
+      setStatus("error");
+      window.alert(error.message);
+    }
+  }
+
+  if (!isSignedIn) {
+    return (
+      <SignInButton mode="modal" forceRedirectUrl="/checkout">
+        <Button
+          type="button"
+          variant="ghost"
+          className="inline-flex min-h-11 items-center py-3 font-plex text-sm font-medium text-ember hover:bg-transparent hover:text-chalk"
+          onClick={(event) => event.stopPropagation()}
+        >
+          {article.cta} <ArrowRight className="size-4" />
+        </Button>
+      </SignInButton>
+    );
+  }
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      disabled={status === "adding"}
+      className="inline-flex min-h-11 items-center py-3 font-plex text-sm font-medium text-ember hover:bg-transparent hover:text-chalk"
+      onClick={addToCart}
+    >
+      {status === "adding" ? "Adding" : "Add"} <ArrowRight className="size-4" />
+    </Button>
   );
 }
 
