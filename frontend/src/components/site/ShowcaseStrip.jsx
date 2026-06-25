@@ -15,73 +15,23 @@ function loopPage(page, pageCount) {
   return ((page % pageCount) + pageCount) % pageCount;
 }
 
-function MobileMagazineViewer({ currentPage, onPageChange, pageCount }) {
-  const trackRef = useRef(null);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) {
-      return undefined;
-    }
-
-    const pageWidth = track.clientWidth || 1;
-    track.scrollTo({
-      left: currentPage * pageWidth,
-      behavior: "smooth",
-    });
-    return undefined;
-  }, [currentPage]);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) {
-      return undefined;
-    }
-
-    let scrollTimeout = 0;
-
-    const updatePageFromScroll = () => {
-      window.clearTimeout(scrollTimeout);
-      scrollTimeout = window.setTimeout(() => {
-        const pageWidth = track.clientWidth || 1;
-        const nextPage = loopPage(Math.round(track.scrollLeft / pageWidth), pageCount);
-        onPageChange(nextPage);
-      }, 90);
-    };
-
-    track.addEventListener("scroll", updatePageFromScroll, { passive: true });
-    return () => {
-      window.clearTimeout(scrollTimeout);
-      track.removeEventListener("scroll", updatePageFromScroll);
-    };
-  }, [onPageChange, pageCount]);
+function MobileMagazineViewer({ currentPage }) {
+  const page = PAGEFLIP_PAGES[currentPage] ?? PAGEFLIP_PAGES[0];
 
   return (
     <div className="mobile-magazine-viewer">
       <div className="mobile-magazine-viewer__frame">
-        <div
-          ref={trackRef}
-          className="mobile-magazine-viewer__track"
-          aria-label="Swipe through the magazine pages"
-        >
-          {PAGEFLIP_PAGES.map((page, index) => (
-            <article key={`${page.alt}-${index}`} className="mobile-magazine-page">
-              <div className="mobile-magazine-page__inner">
-                <img
-                  src={page.image}
-                  alt={page.alt}
-                  className="mobile-magazine-page__image"
-                  loading={index < 2 ? "eager" : "lazy"}
-                  draggable={false}
-                />
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="mobile-magazine-hint" aria-hidden="true">
-          Swipe to turn pages
-        </div>
+        <article className="mobile-magazine-page">
+          <div className="mobile-magazine-page__inner">
+            <img
+              src={page.image}
+              alt={page.alt}
+              className="mobile-magazine-page__image"
+              loading="eager"
+              draggable={false}
+            />
+          </div>
+        </article>
       </div>
     </div>
   );
@@ -118,21 +68,9 @@ function ReactPageFlipShowcase() {
 
   const bookWidth =
     stageWidth < 768
-      ? Math.min(Math.max(stageWidth - 28, 260), 340)
-      : Math.min(Math.max(stageWidth * 0.62, 420), 760);
+      ? Math.min(Math.max((stageWidth - 28) * 0.6, 190), 240)
+      : Math.min(Math.max(stageWidth * 0.37, 300), 456);
   const bookHeight = Math.round(bookWidth * 1.28);
-
-  useEffect(() => {
-    if (pageCount <= 1) {
-      return undefined;
-    }
-
-    const interval = window.setInterval(() => {
-      setCurrentPage((page) => loopPage(page + 1, pageCount));
-    }, 3200);
-
-    return () => window.clearInterval(interval);
-  }, [pageCount]);
 
   useEffect(() => {
     if (isMobile) {
@@ -204,7 +142,7 @@ function ReactPageFlipShowcase() {
               Flip through ADITI&apos;s editorial world.
             </h2>
             <p className="mt-4 mx-auto max-w-lg font-plex text-sm font-light leading-[1.75] text-ash">
-              The book opens from the right - drag its corner or use the controls to begin.
+              Use the controls to move through the preview at your own pace.
             </p>
           </div>
 
@@ -230,8 +168,6 @@ function ReactPageFlipShowcase() {
                   {isMobile ? (
                     <MobileMagazineViewer
                       currentPage={currentPage}
-                      onPageChange={setCurrentPage}
-                      pageCount={pageCount}
                     />
                   ) : (
                     <>
@@ -243,21 +179,21 @@ function ReactPageFlipShowcase() {
                         width={bookWidth}
                         height={bookHeight}
                         size="fixed"
-                        minWidth={260}
-                        maxWidth={760}
-                        minHeight={332}
-                        maxHeight={900}
+                        minWidth={190}
+                        maxWidth={456}
+                        minHeight={243}
+                        maxHeight={584}
                         showCover={false}
                         drawShadow
-                        flippingTime={1100}
+                        flippingTime={760}
                         usePortrait={false}
                         startZIndex={20}
-                        autoSize
-                        maxShadowOpacity={0.55}
-                        mobileScrollSupport
-                        swipeDistance={30}
-                        clickEventForward
-                        useMouseEvents
+                        autoSize={false}
+                        maxShadowOpacity={0.22}
+                        mobileScrollSupport={false}
+                        swipeDistance={0}
+                        clickEventForward={false}
+                        useMouseEvents={false}
                         onFlip={handleFlip}
                         className="pageflip-book"
                       >

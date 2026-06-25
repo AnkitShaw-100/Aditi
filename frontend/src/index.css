@@ -1808,7 +1808,7 @@ body.menu-open {
   border-right: 2px solid rgba(201, 154, 74, 0.85);
   border-bottom: 2px solid rgba(201, 154, 74, 0.85);
   border-radius: 0 0 0.65rem 0;
-  animation: pageflip-corner-pulse 1.8s ease-in-out infinite;
+  animation: pageflip-corner-pulse 2.8s ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -1832,6 +1832,8 @@ body.menu-open {
   border-radius: 1rem;
   overflow: hidden;
   margin-inline: auto;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .pageflip-page {
@@ -1841,6 +1843,7 @@ body.menu-open {
   background:
     linear-gradient(145deg, rgba(18, 21, 15, 0.98), rgba(9, 11, 8, 0.97));
   color: #f2eada;
+  backface-visibility: hidden;
 }
 
 .pageflip-page-inner {
@@ -1859,6 +1862,7 @@ body.menu-open {
   display: block;
   background: #090b08;
   border-radius: 0.7rem;
+  transform: translateZ(0);
 }
 
 .pageflip-footer {
