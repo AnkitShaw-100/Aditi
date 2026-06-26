@@ -316,20 +316,22 @@ export function RailCarousel({
             </div>
           ))}
         </div>
-        <div
-          className={cn("carousel-dots", controlsClassName)}
-          aria-label={`${ariaLabel} pages`}
-        >
-          {Array.from({ length: pageCount }).map((_, index) => (
-            <button
-              key={`${ariaLabel}-dot-${index}`}
-              type="button"
-              aria-label={`Go to ${ariaLabel} page ${index + 1}`}
-              className={cn("carousel-dot", index === activePage && "active")}
-              onClick={() => scrollToPage(index)}
-            />
-          ))}
-        </div>
+        {pageCount > 1 ? (
+          <div
+            className={cn("carousel-dots", controlsClassName)}
+            aria-label={`${ariaLabel} pages`}
+          >
+            {Array.from({ length: pageCount }).map((_, index) => (
+              <button
+                key={`${ariaLabel}-dot-${index}`}
+                type="button"
+                aria-label={`Go to ${ariaLabel} page ${index + 1}`}
+                className={cn("carousel-dot", index === activePage && "active")}
+                onClick={() => scrollToPage(index)}
+              />
+            ))}
+          </div>
+        ) : null}
       </>
     </div>
   );
@@ -347,7 +349,7 @@ export function AuthorCard({ author }) {
             loading="lazy"
           />
           <div className="authors-card-identity">
-            <p className="font-plex text-[0.68rem] font-medium uppercase tracking-[0.2em] text-ember">
+            <p className="font-plex text-[0.68rem] font-medium uppercase leading-[1.45] tracking-[0.12em] text-ember">
               {author.rank}
             </p>
             <h3 className="authors-card-name mt-2 font-rajdhani text-xl font-bold leading-tight text-chalk">
@@ -364,7 +366,7 @@ export function AuthorCard({ author }) {
         <p className="authors-card-specialty mt-2 font-lora text-base italic leading-relaxed text-ash">
           {author.specialty}
         </p>
-        <p className="authors-card-summary mt-4 font-plex text-sm font-light leading-[1.8] text-fog">
+        <p className="authors-card-summary mt-4 font-plex text-base font-light leading-[1.8] text-fog">
           {author.summary}
         </p>
       </div>
@@ -414,7 +416,7 @@ export function ArticleCard({ article }) {
         </p>
         <div className="mt-4 flex items-center justify-between gap-3">
           <span className="font-plex text-xs font-light text-fog">
-            {article.readTime}
+            {article.author ? `by ${article.author}` : article.readTime}
           </span>
           <span className="flex items-center gap-3">
             <b className="font-plex text-xs font-light text-fog">

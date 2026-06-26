@@ -75,7 +75,7 @@ function ReactPageFlipShowcase() {
     stageWidth < 768
       ? Math.min(Math.max((stageWidth - 28) * 0.6, 190), 240)
       : Math.min(Math.max(stageWidth * 0.37, 300), 456);
-  const bookHeight = Math.round(bookWidth * 1.28);
+  const bookHeight = Math.round(bookWidth * 1.42);
 
   useEffect(() => {
     if (isMobile) {
@@ -151,7 +151,7 @@ function ReactPageFlipShowcase() {
             <h2 className="mt-3 font-rajdhani text-[clamp(2rem,6vw,4rem)] font-bold leading-[0.95] text-chalk">
               Flip through ADITI&apos;s editorial world.
             </h2>
-            <p className="mt-4 mx-auto max-w-lg font-plex text-sm font-light leading-[1.75] text-ash">
+            <p className="mt-4 mx-auto max-w-lg font-plex text-base font-light leading-[1.75] text-ash">
               Use the controls to move through the preview at your own pace.
             </p>
           </div>

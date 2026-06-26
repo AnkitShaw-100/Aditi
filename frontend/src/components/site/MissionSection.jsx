@@ -20,10 +20,10 @@ export default function MissionSection() {
             A.D.I.T.I.
           </p>
           <h2 className="mt-5 max-w-4xl font-rajdhani text-[clamp(1.65rem,4.6vw,3.3rem)] font-bold leading-[1] text-chalk">
-            Strategic reading, disciplined and worth returning to.
+            ADITI exists for readers who want India's strategic future argued for, debated, and understood.
           </h2>
           <p className="mission-subtext mt-5 max-w-3xl font-plex text-[clamp(1rem,1.8vw,1.18rem)] font-light leading-[1.9] text-ash">
-            Every dispatch is shaped to help readers move from noise to structure: terrain, doctrine, consequence, and the strategic meaning behind events. The result is a reading experience designed to feel rigorous, memorable, and calm.
+            ADITI is India's foremost platform for strategic and geopolitical analysis on defence. We don't chase what happened. We interrogate why it happened, what it shifts in the balance of power, and what India should do next.
           </p>
           <div className="mission-rail mt-8" aria-hidden="true">
             <span />
@@ -31,7 +31,7 @@ export default function MissionSection() {
             <span />
           </div>
           <p className="mission-note mt-7 max-w-2xl font-lora text-[1rem] italic leading-relaxed text-fog">
-            Built for readers who want arguments they can keep, revisit, and trust.
+            Written by practitioners. Read by professionals. Built, proudly, for an India that demands clarity.
           </p>
         </div>
       </div>

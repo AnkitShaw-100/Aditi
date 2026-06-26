@@ -28,10 +28,10 @@ export default function DispatchesSection() {
               Featured Articles
             </p>
             <h2 className="mt-3 font-rajdhani text-[clamp(1.8rem,6vw,3rem)] font-bold leading-[1.1] text-chalk">
-              Free and premium articles, structured for serious reading.
+              Free articles, structured for serious reading.
             </h2>
-            <p className="mt-3 font-plex text-sm font-light text-fog">
-              Browse open access pieces or buy individual premium dispatches without a recurring subscription.
+            <p className="mt-3 font-plex text-base font-light text-fog">
+              Browse open access pieces now. Premium dispatches will appear here when they are ready.
             </p>
           </div>
 
@@ -60,17 +60,33 @@ export default function DispatchesSection() {
         </div>
 
         <SectionReveal delay={80}>
-        <div className="mt-8">
-          <RailCarousel
-            items={visibleDispatches}
-            desktopPageSize={4}
-            ariaLabel="Dispatch article carousel"
-            trackClassName="dispatch-track"
-            itemClassName="basis-full md:basis-[calc((100%_-_3.75rem)/4)]"
-            showArrows
-            renderItem={(article) => <ArticleCard article={article} />}
-          />
-        </div>
+          <div className="mt-8">
+            {visibleDispatches.length ? (
+              <RailCarousel
+                items={visibleDispatches}
+                desktopPageSize={3}
+                mobilePageSize={1}
+                ariaLabel="Dispatch article carousel"
+                trackClassName="dispatch-track"
+                itemClassName="basis-full sm:basis-[calc((100%_-_1.25rem)/2)] lg:basis-[calc((100%_-_2.5rem)/3)]"
+                showArrows
+                arrowsClassName="dispatch-carousel-arrows"
+                renderItem={(article) => <ArticleCard article={article} />}
+              />
+            ) : (
+              <div className="dispatch-empty-state">
+                <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
+                  Coming Soon
+                </p>
+                <h3 className="mt-2 font-rajdhani text-3xl font-bold text-chalk">
+                  Premium dispatches are being prepared.
+                </h3>
+                <p className="mt-2 max-w-xl font-plex text-sm font-light leading-7 text-ash">
+                  The open-access articles are available now. Paid dispatches will be added once the checkout catalogue is ready.
+                </p>
+              </div>
+            )}
+          </div>
         </SectionReveal>
       </div>
     </section>

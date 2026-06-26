@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { BRAND_STATS } from "@/data/siteContent";
-import rightCardImg from "../../../media/optimized/cover-float-900.jpg";
+import rightCardImg from "../../../media/INS-scaled.webp";
 
 export default function BrandSection() {
   const [activeStat, setActiveStat] = useState(null);
@@ -30,15 +30,15 @@ export default function BrandSection() {
                   What is ADITI
                 </p>
                 <h2 className="mt-4 max-w-[9.5ch] font-rajdhani text-[clamp(2.35rem,5.8vw,4.3rem)] font-bold leading-[0.9] tracking-[-0.03em] text-void text-balance">
-                  Strategy of war. Not defence news.
+                  Pay for the argument, not the access
                 </h2>
                 <p className="brand-intro-text copy-width mt-8 max-w-[34rem] font-lora text-[1.1rem] leading-relaxed text-void/90">
                   Buy the analysis you need without a subscription.
                 </p>
                 <ul className="reading-card-list mt-4 font-lora text-[1.06rem] leading-relaxed">
-                  <li>Premium Magzines at {"\u20B9"}350</li>
-                  <li>Open-access primers to preview the method</li>
-                  <li>Built for mobile and desktop reading</li>
+                  <li>Premium Magzines at {"\u20B9"}350, no subscription required</li>
+                  <li>Open-access primers to start with, before you go premium</li>
+                  <li>Built for mobile and desktop readability</li>
                 </ul>
               </div>
 
@@ -82,7 +82,8 @@ export default function BrandSection() {
                     Start Reading
                   </p>
                   <h3 className="mx-auto mt-4 max-w-[11ch] text-center font-rajdhani text-[clamp(2rem,6.4vw,3.6rem)] font-bold leading-[0.95]">
-                    One dispatch. One complete argument.
+                    <span>One dispatch.</span>
+                    <span className="reading-card-nowrap">One complete argument.</span>
                   </h3>
                 </div>
                 <div className="flex justify-center">

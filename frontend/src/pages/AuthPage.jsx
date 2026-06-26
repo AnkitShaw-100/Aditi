@@ -31,21 +31,10 @@ export default function AuthPage() {
 
   return (
     <section className="account-page min-h-screen px-4 pb-16 pt-28 md:px-8">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto grid max-w-3xl justify-items-center">
         <SignedOut>
-          <div className="account-panel mx-auto grid justify-items-center p-6 text-center md:p-8">
-            <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
-              User Auth
-            </p>
-            <h1 className="mt-3 font-rajdhani text-[clamp(2.3rem,7vw,4.2rem)] font-bold leading-none text-chalk">
-              Sign in to continue.
-            </h1>
-            <p className="mt-4 max-w-xl font-plex text-sm leading-7 text-ash">
-              Your selected article will be added to cart after sign in.
-            </p>
-            <div className="auth-widget mt-7">
-              <SignIn routing="hash" forceRedirectUrl={completionUrl} />
-            </div>
+          <div className="auth-widget auth-widget--standalone">
+            <SignIn routing="hash" forceRedirectUrl={completionUrl} />
           </div>
         </SignedOut>
 

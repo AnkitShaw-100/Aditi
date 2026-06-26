@@ -1,17 +1,27 @@
 import heroVideo from "../../media/aditi-hero-video.mp4";
-import dispatchImage1 from "../../media/image2.webp";
-import dispatchImage2 from "../../media/thumbnail_Serum-Institute-of-India-Pune--scaled.webp";
-import dispatchImage3 from "../../media/INS-scaled.webp";
-import dispatchImage4 from "../../media/Armament-w-scaled.webp";
-import dispatchImage5 from "../../media/Doctrine-w-scaled.webp";
+import westernTheatreImage from "../../media/image2.webp";
+import biotechnologyImage from "../../media/thumbnail_Serum-Institute-of-India-Pune--scaled.webp";
+import builderPsycheImage from "../../media/INS-scaled.webp";
 import frameworkBg from "../../media/Terrain-w-scaled.webp";
 import logoMark from "../../media/logo.png";
-import magPage1 from "../../media/Copy of MAGAZINE LANDING PAGE.png";
-import magPage2 from "../../media/Copy of mag cover mockup out 1 (3).png";
-import magPage3 from "../../media/Copy of mag cover mockup out 2.png";
-import magPage4 from "../../media/Copy of Untitled design (7).png";
-import magPage5 from "../../media/Copy of Untitled design (9).png";
-import magPage6 from "../../media/optimized/magazine-landing-1800.jpg";
+import bookPage1 from "../../media/book-image-1.png";
+import bookPage2 from "../../media/book-image-2.png";
+import bookPage3 from "../../media/book-image-3.png";
+import bookPage4 from "../../media/book-image-4.png";
+
+const contributorImages = import.meta.glob("../../media/contributors image/*", {
+  eager: true,
+  import: "default",
+  query: "?url",
+});
+
+function contributorImage(matchText) {
+  const match = Object.entries(contributorImages).find(([path]) =>
+    path.toLowerCase().includes(matchText.toLowerCase())
+  );
+
+  return match?.[1] ?? "https://i.pravatar.cc/240?img=15";
+}
 
 export const SECTION_IDS = [
   "intro",
@@ -64,36 +74,108 @@ export const MISSION_PILLARS = [
 
 export const AUTHORS = [
   {
-    name: "Brigadier Brijesh Dhiman (Retd.)",
-    rank: "Brigadier",
-    specialty: "Internal Security and Counterinsurgency",
+    name: "Lt. Gen. Dharam Vir Kalra",
+    rank: "PVSM, AVSM (Retd.)",
+    specialty: "Defence logistics, supply-chain management, and operational planning.",
     summary:
-      "Writes on force posture, border stabilisation, and the strategic choices that shape India's internal security doctrine.",
-    image: "https://i.pravatar.cc/240?img=15",
+      "Former Director General of Ordnance Services, he brings a civilisational and logistics lens to questions of strategy.",
+    image: contributorImage("dv kalra"),
   },
   {
-    name: "Prof. Srikanth Kondapalli",
-    rank: "Professor",
-    specialty: "China Studies and Strategic Signalling",
+    name: "Cmde. Anil Jai Singh",
+    rank: "Commodore (Retd.)",
+    specialty: "Submarine warfare, maritime strategy, procurement, and indigenisation.",
     summary:
-      "Brings long-range analysis on Chinese statecraft, cognitive warfare, and how regional pressure campaigns affect Indian strategy.",
-    image: "https://i.pravatar.cc/240?img=52",
+      "A veteran submariner and maritime commentator, he examines India's defence procurement process for ADITI.",
+    image: contributorImage("anil jai singh"),
   },
   {
-    name: "Cmde. Arjun Sethi (Retd.)",
-    rank: "Commodore",
-    specialty: "Maritime Strategy and Sea Control",
+    name: "Brig. Anshuman Narang",
+    rank: "Brigadier (Retd.)",
+    specialty: "OSINT, space security, UAS, and counter-UAS warfare.",
     summary:
-      "Focuses on naval posture, logistics corridors, and the political meaning of maritime reach across the Indian Ocean.",
-    image: "https://i.pravatar.cc/240?img=60",
+      "Founder of the Atma Nirbhar Soch Foundation, he writes on re-energising India's space ecosystem.",
+    image: contributorImage("anshuman narang"),
   },
   {
-    name: "Lt. Gen. Meera Nair (Retd.)",
-    rank: "Lieutenant General",
-    specialty: "Land Warfare and Theatre Strategy",
+    name: "Mr. Pawan Kakkar",
+    rank: "Industry Leader",
+    specialty: "Emerging defence technologies, UAVs, and counter-unmanned systems.",
     summary:
-      "Examines combined arms doctrine, theatre-level campaign design, and the operational choices that shape deterrence on India's frontiers.",
-    image: "https://i.pravatar.cc/240?img=47",
+      "CEO of Jugapro India, he studies counter-UAS innovation through technological and operational relevance.",
+    image: contributorImage("pawan kakkar"),
+  },
+  {
+    name: "Mr. Adithya Kothandhapani",
+    rank: "Aerospace Engineer",
+    specialty: "LEO, cis-lunar missions, satellite tracking, and OSINT validation.",
+    summary:
+      "He combines space engineering with policy analysis to examine the cost of chasing China in space.",
+    image: contributorImage("adithya kothandhapani"),
+  },
+  {
+    name: "Gp. Cpt. Rajiv Kumar Narang",
+    rank: "VM (Retd.)",
+    specialty: "Aviation safety, unmanned systems, drones, and defence indigenisation.",
+    summary:
+      "A former IAF helicopter pilot and Senior Fellow at MP-IDSA, he writes on Atmanirbharta in naval aviation.",
+    image: contributorImage("rk narang"),
+  },
+  {
+    name: "AVM Anil Golani",
+    rank: "AVM (Retd.)",
+    specialty: "Aerospace power, air strategy, and defence studies.",
+    summary:
+      "Director General at the Centre for Aerospace Power and Strategic Studies, he brings an air-power view to strategic debate.",
+    image: contributorImage("avm anil golani"),
+  },
+  {
+    name: "Brig. Brijesh Dhiman",
+    rank: "Brigadier (Retd.)",
+    specialty: "Counterinsurgency, internal security, and Northeast operations.",
+    summary:
+      "An Assam Regiment veteran, he analyses the Indian State's approach to non-state actors in the Northeast.",
+    image: contributorImage("brijesh dhiman"),
+  },
+  {
+    name: "Lt. Gen. Rakesh Sharma",
+    rank: "PVSM, UYSM, AVSM, VSM (Retd.)",
+    specialty: "Land warfare, military strategy, and national security policy.",
+    summary:
+      "A distinguished fellow in strategic affairs, he contributes a senior land-force perspective to national security questions.",
+    image: contributorImage("rakesh sharma"),
+  },
+  {
+    name: "Maj. Gen. Neeraj Bali",
+    rank: "SM (Retd.)",
+    specialty: "Counter-terror operations, training, and China strategy.",
+    summary:
+      "A veteran of Rashtriya Rifles command and strategic advisory roles, he argues why India's China strategy needs a rethink.",
+    image: contributorImage("neeraj bali"),
+  },
+  {
+    name: "Maj. Gen. Rajan Kochhar",
+    rank: "VSM (Retd.)",
+    specialty: "Army logistics, defence analysis, and higher defence management.",
+    summary:
+      "A prolific defence writer and former Army Ordnance Corps officer, he assesses future-ready logistics for the Indian Army.",
+    image: contributorImage("rajan kochhar"),
+  },
+  {
+    name: "Maj. Gen. Bipin Bakshi",
+    rank: "AVSM, VSM (Retd.)",
+    specialty: "Land warfare studies, military modernisation, and strategic affairs.",
+    summary:
+      "A distinguished fellow at CLAWS, he adds a grounded military-modernisation lens to the contributor panel.",
+    image: contributorImage("bipin bakshi"),
+  },
+  {
+    name: "RAdm. Alok Bhatnagar",
+    rank: "NM, Legion of Merit (Retd.)",
+    specialty: "Maritime affairs, international engagement, and defence education.",
+    summary:
+      "A retired Rear Admiral and international affairs leader, he brings maritime and institutional depth to ADITI.",
+    image: contributorImage("alok bhatnagar"),
   },
 ];
 
@@ -160,71 +242,51 @@ export const DISPATCH_FILTERS = [
 export const DISPATCHES = [
   {
     type: "free",
-    href: "article.html?id=china-cognitive-warfare-india",
-    image: dispatchImage1,
-    tag: "Cognitive Warfare",
-    title: "China's Cognitive Warfare and India",
+    href: "/articles/biotechnology-one-bet-several-wins",
+    slug: "biotechnology-one-bet-several-wins",
+    contentPath: "/articles/biotechnology-one-bet-several-wins.txt",
+    image: biotechnologyImage,
+    tag: "Initiative",
+    title: "Biotechnology - One Bet, Several Wins",
     teaser:
-      "Srikanth Kondapalli on China's cognitive domain playbook, its pressure campaigns, and India's strategic response.",
-    readTime: "11 min read",
+      "Kushal Johri on biotechnology as a strategic domain for healthcare, biodefence, exports, and geopolitical leverage.",
+    author: "Mr. Kushal Johri",
+    readTime: "14 min read",
     cta: "Read",
     priceLabel: "Free",
-    ariaLabel: "Read China's Cognitive Warfare and India",
+    ariaLabel: "Read Biotechnology - One Bet, Several Wins",
   },
   {
     type: "free",
-    href: "article.html?id=inside-north-east-security-strategy",
-    image: dispatchImage2,
-    tag: "Internal Security",
-    title: "Inside the Government's North East Security Strategy",
+    href: "/articles/builders-psyche-atmanirbharta-defence",
+    slug: "builders-psyche-atmanirbharta-defence",
+    contentPath: "/articles/builders-psyche-atmanirbharta-defence.txt",
+    image: builderPsycheImage,
+    tag: "Initiative",
+    title: "The Need for a Builder's Psyche in Defence",
     teaser:
-      "Brigadier Brijesh Dhiman (Retd.) examines insurgency decline, hybrid threats, and the next phase of stabilisation.",
-    readTime: "13 min read",
+      "Dr. Indranil Roy argues that Atmanirbharta depends on building, testing, producing, deploying, and iterating domestic weapons.",
+    author: "Dr. Indranil Roy",
+    readTime: "20 min read",
     cta: "Read",
     priceLabel: "Free",
-    ariaLabel: "Read Inside the Government's North East Security Strategy",
+    ariaLabel: "Read The Need for a Builder's Psyche in Defence",
   },
   {
-    type: "premium",
-    href: "/checkout",
-    slug: "ladakh-question-after-buffer-zones",
-    image: dispatchImage3,
-    tag: "Northern Theatre",
-    title: "The Ladakh Question After the Buffer Zones",
+    type: "free",
+    href: "/articles/china-western-theatre-command-evolving-posture",
+    slug: "china-western-theatre-command-evolving-posture",
+    contentPath: "/articles/china-western-theatre-command-evolving-posture.txt",
+    image: westernTheatreImage,
+    tag: "Armament",
+    title: "China's Western Theatre Command and PLA's Evolving Posture",
     teaser:
-      "A close reading of infrastructure, patrol denial and the new rhythm of pressure along the Himalayan frontier.",
-    readTime: "8 min read",
-    cta: "Add to Cart",
-    priceLabel: "\u20B9350",
-    ariaLabel: "Add The Ladakh Question After the Buffer Zones to cart",
-  },
-  {
-    type: "premium",
-    href: "/checkout",
-    slug: "indias-maritime-dilemma-middle-ocean",
-    image: dispatchImage4,
-    tag: "Maritime",
-    title: "India's Maritime Dilemma in the Middle Ocean",
-    teaser:
-      "Why sea control, logistics and island access now sit at the centre of India's strategic autonomy.",
-    readTime: "10 min read",
-    cta: "Add to Cart",
-    priceLabel: "\u20B9350",
-    ariaLabel: "Add India's Maritime Dilemma in the Middle Ocean to cart",
-  },
-  {
-    type: "premium",
-    href: "/checkout",
-    slug: "drones-attrition-return-of-mass",
-    image: dispatchImage5,
-    tag: "Technology",
-    title: "Drones, Attrition and the Return of Mass",
-    teaser:
-      "Cheap unmanned systems are not replacing strategy. They are forcing armies to rediscover depth and redundancy.",
-    readTime: "9 min read",
-    cta: "Add to Cart",
-    priceLabel: "\u20B9350",
-    ariaLabel: "Add Drones, Attrition and the Return of Mass to cart",
+      "Jaidev Jamwal maps the Western Theatre Command's reforms, logistics, airpower, air defence, missiles, and multi-domain posture.",
+    author: "Mr. Jaidev Jamwal",
+    readTime: "23 min read",
+    cta: "Read",
+    priceLabel: "Free",
+    ariaLabel: "Read China's Western Theatre Command and PLA's Evolving Posture",
   },
 ];
 
@@ -355,28 +417,20 @@ export const FAQ_ITEMS = [
 
 export const PAGEFLIP_PAGES = [
   {
-    image: magPage1,
-    alt: "Magazine landing page in warm editorial tones",
+    image: bookPage1,
+    alt: "ADITI booklet page 1",
   },
   {
-    image: magPage2,
-    alt: "Magazine cover mockup with ADITI branding",
+    image: bookPage2,
+    alt: "ADITI booklet page 2",
   },
   {
-    image: magPage3,
-    alt: "Second magazine cover mockup with ADITI branding",
+    image: bookPage3,
+    alt: "ADITI booklet page 3",
   },
   {
-    image: magPage4,
-    alt: "Square magazine design composition",
-  },
-  {
-    image: magPage5,
-    alt: "Alternate square magazine design composition",
-  },
-  {
-    image: magPage6,
-    alt: "Magazine landing page preview",
+    image: bookPage4,
+    alt: "ADITI booklet page 4",
   },
 ];
 

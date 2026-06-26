@@ -84,8 +84,8 @@ export default function HeroSection() {
             <h1 className="mt-5 font-rajdhani text-[clamp(1.8rem,7vw,3.5rem)] font-bold leading-[1.1] text-chalk text-balance">
               We do not report the war. We understand it.
             </h1>
-            <p className="mt-4 font-plex text-sm font-light text-ash">
-              Strategic intelligence for the Indian reader.
+            <p className="mt-4 font-plex text-base font-light text-ash">
+              Strategy. Independent. Deliberately contrarian. Rigorously analytical. Proudly Indian
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-stretch">
               <Button

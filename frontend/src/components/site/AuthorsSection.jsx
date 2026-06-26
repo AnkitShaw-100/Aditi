@@ -13,13 +13,13 @@ export default function AuthorsSection() {
           <div className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
             <div>
               <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
-                Meet the Authors
+                Meet the Contributors
               </p>
               <h2 className="mt-3 max-w-xl font-rajdhani text-[clamp(2rem,6vw,4rem)] font-bold leading-[0.96] text-chalk">
-                Writers with ranks, field knowledge, and strategic range.
+                Strategic voices with rank, field knowledge, and technical range.
               </h2>
-              <p className="mt-4 max-w-lg font-plex text-sm font-light leading-[1.85] text-ash">
-                This section highlights the people behind the arguments. The emphasis is not just on names, but on the professional perspective each author brings into the reading experience.
+              <p className="mt-4 max-w-lg font-plex text-base font-light leading-[1.85] text-ash">
+                This section highlights the people behind the arguments, with concise context on the expertise each contributor brings into the reading experience.
               </p>
             </div>
 
@@ -28,7 +28,7 @@ export default function AuthorsSection() {
                 items={AUTHORS}
                 desktopPageSize={2}
                 mobilePageSize={1}
-                ariaLabel="Authors carousel"
+                ariaLabel="Contributors carousel"
                 trackClassName="authors-track"
                 itemClassName="authors-carousel-item"
                 showArrows

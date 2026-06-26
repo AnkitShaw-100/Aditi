@@ -5,14 +5,14 @@ import AuthorsSection from "@/components/site/AuthorsSection";
 import ShowcaseStrip from "@/components/site/ShowcaseStrip";
 import FrameworkSection from "@/components/site/FrameworkSection";
 import DispatchesSection from "@/components/site/DispatchesSection";
-import EditionsSection from "@/components/site/EditionsSection";
-import OjasSection from "@/components/site/OjasSection";
 import FaqSection from "@/components/site/FaqSection";
 import ReaderFeedbackSection from "@/components/site/ReaderFeedbackSection";
+import PurchaseNudgePopup from "@/components/site/PurchaseNudgePopup";
 
 export default function LandingPage() {
   return (
     <>
+      <PurchaseNudgePopup />
       <HeroSection />
       <MissionSection />
       <BrandSection />
@@ -27,4 +27,3 @@ export default function LandingPage() {
     </>
   );
 }
-

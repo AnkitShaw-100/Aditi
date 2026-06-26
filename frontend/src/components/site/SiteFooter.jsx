@@ -38,9 +38,9 @@ export default function SiteFooter() {
             Contact
           </p>
           <div className="mt-4 space-y-3 font-plex text-sm font-light leading-relaxed text-fog">
-            <p>editorial@aditi.in</p>
-            <p>+91 98765 43210</p>
-            <p>New Delhi, India</p>
+            <p>aditidefence@cscan.co.in</p>
+            <p>+91-9933001428 | +91-9866319062</p>
+            <p>Innov8 Coworking Space, Lower Ground Floor, Saket Salcon, Rasvilas, next to Select Citywalk Mall, Saket District Centre, District Centre, Sector 6, Pushp Vihar, New Delhi, Delhi 110017, India</p>
           </div>
         </div>
 
