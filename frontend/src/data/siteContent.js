@@ -27,11 +27,9 @@ export const SECTION_IDS = [
 
 export const NAV_ITEMS = [
   { id: "intro", label: "Home", index: "01" },
-  { id: "mission", label: "Mission", index: "02" },
-  { id: "authors", label: "Authors", index: "03" },
-  { id: "read", label: "Articles", index: "04" },
-  { id: "feedback", label: "Testimonials", index: "05" },
-  { id: "faq", label: "FAQ", index: "06" },
+  { id: "authors", label: "Authors", index: "02" },
+  { id: "read", label: "Articles", index: "03" },
+  { id: "feedback", label: "Testimonials", index: "04" }
 ];
 
 export const MENU_ITEMS = [
@@ -196,9 +194,9 @@ export const DISPATCHES = [
     teaser:
       "A close reading of infrastructure, patrol denial and the new rhythm of pressure along the Himalayan frontier.",
     readTime: "8 min read",
-    cta: "Access",
+    cta: "Add to Cart",
     priceLabel: "\u20B9350",
-    ariaLabel: "Login to access The Ladakh Question After the Buffer Zones",
+    ariaLabel: "Add The Ladakh Question After the Buffer Zones to cart",
   },
   {
     type: "premium",
@@ -210,9 +208,9 @@ export const DISPATCHES = [
     teaser:
       "Why sea control, logistics and island access now sit at the centre of India's strategic autonomy.",
     readTime: "10 min read",
-    cta: "Access",
+    cta: "Add to Cart",
     priceLabel: "\u20B9350",
-    ariaLabel: "Login to access India's Maritime Dilemma in the Middle Ocean",
+    ariaLabel: "Add India's Maritime Dilemma in the Middle Ocean to cart",
   },
   {
     type: "premium",
@@ -224,9 +222,9 @@ export const DISPATCHES = [
     teaser:
       "Cheap unmanned systems are not replacing strategy. They are forcing armies to rediscover depth and redundancy.",
     readTime: "9 min read",
-    cta: "Access",
+    cta: "Add to Cart",
     priceLabel: "\u20B9350",
-    ariaLabel: "Login to access Drones, Attrition and the Return of Mass",
+    ariaLabel: "Add Drones, Attrition and the Return of Mass to cart",
   },
 ];
 
@@ -275,6 +273,13 @@ export const READER_FEEDBACKS = [
     name: "Ishita Menon",
     role: "Graduate Reader",
     image: "https://i.pravatar.cc/160?img=5",
+  },
+  {
+    category: "Subscriber View",
+    quote: "The essays give me a framework before they give me an opinion.",
+    name: "Rohan Malhotra",
+    role: "Defence Enthusiast",
+    image: "https://i.pravatar.cc/160?img=61",
   },
 ];
 

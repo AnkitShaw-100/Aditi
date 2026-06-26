@@ -20,8 +20,8 @@ export default function LandingPage() {
       <ShowcaseStrip />
       <FrameworkSection />
       <DispatchesSection />
-      <EditionsSection />
-      <OjasSection />
+      {/* <EditionsSection /> */}
+      {/* <OjasSection /> */}
       <FaqSection />
       <ReaderFeedbackSection />
     </>

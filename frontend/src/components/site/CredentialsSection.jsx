@@ -27,7 +27,10 @@ export default function CredentialsSection() {
           desktopPageSize={3}
           ariaLabel="Reader and editor feedback carousel"
           trackClassName="feedback-track"
-          itemClassName="basis-full md:basis-[calc((100%-2rem)/3)]"
+          itemClassName="basis-full md:basis-[calc((100%_-_2rem)/3)]"
+          showArrows
+          arrowsClassName="feedback-carousel-arrows"
+          controlsClassName="feedback-carousel-dots"
           renderItem={(feedback) => <FeedbackCard feedback={feedback} />}
         />
       </div>

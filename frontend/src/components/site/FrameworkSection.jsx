@@ -31,8 +31,8 @@ export default function FrameworkSection() {
                 ADITI is not a news scroll. It is a reading discipline for power: five lenses that turn battlefield noise into a strategic argument.
               </p>
               <div className="aditi-mark" aria-label="ADITI brand letters">
-                {["A", "D", "I", "T", "I"].map((letter) => (
-                  <span key={letter}>{letter}</span>
+                {["A", "D", "I", "T", "I"].map((letter, index) => (
+                  <span key={`${letter}-${index}`}>{letter}</span>
                 ))}
               </div>
             </div>

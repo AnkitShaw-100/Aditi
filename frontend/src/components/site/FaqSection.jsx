@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,21 @@ import { FaqItem } from "@/components/site/shared";
 import { FAQ_ITEMS } from "@/data/siteContent";
 
 export default function FaqSection() {
+  const [viewportWidth, setViewportWidth] = useState(() =>
+    typeof window === "undefined" ? 1280 : window.innerWidth
+  );
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isCompact = viewportWidth < 768;
+  const isMedium = viewportWidth < 1100;
+
   return (
     <section
       id="faq"
@@ -14,12 +30,12 @@ export default function FaqSection() {
       <div className="faq-dot-field-shell" aria-hidden="true">
         <DotField
           className="faq-dot-field"
-          dotRadius={2.8}
-          dotSpacing={12}
-          cursorRadius={150}
-          cursorForce={0.1}
+          dotRadius={isCompact ? 2 : isMedium ? 2.3 : 2.8}
+          dotSpacing={isCompact ? 14 : isMedium ? 13 : 12}
+          cursorRadius={isCompact ? 92 : isMedium ? 120 : 150}
+          cursorForce={isCompact ? 0.06 : 0.1}
           bulgeOnly
-          bulgeStrength={67}
+          bulgeStrength={isCompact ? 38 : isMedium ? 52 : 67}
           sparkle={false}
           waveAmplitude={0}
           gradientFrom="rgba(201, 154, 74, 0.98)"

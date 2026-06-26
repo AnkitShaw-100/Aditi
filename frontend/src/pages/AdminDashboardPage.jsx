@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { API_BASE_URL, formatRupees } from "@/lib/api";
 import { ADMIN_TOKEN_KEY } from "@/pages/AdminLoginPage";
 
+const USERS_PER_PAGE = 7;
+
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("");
 
@@ -20,6 +23,14 @@ export default function AdminDashboardPage() {
     }),
     [users]
   );
+
+  const pageCount = Math.max(1, Math.ceil(users.length / USERS_PER_PAGE));
+  const activePage = Math.min(currentPage, pageCount);
+  const paginatedUsers = useMemo(() => {
+    const start = (activePage - 1) * USERS_PER_PAGE;
+
+    return users.slice(start, start + USERS_PER_PAGE);
+  }, [activePage, users]);
 
   const loadUsers = useCallback(async () => {
     const token = localStorage.getItem(ADMIN_TOKEN_KEY);
@@ -49,6 +60,7 @@ export default function AdminDashboardPage() {
       }
 
       setUsers(data.users ?? []);
+      setCurrentPage(1);
       setStatus("ready");
     } catch (error) {
       setMessage(error.message);
@@ -137,7 +149,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                  {paginatedUsers.map((user) => (
                     <tr key={user.id}>
                       <td>
                         <b>{user.user_name || "Unnamed"}</b>
@@ -171,6 +183,38 @@ export default function AdminDashboardPage() {
             )}
             {message ? <p className="mt-4 font-plex text-sm text-ember">{message}</p> : null}
           </div>
+
+          {users.length > USERS_PER_PAGE ? (
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-steel/50 pt-5">
+              <p className="font-plex text-sm text-ash">
+                Showing {(activePage - 1) * USERS_PER_PAGE + 1}-
+                {Math.min(activePage * USERS_PER_PAGE, users.length)} of {users.length} users
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={activePage === 1}
+                  className="h-10 rounded-none border border-steel/70 px-4 font-rajdhani text-base font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk disabled:opacity-40"
+                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                >
+                  Previous
+                </Button>
+                <span className="min-w-20 text-center font-plex text-sm text-fog">
+                  {activePage} / {pageCount}
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={activePage === pageCount}
+                  className="h-10 rounded-none border border-steel/70 px-4 font-rajdhani text-base font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk disabled:opacity-40"
+                  onClick={() => setCurrentPage((page) => Math.min(pageCount, page + 1))}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
@@ -201,4 +245,3 @@ function AdminList({ items = [], empty, renderItem }) {
     </ul>
   );
 }
-

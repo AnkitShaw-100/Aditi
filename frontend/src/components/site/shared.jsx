@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
-import { SignInButton, useAuth } from "@clerk/clerk-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus, Star } from "lucide-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -157,43 +157,47 @@ export function RailCarousel({
   trackClassName,
   itemClassName,
   renderItem,
-  loop = false,
-  loopDuration = 28,
-  autoScroll = false,
-  autoScrollInterval = 3500,
   controlsClassName = "",
   showArrows = false,
   arrowsClassName = "",
+  wrapArrows = false,
 }) {
   const isMobile = useIsMobile();
   const pageSize = isMobile ? mobilePageSize : desktopPageSize;
   const trackRef = useRef(null);
   const itemRefs = useRef([]);
+  const activePageRef = useRef(0);
   const [activePage, setActivePage] = useState(0);
   const getItemKey = (item, index) => item.title ?? item.name ?? `item-${index}`;
 
   const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
-  const loopItems = loop ? [...items, ...items] : items;
+  const getPageOffset = useCallback((track, page) => {
+    const maxScrollLeft = Math.max(0, track.scrollWidth - track.clientWidth);
+    const target = itemRefs.current[Math.min(page * pageSize, items.length - 1)];
+
+    return target
+      ? Math.min(maxScrollLeft, Math.max(0, target.offsetLeft - track.offsetLeft))
+      : 0;
+  }, [items.length, pageSize]);
 
   useEffect(() => {
     itemRefs.current = itemRefs.current.slice(0, items.length);
 
     const track = trackRef.current;
-    if (track && !loop) {
+    if (track) {
       track.scrollTo({ left: 0, behavior: "auto" });
     }
-  }, [items, pageSize, loop]);
+  }, [items, pageSize]);
 
   useEffect(() => {
-    const id = requestAnimationFrame(() => setActivePage(0));
+    const id = requestAnimationFrame(() => {
+      activePageRef.current = 0;
+      setActivePage(0);
+    });
     return () => cancelAnimationFrame(id);
-  }, [items, pageSize, loop]);
+  }, [items, pageSize]);
 
   useEffect(() => {
-    if (loop) {
-      return undefined;
-    }
-
     const track = trackRef.current;
     if (!track || !items.length) {
       return undefined;
@@ -202,16 +206,22 @@ export function RailCarousel({
     let rafId = 0;
 
     const updatePage = () => {
-      const firstItem = itemRefs.current[0];
-      if (!firstItem) {
+      if (!itemRefs.current[0]) {
         return;
       }
 
-      const gap = Number.parseFloat(getComputedStyle(track).gap || "0");
-      const step = Math.max(1, firstItem.getBoundingClientRect().width + gap);
-      const nextPage = Math.round(track.scrollLeft / (step * pageSize));
+      const pageOffsets = Array.from({ length: pageCount }, (_, page) =>
+        getPageOffset(track, page)
+      );
+      const nextPage = pageOffsets.reduce((closestPage, offset, page) => {
+        const currentDistance = Math.abs(track.scrollLeft - pageOffsets[closestPage]);
+        const nextDistance = Math.abs(track.scrollLeft - offset);
+        return nextDistance < currentDistance ? page : closestPage;
+      }, 0);
 
-      setActivePage(Math.min(pageCount - 1, Math.max(0, nextPage)));
+      const boundedPage = Math.min(pageCount - 1, Math.max(0, nextPage));
+      activePageRef.current = boundedPage;
+      setActivePage(boundedPage);
     };
 
     const handleScroll = () => {
@@ -228,64 +238,39 @@ export function RailCarousel({
       window.removeEventListener("resize", updatePage);
       cancelAnimationFrame(rafId);
     };
-  }, [items.length, pageCount, pageSize, loop]);
-
-  useEffect(() => {
-    if (loop || !autoScroll || pageCount <= 1) {
-      return undefined;
-    }
-
-    const track = trackRef.current;
-    if (!track) {
-      return undefined;
-    }
-
-    const intervalId = window.setInterval(() => {
-      const firstItem = itemRefs.current[0];
-      if (!firstItem) {
-        return;
-      }
-
-      const gap = Number.parseFloat(getComputedStyle(track).gap || "0");
-      const step = Math.max(1, firstItem.getBoundingClientRect().width + gap);
-      const currentPage = Math.round(track.scrollLeft / (step * pageSize));
-      const nextPage = (currentPage + 1) % pageCount;
-      const target = itemRefs.current[nextPage * pageSize];
-
-      target?.scrollIntoView({
-        behavior: "smooth",
-        inline: "start",
-        block: "nearest",
-      });
-    }, autoScrollInterval);
-
-    return () => window.clearInterval(intervalId);
-  }, [autoScroll, autoScrollInterval, pageCount, pageSize, loop]);
+  }, [getPageOffset, items.length, pageCount, pageSize]);
 
   const scrollToPage = (page) => {
     const nextPage = Math.min(pageCount - 1, Math.max(0, page));
+    const track = trackRef.current;
     const target = itemRefs.current[nextPage * pageSize];
 
-    if (!loop) {
-      setActivePage(nextPage);
-    }
+    activePageRef.current = nextPage;
+    setActivePage(nextPage);
 
-    if (target) {
-      target.scrollIntoView({
+    if (target && track) {
+      track.scrollTo({
+        left: getPageOffset(track, nextPage),
         behavior: "smooth",
-        inline: "start",
-        block: "nearest",
       });
     }
   };
 
   const scrollByPage = (direction) => {
-    scrollToPage(activePage + direction);
+    const currentPage = activePageRef.current;
+    let nextPage = currentPage + direction;
+
+    if (wrapArrows) {
+      if (nextPage < 0) nextPage = pageCount - 1;
+      if (nextPage >= pageCount) nextPage = 0;
+    }
+
+    scrollToPage(nextPage);
   };
 
   return (
     <div className="rail-carousel" aria-label={ariaLabel}>
-      {showArrows && !loop && pageCount > 1 ? (
+      {showArrows && pageCount > 1 ? (
         <div className={cn("carousel-arrows", arrowsClassName)}>
           <Button
             type="button"
@@ -293,7 +278,7 @@ export function RailCarousel({
             size="icon"
             className="carousel-arrow h-10 w-10 rounded-full border-steel/60 bg-bunker/80 text-chalk hover:border-ember/50 hover:bg-plate hover:text-chalk"
             aria-label={`Previous ${ariaLabel} page`}
-            disabled={activePage === 0}
+            disabled={!wrapArrows && activePage === 0}
             onClick={() => scrollByPage(-1)}
           >
             <ChevronLeft className="size-5" />
@@ -304,77 +289,48 @@ export function RailCarousel({
             size="icon"
             className="carousel-arrow h-10 w-10 rounded-full border-steel/60 bg-bunker/80 text-chalk hover:border-ember/50 hover:bg-plate hover:text-chalk"
             aria-label={`Next ${ariaLabel} page`}
-            disabled={activePage >= pageCount - 1}
+            disabled={!wrapArrows && activePage >= pageCount - 1}
             onClick={() => scrollByPage(1)}
           >
             <ChevronRight className="size-5" />
           </Button>
         </div>
       ) : null}
-      {loop ? (
+      <>
         <div
           ref={trackRef}
-          className="dispatch-loop-track"
-          style={{ "--carousel-loop-duration": `${loopDuration}s` }}
+          className={cn(
+            "dispatch-track flex items-start gap-5 overflow-x-auto scroll-smooth pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden",
+            trackClassName
+          )}
         >
-          <div className="dispatch-loop-group">
-            {loopItems.map((item, index) => (
-              <div
-                key={`${getItemKey(item, index)}-loop-a-${index}`}
-                className={cn("shrink-0 snap-start", itemClassName)}
-              >
-                {renderItem(item, index % items.length)}
-              </div>
-            ))}
-          </div>
-          <div className="dispatch-loop-group" aria-hidden="true">
-            {loopItems.map((item, index) => (
-              <div
-                key={`${getItemKey(item, index)}-loop-b-${index}`}
-                className={cn("shrink-0 snap-start", itemClassName)}
-              >
-                {renderItem(item, index % items.length)}
-              </div>
-            ))}
-          </div>
+          {items.map((item, index) => (
+            <div
+              key={getItemKey(item, index)}
+              ref={(node) => {
+                itemRefs.current[index] = node;
+              }}
+              className={cn("shrink-0 snap-start", itemClassName)}
+            >
+              {renderItem(item, index)}
+            </div>
+          ))}
         </div>
-      ) : (
-        <>
-          <div
-            ref={trackRef}
-            className={cn(
-              "dispatch-track flex items-start gap-5 overflow-x-auto scroll-smooth pb-2 scrollbar-none [&::-webkit-scrollbar]:hidden",
-              trackClassName
-            )}
-          >
-            {items.map((item, index) => (
-              <div
-                key={getItemKey(item, index)}
-                ref={(node) => {
-                  itemRefs.current[index] = node;
-                }}
-                className={cn("shrink-0 snap-start", itemClassName)}
-              >
-                {renderItem(item, index)}
-              </div>
-            ))}
-          </div>
-          <div
-            className={cn("carousel-dots", controlsClassName)}
-            aria-label={`${ariaLabel} pages`}
-          >
-            {Array.from({ length: pageCount }).map((_, index) => (
-              <button
-                key={`${ariaLabel}-dot-${index}`}
-                type="button"
-                aria-label={`Go to ${ariaLabel} page ${index + 1}`}
-                className={cn("carousel-dot", index === activePage && "active")}
-                onClick={() => scrollToPage(index)}
-              />
-            ))}
-          </div>
-        </>
-      )}
+        <div
+          className={cn("carousel-dots", controlsClassName)}
+          aria-label={`${ariaLabel} pages`}
+        >
+          {Array.from({ length: pageCount }).map((_, index) => (
+            <button
+              key={`${ariaLabel}-dot-${index}`}
+              type="button"
+              aria-label={`Go to ${ariaLabel} page ${index + 1}`}
+              className={cn("carousel-dot", index === activePage && "active")}
+              onClick={() => scrollToPage(index)}
+            />
+          ))}
+        </div>
+      </>
     </div>
   );
 }
@@ -486,14 +442,31 @@ export function ArticleCard({ article }) {
 
 function AddToCartButton({ article }) {
   const { getToken, isSignedIn } = useAuth();
+  const { user } = useUser();
   const navigate = useNavigate();
   const [status, setStatus] = useState("idle");
 
+  const authUrl = `/auth?redirect=${encodeURIComponent("/checkout")}&magazine_slug=${encodeURIComponent(article.slug)}`;
+
   async function addToCart(event) {
     event.stopPropagation();
+
+    if (!isSignedIn) {
+      navigate(authUrl);
+      return;
+    }
+
     setStatus("adding");
 
     try {
+      await apiRequest(getToken, "/api/auth/sync-user", {
+        method: "POST",
+        body: JSON.stringify({
+          user_name: user?.fullName || user?.username,
+          gmail: user?.primaryEmailAddress?.emailAddress,
+          phone_number: user?.primaryPhoneNumber?.phoneNumber,
+        }),
+      });
       await apiRequest(getToken, "/api/cart", {
         method: "POST",
         body: JSON.stringify({ magazine_slug: article.slug }),
@@ -506,21 +479,6 @@ function AddToCartButton({ article }) {
     }
   }
 
-  if (!isSignedIn) {
-    return (
-      <SignInButton mode="modal" forceRedirectUrl="/checkout">
-        <Button
-          type="button"
-          variant="ghost"
-          className="inline-flex min-h-11 items-center py-3 font-plex text-sm font-medium text-ember hover:bg-transparent hover:text-chalk"
-          onClick={(event) => event.stopPropagation()}
-        >
-          {article.cta} <ArrowRight className="size-4" />
-        </Button>
-      </SignInButton>
-    );
-  }
-
   return (
     <Button
       type="button"
@@ -529,7 +487,7 @@ function AddToCartButton({ article }) {
       className="inline-flex min-h-11 items-center py-3 font-plex text-sm font-medium text-ember hover:bg-transparent hover:text-chalk"
       onClick={addToCart}
     >
-      {status === "adding" ? "Adding" : "Add"} <ArrowRight className="size-4" />
+      {status === "adding" ? "Adding" : article.cta} <ArrowRight className="size-4" />
     </Button>
   );
 }
@@ -537,10 +495,17 @@ function AddToCartButton({ article }) {
 export function FeedbackCard({ feedback }) {
   return (
     <Card className="feedback-card h-full overflow-hidden border-0 bg-transparent p-0 py-0 shadow-none ring-0">
-      <div className="p-1 md:p-2">
-        <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
-          {feedback.category}
-        </p>
+      <div className="feedback-card-inner">
+        <div className="feedback-card-top">
+          <p className="feedback-category font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
+            {feedback.category}
+          </p>
+          <span className="feedback-rating" aria-label="Five star reader rating">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Star key={index} className="size-3.5" fill="currentColor" />
+            ))}
+          </span>
+        </div>
         <p className="feedback-quote font-lora italic">"{feedback.quote}"</p>
         <div className="feedback-meta">
           <img

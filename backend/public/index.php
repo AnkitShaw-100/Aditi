@@ -224,6 +224,8 @@ Response::json(['error' => 'Route not found'], 404);
 
 function requireClaims(Request $request, ClerkJwtVerifier $verifier): array
 {
+    global $config;
+
     $token = $request->bearerToken();
 
     if ($token === null) {
@@ -233,7 +235,13 @@ function requireClaims(Request $request, ClerkJwtVerifier $verifier): array
     try {
         return $verifier->verify($token);
     } catch (Throwable $exception) {
-        Response::json(['error' => 'Invalid or expired Clerk token'], 401);
+        $payload = ['error' => 'Invalid or expired Clerk token'];
+
+        if (($config['app']['debug'] ?? false) === true) {
+            $payload['message'] = $exception->getMessage();
+        }
+
+        Response::json($payload, 401);
     }
 }
 

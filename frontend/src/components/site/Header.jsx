@@ -21,7 +21,7 @@ export default function SiteHeader() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[rgba(17,22,15,0.55)] shadow-[0_16px_55px_rgba(0,0,0,0.2)] backdrop-blur-2xl supports-[backdrop-filter]:bg-[rgba(17,22,15,0.4)]">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-10">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 sm:px-5 lg:px-4">
         <a
           href="/#intro"
           className="flex items-center gap-3 font-rajdhani text-xl font-bold tracking-[0.16em] text-chalk md:text-[1.7rem]"
@@ -42,8 +42,8 @@ export default function SiteHeader() {
           </span>
         </a>
 
-        <div className="flex items-center gap-5 md:gap-7">
-          <nav className="hidden items-center gap-6 md:flex" aria-label="Primary navigation">
+        <div className="flex items-center gap-2 sm:gap-3 xl:gap-7">
+          <nav className="hidden items-center gap-6 xl:flex" aria-label="Primary navigation">
             {NAV_ITEMS.map((item) => (
               <a
                 key={item.id}
@@ -60,8 +60,12 @@ export default function SiteHeader() {
             ))}
           </nav>
 
-          <div className="hidden md:block">
+          <div className="hidden xl:block">
             <AuthNavButton />
+          </div>
+
+          <div className="block xl:hidden">
+            <AuthNavButton compact />
           </div>
 
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
@@ -69,7 +73,7 @@ export default function SiteHeader() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="menu-toggle flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 p-0 text-chalk shadow-none hover:bg-white/10 hover:text-chalk md:hidden"
+                className="menu-toggle flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 p-0 text-chalk shadow-none hover:bg-white/10 hover:text-chalk xl:hidden"
                 aria-label="Open menu"
               >
                 <Menu className="size-5" />

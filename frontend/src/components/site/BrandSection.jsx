@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import brandSectionBg from "../../../media/brand-section-bg.png";
 
@@ -9,6 +10,8 @@ import { BRAND_STATS } from "@/data/siteContent";
 import rightCardImg from "../../../media/optimized/cover-float-900.jpg";
 
 export default function BrandSection() {
+  const [activeStat, setActiveStat] = useState(null);
+
   return (
     <section
       id="brand"
@@ -26,14 +29,14 @@ export default function BrandSection() {
                 <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
                   What is ADITI
                 </p>
-                <h2 className="mt-4 max-w-[11ch] font-rajdhani text-[clamp(2rem,6.4vw,3.6rem)] font-bold leading-[0.95] text-void text-balance">
+                <h2 className="mt-4 max-w-[9.5ch] font-rajdhani text-[clamp(2.35rem,5.8vw,4.3rem)] font-bold leading-[0.9] tracking-[-0.03em] text-void text-balance">
                   Strategy of war. Not defence news.
                 </h2>
-                <p className="brand-intro-text copy-width mt-8 max-w-[34rem] font-lora text-[1.02rem] italic leading-relaxed text-chalk">
+                <p className="brand-intro-text copy-width mt-8 max-w-[34rem] font-lora text-[1.1rem] leading-relaxed text-void/90">
                   Buy the analysis you need without a subscription.
                 </p>
-                <ul className="reading-card-list mt-4">
-                  <li>Premium essays at {"\u20B9"}350</li>
+                <ul className="reading-card-list mt-4 font-lora text-[1.06rem] leading-relaxed">
+                  <li>Premium Magzines at {"\u20B9"}350</li>
                   <li>Open-access primers to preview the method</li>
                   <li>Built for mobile and desktop reading</li>
                 </ul>
@@ -45,10 +48,14 @@ export default function BrandSection() {
                     key={stat.label}
                     className={cn(
                       "brand-stat-item brand-stat-item--glass",
+                      activeStat === stat.label && "brand-stat-item--active",
                       stat.tone === "void" && "brand-stat-item--void",
                       stat.tone === "plate" && "brand-stat-item--plate",
                       stat.tone === "ember" && "brand-stat-item--ember"
                     )}
+                    onTouchStart={() => setActiveStat(stat.label)}
+                    onTouchEnd={() => setActiveStat(null)}
+                    onTouchCancel={() => setActiveStat(null)}
                   >
                     <p className="brand-stat-value font-rajdhani text-[2.5rem] font-bold leading-none tracking-[-0.04em] text-ember md:text-[3rem]">
                       {stat.value}
@@ -67,21 +74,21 @@ export default function BrandSection() {
               <img
                 src={rightCardImg}
                 alt="Reading preview"
-                className="w-full h-40 md:h-56 object-cover rounded-t-2xl"
+                className="h-1/2 min-h-[14rem] w-full object-cover object-center rounded-t-2xl lg:min-h-0"
               />
-              <div className="brand-reading-shell flex h-full flex-col justify-between p-6 md:p-8">
+              <div className="brand-reading-shell flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center md:p-8">
                 <div>
                   <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-chalk">
                     Start Reading
                   </p>
-                  <h3 className="reading-card-title mt-6 font-rajdhani font-bold">
+                  <h3 className="mx-auto mt-4 max-w-[11ch] text-center font-rajdhani text-[clamp(2rem,6.4vw,3.6rem)] font-bold leading-[0.95]">
                     One dispatch. One complete argument.
                   </h3>
                 </div>
-                <div className="mt-4 md:mt-6">
+                <div className="flex justify-center">
                   <Button
                     asChild
-                    className="mt-2 h-12 w-full rounded-full bg-ember px-6 py-3 font-rajdhani text-base font-bold text-void transition hover:bg-[#ddb255] sm:w-fit"
+                    className="mt-2 min-h-11 rounded-full bg-ember px-6 py-3 font-rajdhani text-base font-bold text-void transition hover:bg-[#ddb255]"
                   >
                     <a href="#read">
                       Browse Dispatches <ArrowRight className="size-4" />

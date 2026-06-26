@@ -92,14 +92,14 @@ export default function HeroSection() {
                 asChild
                 className="h-12 rounded-full bg-ember px-6 font-rajdhani text-base font-bold text-void hover:bg-[#ddb255]"
               >
-                <a href="#read">Get Access</a>
+                <a href="#read">Read for Free</a>
               </Button>
               <Button
                 asChild
                 variant="outline"
                 className="h-12 rounded-full border border-white/15 bg-white/5 px-6 font-rajdhani text-base font-bold uppercase tracking-[0.14em] text-chalk hover:bg-white/10 hover:text-chalk"
               >
-                <a href="#pillars">Framework</a>
+                <a href="#pillars">Buy Now</a>
               </Button>
             </div>
           </div>

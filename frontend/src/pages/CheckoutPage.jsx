@@ -19,7 +19,7 @@ export default function CheckoutPage() {
               Sign in to view your cart.
             </h1>
             <SignInButton mode="modal" forceRedirectUrl="/checkout">
-              <Button className="final-button mt-6 h-11 rounded-none px-8 font-rajdhani text-lg font-bold">
+              <Button className="signin-button mt-6 h-11 rounded-none px-8 font-rajdhani text-lg font-bold">
                 Sign In
               </Button>
             </SignInButton>

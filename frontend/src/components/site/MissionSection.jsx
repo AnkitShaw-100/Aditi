@@ -38,9 +38,9 @@ export default function MissionSection() {
 
       <div className="mission-aurora" aria-hidden="true">
         <AuroraGraphic
-          colorStops={["#2b3326", "#c99a4a", "#727f57"]}
-          amplitude={0.85}
-          blend={0.72}
+          colorStops={["#202719", "#c99a4a", "#8a713f"]}
+          amplitude={0.78}
+          blend={0.68}
           speed={0.48}
         />
       </div>

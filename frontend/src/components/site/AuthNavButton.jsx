@@ -17,7 +17,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8080";
 const CLERK_ENABLED = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 const syncedSessions = new Set();
 
-export default function AuthNavButton({ mobile = false }) {
+export default function AuthNavButton({ mobile = false, compact = false }) {
   if (!CLERK_ENABLED) {
     return (
       <Button
@@ -25,28 +25,30 @@ export default function AuthNavButton({ mobile = false }) {
         disabled
         className={cn(
           "auth-nav-button h-10 rounded-none border border-ember/45 bg-ember/10 px-4 font-rajdhani text-sm font-bold uppercase tracking-[0.16em] text-ember shadow-none",
+          compact && "h-9 px-3 text-xs tracking-[0.12em]",
           mobile && "h-12 w-full justify-center text-base"
         )}
         title="Add VITE_CLERK_PUBLISHABLE_KEY in frontend/.env"
       >
-        Sign In
+        {compact ? "Sign Up" : "Sign In"}
       </Button>
     );
   }
 
   return (
-    <div className={cn("auth-nav", mobile && "auth-nav--mobile")}>
+    <div className={cn("auth-nav", mobile && "auth-nav--mobile", compact && "auth-nav--compact")}>
       <SignedOut>
         <SignInButton mode="modal" forceRedirectUrl="/">
           <Button
             type="button"
             className={cn(
-              "auth-nav-button h-10 rounded-none border border-ember/55 bg-[linear-gradient(135deg,#c99a4a,#8a713f)] px-4 font-rajdhani text-sm font-bold uppercase tracking-[0.16em] text-void shadow-[0_12px_28px_rgba(0,0,0,0.25)] hover:border-chalk hover:bg-chalk hover:text-void",
+              "auth-nav-button h-10 rounded-none border border-ember/55 bg-ember px-4 font-rajdhani text-sm font-bold uppercase tracking-[0.16em] text-void shadow-none hover:border-chalk hover:bg-chalk hover:text-void",
+              compact && "h-9 px-3 text-xs tracking-[0.12em]",
               mobile && "h-12 w-full justify-center text-base"
             )}
           >
-            <LogIn className="size-4" />
-            Sign In
+            <LogIn className={cn("size-4", compact && "hidden sm:block")} />
+            {compact ? "Sign Up" : "Sign In"}
           </Button>
         </SignInButton>
       </SignedOut>
@@ -55,7 +57,8 @@ export default function AuthNavButton({ mobile = false }) {
         <SyncClerkUser />
         <div
           className={cn(
-            "auth-user-chip flex h-10 items-center gap-2 border border-white/10 bg-white/5 px-2",
+            "auth-user-chip flex h-10 items-center gap-2 border-0 bg-transparent px-0",
+            compact && "h-9 gap-2",
             mobile && "h-auto w-full flex-wrap justify-center py-2"
           )}
         >
@@ -63,30 +66,37 @@ export default function AuthNavButton({ mobile = false }) {
             asChild
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-none border border-steel/60 text-fog hover:border-ember hover:bg-plate hover:text-chalk"
-            title="Profile"
-          >
-            <Link to="/profile" aria-label="Profile">
-              <UserRound className="size-4" />
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-none border border-steel/60 text-fog hover:border-ember hover:bg-plate hover:text-chalk"
+            className={cn(
+              "h-8 w-8 rounded-none border-0 bg-transparent text-chalk hover:bg-transparent hover:text-ember",
+              compact && "text-chalk"
+            )}
             title="Cart"
           >
             <Link to="/checkout" aria-label="Cart">
               <ShoppingCart className="size-4" />
             </Link>
           </Button>
-          <UserLabel />
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-8 w-8 rounded-none border-0 bg-transparent text-chalk hover:bg-transparent hover:text-ember",
+              compact && "text-chalk"
+            )}
+            title="Profile"
+          >
+            <Link to="/profile" aria-label="Profile">
+              <UserRound className="size-4" />
+            </Link>
+          </Button>
+          {!compact ? <UserLabel /> : null}
           <UserButton
             appearance={{
               elements: {
-                avatarBox:
-                  "h-8 w-8 rounded-none border border-ember/50 shadow-none",
+                avatarBox: cn(
+                  "h-8 w-8 rounded-full border-0 shadow-none"
+                ),
                 userButtonPopoverCard:
                   "rounded-none border border-[#3b402f] bg-[#090b08] text-[#f2eada]",
                 userButtonPopoverActionButton:
@@ -124,8 +134,6 @@ function SyncClerkUser() {
       return;
     }
 
-    syncedSessions.add(sessionId);
-
     const controller = new AbortController();
 
     async function syncUser() {
@@ -135,7 +143,7 @@ function SyncClerkUser() {
         return;
       }
 
-      await fetch(`${BACKEND_URL}/api/auth/sync-user`, {
+      const response = await fetch(`${BACKEND_URL}/api/auth/sync-user`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -149,6 +157,14 @@ function SyncClerkUser() {
         }),
         signal: controller.signal,
       });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || "Unable to sync Clerk user");
+      }
+
+      syncedSessions.add(sessionId);
     }
 
     syncUser().catch((error) => {

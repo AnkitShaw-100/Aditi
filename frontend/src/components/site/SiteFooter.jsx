@@ -30,12 +30,6 @@ export default function SiteFooter() {
                 {item.label}
               </a>
             ))}
-            <a className="flex min-h-10 items-center py-2 transition hover:text-chalk" href="#pillars">
-              Framework
-            </a>
-            <a className="flex min-h-10 items-center py-2 transition hover:text-chalk" href="#credentials">
-              Credentials
-            </a>
           </nav>
         </div>
 

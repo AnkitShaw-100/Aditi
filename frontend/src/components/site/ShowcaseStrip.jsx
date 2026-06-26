@@ -15,13 +15,17 @@ function loopPage(page, pageCount) {
   return ((page % pageCount) + pageCount) % pageCount;
 }
 
-function MobileMagazineViewer({ currentPage }) {
+function MobileMagazineViewer({ currentPage, direction }) {
   const page = PAGEFLIP_PAGES[currentPage] ?? PAGEFLIP_PAGES[0];
 
   return (
     <div className="mobile-magazine-viewer">
       <div className="mobile-magazine-viewer__frame">
-        <article className="mobile-magazine-page">
+        <article
+          key={currentPage}
+          className="mobile-magazine-page"
+          data-direction={direction}
+        >
           <div className="mobile-magazine-page__inner">
             <img
               src={page.image}
@@ -43,6 +47,7 @@ function ReactPageFlipShowcase() {
   const isMobile = useIsMobile();
   const [stageWidth, setStageWidth] = useState(320);
   const [currentPage, setCurrentPage] = useState(0);
+  const [direction, setDirection] = useState("next");
   const pageCount = PAGEFLIP_PAGES.length;
 
   useEffect(() => {
@@ -114,18 +119,23 @@ function ReactPageFlipShowcase() {
   }, [currentPage, isMobile, pageCount]);
 
   const goPrev = () => {
-    setCurrentPage((page) => loopPage(page - 1, pageCount));
+    setDirection("prev");
+    setCurrentPage((page) => Math.max(0, page - 1));
   };
 
   const goNext = () => {
-    setCurrentPage((page) => loopPage(page + 1, pageCount));
+    setDirection("next");
+    setCurrentPage((page) => Math.min(pageCount - 1, page + 1));
   };
 
   const handleFlip = (event) => {
+    setDirection(event.data > currentPage ? "next" : "prev");
     setCurrentPage(event.data);
   };
 
   const displayPage = Math.min(currentPage + 1, pageCount);
+  const canGoPrev = currentPage > 0;
+  const canGoNext = currentPage < pageCount - 1;
 
   return (
     <section
@@ -158,6 +168,7 @@ function ReactPageFlipShowcase() {
                 size="icon"
                 className="pageflip-shell__nav pageflip-shell__nav--prev hidden h-11 w-11 shrink-0 rounded-full border-steel/50 bg-bunker/80 text-chalk hover:border-ember/50 hover:bg-plate md:inline-flex"
                 aria-label="Previous page"
+                disabled={!canGoPrev}
                 onClick={goPrev}
               >
                 <ChevronLeft className="size-5" />
@@ -168,6 +179,7 @@ function ReactPageFlipShowcase() {
                   {isMobile ? (
                     <MobileMagazineViewer
                       currentPage={currentPage}
+                      direction={direction}
                     />
                   ) : (
                     <>
@@ -222,7 +234,7 @@ function ReactPageFlipShowcase() {
                 size="icon"
                 className="pageflip-shell__nav pageflip-shell__nav--next hidden h-11 w-11 shrink-0 rounded-full border-steel/50 bg-bunker/80 text-chalk hover:border-ember/50 hover:bg-plate md:inline-flex"
                 aria-label="Next page"
-                disabled={currentPage >= pageCount - 1}
+                disabled={!canGoNext}
                 onClick={goNext}
               >
                 <ChevronRight className="size-5" />
@@ -247,6 +259,7 @@ function ReactPageFlipShowcase() {
               <Button
                 type="button"
                 onClick={goPrev}
+                disabled={!canGoPrev}
                 variant="outline"
                 className="h-11 rounded-full border border-white/15 bg-white/5 px-5 font-plex text-xs uppercase tracking-[0.16em] text-chalk hover:bg-white/10 hover:text-chalk disabled:opacity-40"
               >
@@ -256,6 +269,7 @@ function ReactPageFlipShowcase() {
               <Button
                 type="button"
                 onClick={goNext}
+                disabled={!canGoNext}
                 className="h-11 rounded-full bg-ember px-5 font-plex text-xs uppercase tracking-[0.16em] text-void hover:bg-[#ddb255] disabled:opacity-40"
               >
                 Next
@@ -276,7 +290,7 @@ function CurvedLoopBand() {
       aria-label="ADITI themes"
     >
       <div className="marquee-track flex gap-4 font-plex text-xs font-medium uppercase tracking-[0.15em] text-fog">
-        <span>
+        <span className="marquee-track__item">
           Strategy <b className="font-medium text-ember">&middot;</b>{" "}
           Sovereignty <b className="font-medium text-ember">&middot;</b>{" "}
           Intelligence <b className="font-medium text-ember">&middot;</b>{" "}
@@ -287,7 +301,7 @@ function CurvedLoopBand() {
           Proudly Indian <b className="font-medium text-ember">&middot;</b>{" "}
           Rigorously Analytical <b className="font-medium text-ember">&middot;</b>
         </span>
-        <span>
+        <span className="marquee-track__item" aria-hidden="true">
           Strategy <b className="font-medium text-ember">&middot;</b>{" "}
           Sovereignty <b className="font-medium text-ember">&middot;</b>{" "}
           Intelligence <b className="font-medium text-ember">&middot;</b>{" "}

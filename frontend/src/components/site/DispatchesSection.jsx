@@ -66,7 +66,8 @@ export default function DispatchesSection() {
             desktopPageSize={4}
             ariaLabel="Dispatch article carousel"
             trackClassName="dispatch-track"
-            itemClassName="basis-full md:basis-[calc((100%-3.75rem)/4)]"
+            itemClassName="basis-full md:basis-[calc((100%_-_3.75rem)/4)]"
+            showArrows
             renderItem={(article) => <ArticleCard article={article} />}
           />
         </div>
