@@ -35,6 +35,9 @@ CREATE TABLE magazines (
     price_paise INT UNSIGNED NOT NULL DEFAULT 35000,
     currency CHAR(3) NOT NULL DEFAULT 'INR',
     pdf_path VARCHAR(2048) NULL,
+    pdf_file LONGBLOB NULL,
+    pdf_filename VARCHAR(255) NULL,
+    pdf_mime_type VARCHAR(100) NOT NULL DEFAULT 'application/pdf',
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -61,9 +64,14 @@ CREATE TABLE user_magazines (
     INDEX idx_user_magazines_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO magazines (sku, slug, title, price_paise, currency)
+INSERT INTO magazines (sku, slug, title, price_paise, currency, pdf_filename, pdf_mime_type)
 VALUES
-    ('ADITI-DISPATCH-LADAKH-BUFFER-ZONES', 'ladakh-question-after-buffer-zones', 'The Ladakh Question After the Buffer Zones', 35000, 'INR'),
-    ('ADITI-DISPATCH-MIDDLE-OCEAN', 'indias-maritime-dilemma-middle-ocean', 'India''s Maritime Dilemma in the Middle Ocean', 35000, 'INR'),
-    ('ADITI-DISPATCH-DRONES-ATTRITION-MASS', 'drones-attrition-return-of-mass', 'Drones, Attrition and the Return of Mass', 35000, 'INR');
-
+    (
+        'ADITI-MAG-V1-I1',
+        'aditi-strategy-defence-volume-1-issue-1',
+        'ADITI Strategy & Defence Magazine - Volume 1, Issue 1 (Inaugural Issue): Cognitive Dissonance in Indian Strategy',
+        35000,
+        'INR',
+        'ADITI-Strategy-Defence-Magazine-Volume-1-Issue-1.pdf',
+        'application/pdf'
+    );

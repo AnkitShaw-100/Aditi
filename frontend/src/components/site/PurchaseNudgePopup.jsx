@@ -8,7 +8,7 @@ import { DISPATCHES } from "@/data/siteContent";
 import { apiRequest } from "@/lib/api";
 
 const SHOW_DELAY_MS = 2500;
-const VISIBLE_DURATION_MS = 10000;
+const VISIBLE_DURATION_MS = 8000;
 
 export default function PurchaseNudgePopup() {
   const { getToken, isSignedIn } = useAuth();
@@ -110,7 +110,7 @@ export default function PurchaseNudgePopup() {
 
       <div className="purchase-popup__content">
         <p className="purchase-popup__eyebrow">Magazine access</p>
-        <h2>Continue to the premium dispatch.</h2>
+        <h2>Buy the inaugural ADITI magazine.</h2>
         <p>
           Sign in only when you choose to buy. Payment opens securely from checkout.
         </p>

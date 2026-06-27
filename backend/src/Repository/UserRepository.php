@@ -225,6 +225,146 @@ final class UserRepository
         return $this->getCart($clerkUserId);
     }
 
+    public function cartSummary(string $clerkUserId): array
+    {
+        $cart = $this->getCart($clerkUserId);
+        $total = array_reduce(
+            $cart,
+            static fn (int $sum, array $item): int => $sum + (int) ($item['price_paise'] ?? 0),
+            0
+        );
+
+        return [
+            'cart' => $cart,
+            'total_paise' => $total,
+            'currency' => $cart[0]['currency'] ?? 'INR',
+        ];
+    }
+
+    public function createPendingPurchasesForCart(string $clerkUserId, string $razorpayOrderId): array
+    {
+        $user = $this->findUserRowByClerkId($clerkUserId);
+
+        if ($user === null) {
+            throw new \RuntimeException('User profile not found.');
+        }
+
+        $cart = $this->getCart($clerkUserId);
+
+        if ($cart === []) {
+            throw new \RuntimeException('Cart is empty.');
+        }
+
+        $statement = $this->pdo->prepare(
+            'INSERT INTO user_magazines (user_id, magazine_id, razorpay_order_id, status)
+             VALUES (:user_id, :magazine_id, :razorpay_order_id, "pending")
+             ON DUPLICATE KEY UPDATE status = "pending", updated_at = NOW()'
+        );
+
+        foreach ($cart as $item) {
+            $statement->execute([
+                'user_id' => $user['id'],
+                'magazine_id' => $item['id'],
+                'razorpay_order_id' => $razorpayOrderId,
+            ]);
+        }
+
+        return $cart;
+    }
+
+    public function markRazorpayOrderPaid(
+        string $clerkUserId,
+        string $razorpayOrderId,
+        string $razorpayPaymentId
+    ): array {
+        $user = $this->findUserRowByClerkId($clerkUserId);
+
+        if ($user === null) {
+            throw new \RuntimeException('User profile not found.');
+        }
+
+        try {
+            $this->pdo->beginTransaction();
+
+            $purchaseIds = $this->pdo->prepare(
+                'SELECT magazine_id
+                 FROM user_magazines
+                 WHERE user_id = :user_id AND razorpay_order_id = :razorpay_order_id'
+            );
+            $purchaseIds->execute([
+                'user_id' => $user['id'],
+                'razorpay_order_id' => $razorpayOrderId,
+            ]);
+            $magazineIds = array_map(
+                static fn (array $row): int => (int) $row['magazine_id'],
+                $purchaseIds->fetchAll()
+            );
+
+            if ($magazineIds === []) {
+                throw new \RuntimeException('No pending purchase found for this payment.');
+            }
+
+            $update = $this->pdo->prepare(
+                'UPDATE user_magazines
+                 SET status = "paid",
+                     razorpay_payment_id = :razorpay_payment_id,
+                     purchased_at = NOW(),
+                     updated_at = NOW()
+                 WHERE user_id = :user_id AND razorpay_order_id = :razorpay_order_id'
+            );
+            $update->execute([
+                'user_id' => $user['id'],
+                'razorpay_order_id' => $razorpayOrderId,
+                'razorpay_payment_id' => $razorpayPaymentId,
+            ]);
+
+            $placeholders = implode(',', array_fill(0, count($magazineIds), '?'));
+            $delete = $this->pdo->prepare(
+                "DELETE FROM user_cart_items
+                 WHERE user_id = ? AND magazine_id IN ($placeholders)"
+            );
+            $delete->execute([$user['id'], ...$magazineIds]);
+
+            $this->pdo->commit();
+        } catch (\Throwable $exception) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+
+            throw $exception;
+        }
+
+        return $this->findProfileByClerkId($clerkUserId)['magazines_bought'] ?? [];
+    }
+
+    public function paidMagazineFile(string $clerkUserId, string $slug): ?array
+    {
+        $user = $this->findUserRowByClerkId($clerkUserId);
+
+        if ($user === null) {
+            return null;
+        }
+
+        $statement = $this->pdo->prepare(
+            'SELECT m.title, m.slug, m.pdf_file, m.pdf_filename, m.pdf_mime_type
+             FROM user_magazines um
+             INNER JOIN magazines m ON m.id = um.magazine_id
+             WHERE um.user_id = :user_id
+               AND m.slug = :slug
+               AND um.status = "paid"
+             ORDER BY um.purchased_at DESC
+             LIMIT 1'
+        );
+        $statement->execute([
+            'user_id' => $user['id'],
+            'slug' => $slug,
+        ]);
+
+        $file = $statement->fetch();
+
+        return $file === false ? null : $file;
+    }
+
     private function findUserRowByClerkId(string $clerkUserId): ?array
     {
         $statement = $this->pdo->prepare(

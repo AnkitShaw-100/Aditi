@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { SignInButton, SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
-import { ArrowLeft, CreditCard, Trash2, UserRound } from "lucide-react";
+import { ArrowLeft, CreditCard, Download, Trash2, UserRound } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-import { apiRequest, formatRupees } from "@/lib/api";
+import { apiRequest, downloadProtectedFile, formatRupees } from "@/lib/api";
 
 export default function CheckoutPage() {
   return (
@@ -40,6 +40,8 @@ function CheckoutPanel() {
   const [cart, setCart] = useState([]);
   const [profile, setProfile] = useState(null);
   const [status, setStatus] = useState("loading");
+  const [paymentStatus, setPaymentStatus] = useState("idle");
+  const [paidPurchases, setPaidPurchases] = useState([]);
   const [message, setMessage] = useState("");
 
   const loadCheckout = useCallback(async () => {
@@ -83,6 +85,78 @@ function CheckoutPanel() {
         method: "DELETE",
       });
       setCart(data.cart ?? []);
+    } catch (error) {
+      setMessage(error.message);
+    }
+  }
+
+  async function continueToPayment() {
+    setPaymentStatus("creating");
+    setMessage("");
+
+    try {
+      await loadRazorpayCheckout();
+      const data = await apiRequest(getToken, "/api/payments/razorpay/order", {
+        method: "POST",
+      });
+
+      const options = {
+        key: data.key_id,
+        amount: data.order.amount,
+        currency: data.order.currency,
+        name: "ADITI",
+        description: "ADITI Strategy & Defence Magazine",
+        order_id: data.order.id,
+        prefill: {
+          name: profile?.user_name ?? user?.fullName ?? "",
+          email: profile?.gmail ?? user?.primaryEmailAddress?.emailAddress ?? "",
+          contact: profile?.phone_number ?? user?.primaryPhoneNumber?.phoneNumber ?? "",
+        },
+        notes: {
+          address: profile?.address ?? "",
+        },
+        theme: {
+          color: "#c99a4a",
+        },
+        handler: async (response) => {
+          try {
+            setPaymentStatus("verifying");
+            const verified = await apiRequest(getToken, "/api/payments/razorpay/verify", {
+              method: "POST",
+              body: JSON.stringify(response),
+            });
+
+            setCart([]);
+            setPaidPurchases(verified.purchases ?? []);
+            setPaymentStatus("paid");
+            setMessage("Payment successful. Your magazine is ready to download.");
+          } catch (error) {
+            setPaymentStatus("error");
+            setMessage(error.message);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setPaymentStatus("idle");
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      setPaymentStatus("error");
+      setMessage(error.message);
+    }
+  }
+
+  async function downloadMagazine(magazine) {
+    try {
+      await downloadProtectedFile(
+        getToken,
+        `/api/magazines/${encodeURIComponent(magazine.slug)}/download`,
+        `${magazine.slug}.pdf`
+      );
     } catch (error) {
       setMessage(error.message);
     }
@@ -199,16 +273,68 @@ function CheckoutPanel() {
 
         <Button
           type="button"
-          disabled={!cart.length || !profileComplete}
+          disabled={!cart.length || !profileComplete || paymentStatus === "creating" || paymentStatus === "verifying"}
+          onClick={continueToPayment}
           className="final-button mt-5 h-11 w-full rounded-none px-6 font-rajdhani text-base font-bold"
         >
           <CreditCard className="size-4" />
-          Continue to Payment
+          {paymentStatus === "creating"
+            ? "Creating Order"
+            : paymentStatus === "verifying"
+              ? "Verifying"
+              : "Continue to Payment"}
         </Button>
         <p className="mt-3 font-plex text-xs leading-5 text-fog">
-          Razorpay order creation and payment verification will be connected in the next backend step.
+          Secure payment opens through Razorpay. After successful verification, the PDF download appears here and in your profile.
         </p>
+
+        {paidPurchases.length ? (
+          <div className="mt-5 border-t border-steel/50 pt-5">
+            <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
+              Ready to Download
+            </p>
+            <div className="mt-3 grid gap-3">
+              {paidPurchases.map((magazine) => (
+                <Button
+                  key={`${magazine.slug}-${magazine.razorpay_order_id}`}
+                  type="button"
+                  variant="ghost"
+                  className="h-auto justify-between rounded-none border border-steel/70 px-4 py-3 text-left font-rajdhani text-base font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk"
+                  onClick={() => downloadMagazine(magazine)}
+                >
+                  <span>{magazine.title}</span>
+                  <Download className="size-4" />
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </aside>
     </div>
   );
+}
+
+function loadRazorpayCheckout() {
+  if (window.Razorpay) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+
+    if (existing) {
+      existing.addEventListener("load", resolve, { once: true });
+      existing.addEventListener("error", () => reject(new Error("Unable to load Razorpay Checkout.")), {
+        once: true,
+      });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error("Unable to load Razorpay Checkout."));
+    document.body.appendChild(script);
+  });
 }

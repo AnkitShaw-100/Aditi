@@ -398,7 +398,10 @@ export function ArticleCard({ article }) {
     >
       <div className="relative h-[11.25rem] md:h-[13.75rem]">
         <img
-          className="h-full w-full object-cover"
+          className={cn(
+            "h-full w-full object-cover",
+            isPremium && "object-cover object-center"
+          )}
           src={article.image}
           alt={article.tag}
           loading="lazy"

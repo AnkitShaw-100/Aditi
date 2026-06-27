@@ -28,4 +28,8 @@ return [
         'jwks_cache_file' => __DIR__ . '/../storage/cache/clerk_jwks.json',
         'jwks_cache_ttl_seconds' => 3600,
     ],
+    'razorpay' => [
+        'key_id' => Env::get('RAZORPAY_KEY_ID', ''),
+        'key_secret' => Env::get('RAZORPAY_KEY_SECRET', ''),
+    ],
 ];

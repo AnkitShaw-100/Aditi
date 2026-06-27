@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { BRAND_STATS } from "@/data/siteContent";
-import rightCardImg from "../../../media/INS-scaled.webp";
+
+const magazineMockup = "/article-banners/aditi-strategy-defence-magazine-mockup.webp";
 
 export default function BrandSection() {
   const [activeStat, setActiveStat] = useState(null);
@@ -72,18 +73,18 @@ export default function BrandSection() {
           <div className="brand-side-layout flex flex-col gap-5">
             <Card className="brand-box brand-box--reading brand-card-equal h-full min-h-[320px] gap-0 overflow-hidden rounded-2xl p-0 shadow-[0_0_45px_rgba(200,133,58,0.16)]">
               <img
-                src={rightCardImg}
-                alt="Reading preview"
-                className="h-1/2 min-h-[14rem] w-full object-cover object-center rounded-t-2xl lg:min-h-0"
+                src={magazineMockup}
+                alt="ADITI Strategy and Defence Magazine mockup"
+                className="h-1/2 min-h-[14rem] w-full rounded-t-2xl object-cover object-center lg:min-h-0"
               />
               <div className="brand-reading-shell flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center md:p-8">
                 <div>
                   <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-chalk">
-                    Start Reading
+                    Premium Magazine
                   </p>
                   <h3 className="mx-auto mt-4 max-w-[11ch] text-center font-rajdhani text-[clamp(2rem,6.4vw,3.6rem)] font-bold leading-[0.95]">
-                    <span>One dispatch.</span>
-                    <span className="reading-card-nowrap">One complete argument.</span>
+                    <span>Volume 1, Issue 1.</span>
+                    <span className="reading-card-nowrap">Cognitive Dissonance.</span>
                   </h3>
                 </div>
                 <div className="flex justify-center">
@@ -92,7 +93,7 @@ export default function BrandSection() {
                     className="mt-2 min-h-11 rounded-full bg-ember px-6 py-3 font-rajdhani text-base font-bold text-void transition hover:bg-[#ddb255]"
                   >
                     <a href="#read">
-                      Browse Dispatches <ArrowRight className="size-4" />
+                      Buy Now <ArrowRight className="size-4" />
                     </a>
                   </Button>
                 </div>

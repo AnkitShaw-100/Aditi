@@ -141,12 +141,12 @@
   bottom: clamp(1rem, 3vw, 2rem);
   z-index: 70;
   display: grid;
-  grid-template-columns: 8.5rem minmax(0, 1fr);
-  width: min(calc(100vw - 2rem), 31rem);
-  min-height: 10.25rem;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  width: min(calc(100vw - 2rem), 38rem);
+  min-height: 12.5rem;
   overflow: hidden;
   border: 1px solid rgba(201, 154, 74, 0.38);
-  border-radius: 0.75rem;
+  border-radius: 0.9rem;
   background: rgba(12, 15, 10, 0.94);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(18px);
@@ -195,7 +195,7 @@
   min-width: 0;
   flex-direction: column;
   justify-content: center;
-  padding: 1rem 1rem 1rem 1.1rem;
+  padding: 1.35rem 1.35rem 1.35rem 1.45rem;
 }
 
 .purchase-popup__eyebrow {
@@ -209,22 +209,22 @@
 
 .purchase-popup h2 {
   margin-top: 0.35rem;
-  max-width: 18rem;
+  max-width: 22rem;
   font-family: "Rajdhani", sans-serif;
-  font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+  font-size: clamp(1.45rem, 2.5vw, 1.95rem);
   font-weight: 700;
   line-height: 1.05;
   color: #f2eada;
 }
 
 .purchase-popup p {
-  max-width: 20rem;
+  max-width: 23rem;
 }
 
 .purchase-popup__content > p:not(.purchase-popup__eyebrow) {
-  margin-top: 0.45rem;
+  margin-top: 0.55rem;
   font-family: "IBM Plex Sans", sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 300;
   line-height: 1.45;
   color: #d8d2c0;
@@ -235,23 +235,23 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-top: 0.85rem;
+  margin-top: 1rem;
 }
 
 .purchase-popup__footer span {
   font-family: "Rajdhani", sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #f2eada;
 }
 
 .purchase-popup__cta {
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   border-radius: 999px;
   background: #c99a4a;
-  padding-inline: 1rem;
+  padding-inline: 1.15rem;
   font-family: "Rajdhani", sans-serif;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #090b08;
 }
@@ -275,13 +275,20 @@
 
 @media (max-width: 640px) {
   .purchase-popup {
-    right: 0.75rem;
-    bottom: 0.75rem;
-    left: 0.75rem;
-    grid-template-columns: 5.5rem minmax(0, 1fr);
-    width: auto;
-    min-height: 8.75rem;
-    border-radius: 0.65rem;
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    grid-template-columns: 1fr;
+    width: min(calc(100vw - 1.5rem), 24rem);
+    min-height: 0;
+    border-radius: 0.85rem;
+    animation: purchase-popup-mobile-in 220ms ease-out both;
+  }
+
+  .purchase-popup__media {
+    height: clamp(8.5rem, 38vw, 11rem);
+    min-height: 0;
   }
 
   .purchase-popup__media img {
@@ -289,36 +296,48 @@
   }
 
   .purchase-popup__content {
-    padding: 0.85rem 0.85rem 0.85rem 0.9rem;
+    padding: 1.05rem;
   }
 
   .purchase-popup h2 {
-    max-width: 13rem;
-    font-size: 1.2rem;
+    max-width: 18rem;
+    font-size: 1.45rem;
   }
 
   .purchase-popup__content > p:not(.purchase-popup__eyebrow) {
     display: -webkit-box;
     overflow: hidden;
-    font-size: 0.76rem;
-    line-height: 1.38;
+    font-size: 0.82rem;
+    line-height: 1.45;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     line-clamp: 2;
   }
 
   .purchase-popup__footer {
-    margin-top: 0.65rem;
+    margin-top: 0.85rem;
   }
 
   .purchase-popup__footer span {
-    font-size: 1rem;
+    font-size: 1.15rem;
   }
 
   .purchase-popup__cta {
-    min-height: 2.25rem;
-    padding-inline: 0.75rem;
-    font-size: 0.82rem;
+    min-height: 2.45rem;
+    padding-inline: 0.85rem;
+    font-size: 0.88rem;
+  }
+}
+
+@keyframes purchase-popup-mobile-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 0.75rem)) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 

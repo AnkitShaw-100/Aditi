@@ -28,10 +28,10 @@ export default function DispatchesSection() {
               Featured Articles
             </p>
             <h2 className="mt-3 font-rajdhani text-[clamp(1.8rem,6vw,3rem)] font-bold leading-[1.1] text-chalk">
-              Free articles, structured for serious reading.
+              Free articles and the inaugural premium magazine.
             </h2>
             <p className="mt-3 font-plex text-base font-light text-fog">
-              Browse open access pieces now. Premium dispatches will appear here when they are ready.
+              Browse open access pieces or add the ADITI Strategy & Defence Magazine to your cart.
             </p>
           </div>
 
@@ -82,7 +82,7 @@ export default function DispatchesSection() {
                   Premium dispatches are being prepared.
                 </h3>
                 <p className="mt-2 max-w-xl font-plex text-sm font-light leading-7 text-ash">
-                  The open-access articles are available now. Paid dispatches will be added once the checkout catalogue is ready.
+                  The open-access articles are available now. Premium magazine issues will appear here when available.
                 </p>
               </div>
             )}

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { SignInButton, SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
-import { ArrowRight, Save } from "lucide-react";
+import { ArrowRight, Download, Save } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-import { apiRequest } from "@/lib/api";
+import { apiRequest, downloadProtectedFile } from "@/lib/api";
 
 const emptyProfile = {
   user_name: "",
@@ -128,6 +128,18 @@ function ProfilePanel() {
     }
   }
 
+  async function downloadMagazine(magazine) {
+    try {
+      await downloadProtectedFile(
+        getToken,
+        `/api/magazines/${encodeURIComponent(magazine.slug)}/download`,
+        `${magazine.slug}.pdf`
+      );
+    } catch (error) {
+      setMessage(error.message);
+    }
+  }
+
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
       <form className="account-panel p-5 md:p-7" onSubmit={handleSubmit}>
@@ -215,7 +227,19 @@ function ProfilePanel() {
               magazines.map((magazine) => (
                 <div key={`${magazine.id}-${magazine.razorpay_order_id}`} className="account-mini-row">
                   <span>{magazine.title}</span>
-                  <b>{magazine.status}</b>
+                  {magazine.status === "paid" ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-9 rounded-none border border-steel/70 px-3 font-rajdhani text-sm font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk"
+                      onClick={() => downloadMagazine(magazine)}
+                    >
+                      <Download className="size-4" />
+                      PDF
+                    </Button>
+                  ) : (
+                    <b>{magazine.status}</b>
+                  )}
                 </div>
               ))
             ) : (

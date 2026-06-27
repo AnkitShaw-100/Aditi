@@ -29,6 +29,15 @@ Then import:
 mysql -u root -p aditi < backend\database\migrations\001_create_auth_users_and_magazines.sql
 ```
 
+For an existing database, replace the old dummy magazine catalogue with the real ADITI issue:
+
+```powershell
+Get-Content -Raw backend\database\migrations\004_replace_catalogue_with_aditi_magazine.sql | mysql -u root -p aditi
+php backend\scripts\import_magazine_pdf.php "C:\Users\Ankit\Desktop\ADITI Strategy & Defence Magazine.pdf"
+```
+
+The import script stores the PDF in `magazines.pdf_file` and keeps the public frontend from exposing the paid file directly.
+
 Run locally:
 
 ```powershell
@@ -110,6 +119,21 @@ Then add the endpoint signing secret to `backend/.env`:
 
 ```env
 CLERK_WEBHOOK_SECRET=whsec_xxxxx
+```
+
+## Razorpay Payments
+
+Set these values in `backend/.env`:
+
+```env
+RAZORPAY_KEY_ID=rzp_test_xxxxx
+RAZORPAY_KEY_SECRET=xxxxx
+```
+
+The checkout flow creates a Razorpay order from the signed-in user's cart, verifies the Razorpay signature after payment, marks `user_magazines.status` as `paid`, clears the purchased item from cart, and enables protected PDF download through:
+
+```text
+GET /api/magazines/{slug}/download
 ```
 
 For local testing, expose the PHP backend with a tunnel such as ngrok:
