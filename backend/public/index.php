@@ -168,10 +168,15 @@ if ($route === 'GET /api/me') {
 
 if ($route === 'PUT /api/me') {
     $claims = requireClaims($request, $verifier);
-    $user = $users->updateProfile(
-        (string) $claims['sub'],
-        $request->only(['gmail', 'email', 'phone_number', 'address', 'user_name', 'name'])
-    );
+
+    try {
+        $user = $users->updateProfile(
+            (string) $claims['sub'],
+            $request->only(['gmail', 'email', 'phone_number', 'address', 'user_name', 'name'])
+        );
+    } catch (RuntimeException $exception) {
+        Response::json(['error' => $exception->getMessage()], 409);
+    }
 
     if ($user === null) {
         Response::json(['error' => 'User not found. Call /api/auth/sync-user first.'], 404);

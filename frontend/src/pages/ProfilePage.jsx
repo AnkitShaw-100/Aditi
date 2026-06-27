@@ -101,6 +101,7 @@ function ProfilePanel() {
     () => profile.user_name && profile.gmail && profile.phone_number && profile.address,
     [profile]
   );
+  const profileLocked = status === "ready" && Boolean(isComplete);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -157,23 +158,27 @@ function ProfilePanel() {
           <ProfileField
             label="Name"
             value={profile.user_name}
+            disabled={profileLocked}
             onChange={(value) => setProfile((current) => ({ ...current, user_name: value }))}
           />
           <ProfileField
             label="Gmail"
             type="email"
             value={profile.gmail}
+            disabled={profileLocked}
             onChange={(value) => setProfile((current) => ({ ...current, gmail: value }))}
           />
           <ProfileField
             label="Phone Number"
             value={profile.phone_number}
+            disabled={profileLocked}
             onChange={(value) => setProfile((current) => ({ ...current, phone_number: value }))}
           />
           <label className="account-field sm:col-span-2">
             <span>Address</span>
             <textarea
               value={profile.address}
+              disabled={profileLocked}
               onChange={(event) =>
                 setProfile((current) => ({ ...current, address: event.target.value }))
               }
@@ -185,11 +190,11 @@ function ProfilePanel() {
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Button
             type="submit"
-            disabled={status === "saving"}
+            disabled={status === "saving" || profileLocked}
             className="final-button h-11 rounded-none px-6 font-rajdhani text-base font-bold"
           >
             <Save className="size-4" />
-            {status === "saving" ? "Saving" : "Save Profile"}
+            {profileLocked ? "Profile Locked" : status === "saving" ? "Saving" : "Save Profile"}
           </Button>
           <Button
             asChild
@@ -215,7 +220,9 @@ function ProfilePanel() {
             {isComplete ? "Ready for checkout" : "Profile needs details"}
           </p>
           <p className="mt-3 font-plex text-sm leading-7 text-ash">
-            Name, Gmail, phone number, and address are required before payment.
+            {isComplete
+              ? "These details are saved and cannot be edited again from this page."
+              : "Name, Gmail, phone number, and address are required before payment."}
           </p>
         </div>
         <div className="mt-6 border-t border-steel/50 pt-4">
@@ -252,11 +259,16 @@ function ProfilePanel() {
   );
 }
 
-function ProfileField({ label, type = "text", value, onChange }) {
+function ProfileField({ label, type = "text", value, disabled = false, onChange }) {
   return (
     <label className="account-field">
       <span>{label}</span>
-      <input type={type} value={value} onChange={(event) => onChange(event.target.value)} />
+      <input
+        type={type}
+        value={value}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.value)}
+      />
     </label>
   );
 }

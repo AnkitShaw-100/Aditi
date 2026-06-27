@@ -376,6 +376,22 @@ export function AuthorCard({ author }) {
 
 export function ArticleCard({ article }) {
   const isPremium = article.type === "premium";
+  const media = (
+    <>
+      <img
+        className={cn(
+          "h-full w-full object-cover",
+          isPremium && "object-cover object-center"
+        )}
+        src={article.image}
+        alt={article.tag}
+        loading="lazy"
+      />
+      <span className="absolute bottom-3 left-3 rounded-sm bg-void/75 px-2 py-0.75 font-plex text-xs font-medium uppercase text-ember">
+        {article.tag}
+      </span>
+    </>
+  );
 
   return (
     <Card
@@ -396,23 +412,30 @@ export function ArticleCard({ article }) {
         }
       }}
     >
-      <div className="relative h-[11.25rem] md:h-[13.75rem]">
-        <img
-          className={cn(
-            "h-full w-full object-cover",
-            isPremium && "object-cover object-center"
-          )}
-          src={article.image}
-          alt={article.tag}
-          loading="lazy"
-        />
-        <span className="absolute bottom-3 left-3 rounded-sm bg-void/75 px-2 py-0.75 font-plex text-xs font-medium uppercase text-ember">
-          {article.tag}
-        </span>
-      </div>
+      {isPremium ? (
+        <div className="relative h-[11.25rem] md:h-[13.75rem]">{media}</div>
+      ) : (
+        <a
+          href={article.href}
+          className="relative block h-[11.25rem] md:h-[13.75rem]"
+          onClick={(event) => event.stopPropagation()}
+        >
+          {media}
+        </a>
+      )}
       <div className="p-4">
         <h3 className="article-title font-rajdhani text-[1.15rem] font-bold leading-tight text-chalk">
-          {article.title}
+          {isPremium ? (
+            article.title
+          ) : (
+            <a
+              href={article.href}
+              className="text-current hover:text-ember"
+              onClick={(event) => event.stopPropagation()}
+            >
+              {article.title}
+            </a>
+          )}
         </h3>
         <p className="article-teaser mt-3 font-lora text-[0.88rem] leading-[1.65] text-ash">
           {article.teaser}
@@ -445,7 +468,7 @@ export function ArticleCard({ article }) {
   );
 }
 
-function AddToCartButton({ article }) {
+export function AddToCartButton({ article, className, children, stopPropagation = true }) {
   const { getToken, isSignedIn } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
@@ -454,7 +477,9 @@ function AddToCartButton({ article }) {
   const authUrl = `/auth?redirect=${encodeURIComponent("/checkout")}&magazine_slug=${encodeURIComponent(article.slug)}`;
 
   async function addToCart(event) {
-    event.stopPropagation();
+    if (stopPropagation) {
+      event.stopPropagation();
+    }
 
     if (!isSignedIn) {
       navigate(authUrl);
@@ -489,10 +514,13 @@ function AddToCartButton({ article }) {
       type="button"
       variant="ghost"
       disabled={status === "adding"}
-      className="inline-flex min-h-11 items-center py-3 font-plex text-sm font-medium text-ember hover:bg-transparent hover:text-chalk"
+      className={cn(
+        "inline-flex min-h-11 items-center py-3 font-plex text-sm font-medium text-ember hover:bg-transparent hover:text-chalk",
+        className
+      )}
       onClick={addToCart}
     >
-      {status === "adding" ? "Adding" : article.cta} <ArrowRight className="size-4" />
+      {status === "adding" ? "Adding" : (children ?? article.cta)} <ArrowRight className="size-4" />
     </Button>
   );
 }

@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { ArrowRight } from "lucide-react";
 import brandSectionBg from "../../../media/brand-section-bg.png";
 
 import SectionReveal from "@/components/site/SectionReveal";
-import { Button } from "@/components/ui/button";
+import { AddToCartButton } from "@/components/site/shared";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { BRAND_STATS } from "@/data/siteContent";
+import { BRAND_STATS, DISPATCHES } from "@/data/siteContent";
 
 const magazineMockup = "/article-banners/aditi-strategy-defence-magazine-mockup.webp";
 
 export default function BrandSection() {
   const [activeStat, setActiveStat] = useState(null);
+  const premiumMagazine = DISPATCHES.find((item) => item.type === "premium");
 
   return (
     <section
@@ -88,14 +88,15 @@ export default function BrandSection() {
                   </h3>
                 </div>
                 <div className="flex justify-center">
-                  <Button
-                    asChild
-                    className="mt-2 min-h-11 rounded-full bg-ember px-6 py-3 font-rajdhani text-base font-bold text-void transition hover:bg-[#ddb255]"
-                  >
-                    <a href="#read">
-                      Buy Now <ArrowRight className="size-4" />
-                    </a>
-                  </Button>
+                  {premiumMagazine ? (
+                    <AddToCartButton
+                      article={premiumMagazine}
+                      stopPropagation={false}
+                      className="mt-2 min-h-11 rounded-full bg-ember px-6 py-3 font-rajdhani text-base font-bold text-void transition hover:bg-[#ddb255] hover:text-void"
+                    >
+                      Buy Now
+                    </AddToCartButton>
+                  ) : null}
                 </div>
               </div>
             </Card>

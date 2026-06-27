@@ -134,6 +134,16 @@ final class UserRepository
 
     public function updateProfile(string $clerkUserId, array $profile): ?array
     {
+        $current = $this->findUserRowByClerkId($clerkUserId);
+
+        if ($current === null) {
+            return null;
+        }
+
+        if ($this->profileIsComplete($current)) {
+            throw new \RuntimeException('Profile details can only be saved once. Contact support if a correction is needed.');
+        }
+
         $statement = $this->pdo->prepare(
             'UPDATE users
              SET gmail = COALESCE(:gmail, gmail),
@@ -394,6 +404,14 @@ final class UserRepository
         $magazine = $statement->fetch();
 
         return $magazine === false ? null : $magazine;
+    }
+
+    private function profileIsComplete(array $user): bool
+    {
+        return $this->firstNonEmpty($user['user_name'] ?? null) !== null
+            && $this->firstNonEmpty($user['gmail'] ?? null) !== null
+            && $this->firstNonEmpty($user['phone_number'] ?? null) !== null
+            && $this->firstNonEmpty($user['address'] ?? null) !== null;
     }
 
     private function firstNonEmpty(mixed ...$values): ?string
