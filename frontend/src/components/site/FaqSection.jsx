@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -21,10 +21,20 @@ export default function FaqSection() {
 
   const isCompact = viewportWidth < 768;
   const isMedium = viewportWidth < 1100;
+  const dotExclusionPadding = useMemo(
+    () => ({
+      top: isCompact ? 10 : 14,
+      right: isCompact ? 12 : isMedium ? 20 : 28,
+      bottom: isCompact ? 18 : 32,
+      left: isCompact ? 12 : isMedium ? 20 : 28,
+    }),
+    [isCompact, isMedium]
+  );
 
   return (
     <section
       id="faq"
+      data-dot-exclusion-root
       className="faq-section border-t border-steel bg-void px-4 py-16 scroll-mt-20 md:px-8 md:py-24"
     >
       <div className="faq-dot-field-shell" aria-hidden="true">
@@ -40,9 +50,11 @@ export default function FaqSection() {
           waveAmplitude={0}
           gradientFrom="rgba(201, 154, 74, 0.98)"
           gradientTo="rgba(201, 154, 74, 0.74)"
+          exclusionSelector=".faq-content"
+          exclusionPadding={dotExclusionPadding}
         />
       </div>
-      <div className="mx-auto max-w-4xl">
+      <div className="faq-content mx-auto max-w-4xl">
         <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
           FAQ
         </p>

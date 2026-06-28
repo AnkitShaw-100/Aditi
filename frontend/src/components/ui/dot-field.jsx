@@ -75,6 +75,56 @@ function toRgba(color) {
   )}, ${clamp(color.a, 0, 1)})`;
 }
 
+function normalizePadding(padding) {
+  if (typeof padding === "number") {
+    return { top: padding, right: padding, bottom: padding, left: padding };
+  }
+
+  if (!padding || typeof padding !== "object") {
+    return { top: 0, right: 0, bottom: 0, left: 0 };
+  }
+
+  const x = padding.x ?? 0;
+  const y = padding.y ?? 0;
+
+  return {
+    top: padding.top ?? y,
+    right: padding.right ?? x,
+    bottom: padding.bottom ?? y,
+    left: padding.left ?? x,
+  };
+}
+
+function resolveElementExclusion(canvas, selector, padding) {
+  if (!selector) return null;
+
+  const parent = canvas.parentElement;
+  const root = parent?.closest("[data-dot-exclusion-root]");
+  const target = root?.querySelector(selector);
+  if (!parent || !target) return null;
+
+  const parentRect = parent.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const inset = normalizePadding(padding);
+
+  return {
+    left: targetRect.left - parentRect.left - inset.left,
+    right: targetRect.right - parentRect.left + inset.right,
+    top: targetRect.top - parentRect.top - inset.top,
+    bottom: targetRect.bottom - parentRect.top + inset.bottom,
+  };
+}
+
+function isInsideRect(point, rect) {
+  return (
+    rect &&
+    point.x >= rect.left &&
+    point.x <= rect.right &&
+    point.y >= rect.top &&
+    point.y <= rect.bottom
+  );
+}
+
 const DotField = memo(
   ({
     dotRadius = 1.5,
@@ -87,6 +137,8 @@ const DotField = memo(
       waveAmplitude = 0,
       gradientFrom = "rgba(201, 154, 74, 0.96)",
       gradientTo = "rgba(201, 154, 74, 0.9)",
+    exclusionSelector = null,
+    exclusionPadding = 0,
     className = "",
     ...rest
   }) => {
@@ -100,7 +152,7 @@ const DotField = memo(
       speed: 0,
     });
     const rafRef = useRef(null);
-    const sizeRef = useRef({ w: 0, h: 0, offsetX: 0, offsetY: 0 });
+    const sizeRef = useRef({ w: 0, h: 0 });
     const propsRef = useRef({});
     const rebuildRef = useRef(null);
     const engagement = useRef(0);
@@ -117,6 +169,8 @@ const DotField = memo(
       baseColor: parseColor("rgba(201, 154, 74, 0.38)"),
       gradientFromColor: parseColor(gradientFrom),
       gradientToColor: parseColor(gradientTo),
+      exclusionSelector,
+      exclusionPadding,
     };
 
     useEffect(() => {
@@ -163,12 +217,7 @@ const DotField = memo(
         canvas.style.height = `${h}px`;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        sizeRef.current = {
-          w,
-          h,
-          offsetX: rect.left + window.scrollX,
-          offsetY: rect.top + window.scrollY,
-        };
+        sizeRef.current = { w, h };
 
         buildDots(w, h);
       }
@@ -179,9 +228,12 @@ const DotField = memo(
       }
 
       function onMouseMove(event) {
-        const size = sizeRef.current;
-        mouseRef.current.x = event.pageX - size.offsetX;
-        mouseRef.current.y = event.pageY - size.offsetY;
+        const parent = canvas.parentElement;
+        if (!parent) return;
+
+        const rect = parent.getBoundingClientRect();
+        mouseRef.current.x = event.clientX - rect.left;
+        mouseRef.current.y = event.clientY - rect.top;
       }
 
       function updateMouseSpeed() {
@@ -206,6 +258,11 @@ const DotField = memo(
         const p = propsRef.current;
         const len = dots.length;
         const time = frameCount * 0.02;
+        const exclusion = resolveElementExclusion(
+          canvas,
+          p.exclusionSelector,
+          p.exclusionPadding
+        );
 
         const targetEngagement = Math.min(m.speed / 5, 1);
         // Smooth engagement keeps the field from flickering when the cursor slows.
@@ -259,6 +316,10 @@ const DotField = memo(
           if (p.waveAmplitude > 0) {
             drawY += Math.sin(d.ax * 0.03 + time) * p.waveAmplitude;
             drawX += Math.cos(d.ay * 0.03 + time * 0.7) * p.waveAmplitude * 0.5;
+          }
+
+          if (isInsideRect({ x: drawX, y: drawY }, exclusion)) {
+            continue;
           }
 
           const activeTone =

@@ -491,24 +491,39 @@ export const OJAS_PANELS = [
 
 export const FAQ_ITEMS = [
   {
-    question: "Can I buy one article without subscribing?",
+    question: "What exactly do I get for ₹350?",
     answer:
-      "Yes. ADITI is built around individual strategic dispatches. Premium articles are priced at \u20B9350 each.",
+      "The complete first issue — all sixteen contributions, the full magazine, not a sample. It's yours to keep and re-read, on mobile or desktop, from the moment your payment clears.",
   },
   {
-    question: "What do I receive after purchase?",
+    question: "Is this a subscription? Will I be charged again?",
     answer:
-      "You receive access to the full dispatch in a clean reading format designed for mobile and desktop.",
+      "No. Issue I is a single purchase — one payment, no auto-renewal, nothing recurring. A full subscription opens in July with our new website, but it will always sit alongside the option to buy a single issue. You commit to nothing today beyond this one issue.",
   },
   {
-    question: "Is ADITI political commentary?",
+    question: "I've never read defence or strategy writing. Is this for me?",
     answer:
-      "ADITI focuses on strategic analysis: doctrine, geography, technology, sovereignty and military decision-making.",
+      "Yes. ADITI is written to be understood, not to show off. If you can follow the news, you can follow ADITI — you'll simply understand far more of what you're reading, and why it matters.",
   },
   {
-    question: "Are there free articles?",
+    question: "Who actually writes it?",
     answer:
-      "Yes. Open access dispatches introduce the ADITI method and help readers decide what to buy next.",
+      "Senior retired officers of the Indian armed forces and India's leading strategic scholars — Air Marshals, Lieutenant Generals, Major Generals, a Commodore, Brigadiers, and one of the country's foremost China experts.",
+  },
+  {
+    question: "Is ADITI political?",
+    answer:
+      "No. ADITI analyses strategy, not party politics. It is deliberately independent and rigorously analytical — the goal is clearer thinking about Indian power, not a position to defend.",
+  },
+  {
+    question: "Can I read a bit before I buy?",
+    answer:
+      "Yes — three primers are open and free. Read them here. They show you exactly how ADITI reasons before you spend a rupee.",
+  },
+  {
+    question: "When is the next issue, and will I get it?",
+    answer:
+      "Issue II — Forging the Republic's Power — arrives in July. Buy Issue I now and you'll be reading ADITI from its very first edition — first in line for every issue that follows.",
   },
 ];
 

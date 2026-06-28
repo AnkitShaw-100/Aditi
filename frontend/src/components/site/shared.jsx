@@ -576,15 +576,15 @@ export function FaqItem({ item }) {
           setOpen((value) => !value);
         }}
       >
-        {item.question}
-        <span className="faq-icon text-ember">
+        <span className="min-w-0 flex-1 break-words">{item.question}</span>
+        <span className="faq-icon shrink-0 text-ember">
           {open ? <Minus className="size-4" /> : <Plus className="size-4" />}
         </span>
       </summary>
       <div className="faq-answer" style={{ maxHeight }}>
         <p
           ref={contentRef}
-          className="pb-4 font-plex text-sm font-light leading-[1.7] text-ash"
+          className="break-words pb-4 font-plex text-sm font-light leading-[1.7] text-ash"
         >
           {item.answer}
         </p>

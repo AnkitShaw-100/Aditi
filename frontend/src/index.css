@@ -3128,7 +3128,7 @@ body.menu-open {
   transform: translateZ(0);
 }
 
-.faq-section > .mx-auto {
+.faq-section > .faq-content {
   position: relative;
   z-index: 2;
 }
@@ -3138,8 +3138,6 @@ body.menu-open {
   height: 100%;
   opacity: 0.95;
   filter: contrast(1.08) saturate(1.05);
-  -webkit-mask-image: radial-gradient(circle at 50% 38%, transparent 0 22%, black 42%, black 100%);
-  mask-image: radial-gradient(circle at 50% 38%, transparent 0 22%, black 42%, black 100%);
 }
 
 .faq-dot-field-shell .dot-field-container {
@@ -3155,10 +3153,6 @@ body.menu-open {
   .faq-dot-field {
     opacity: 0.8;
     filter: contrast(1.08) saturate(1.04);
-    -webkit-mask-image:
-      radial-gradient(circle at 50% 32%, transparent 0 18%, black 38%, black 100%);
-    mask-image:
-      radial-gradient(circle at 50% 32%, transparent 0 18%, black 38%, black 100%);
   }
 }
 
@@ -3174,10 +3168,6 @@ body.menu-open {
   .faq-dot-field {
     opacity: 0.72;
     filter: contrast(1.12) saturate(1.08);
-    -webkit-mask-image:
-      radial-gradient(circle at 50% 34%, transparent 0 12%, black 28%, black 100%);
-    mask-image:
-      radial-gradient(circle at 50% 34%, transparent 0 12%, black 28%, black 100%);
   }
 }
 
