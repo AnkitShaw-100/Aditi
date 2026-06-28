@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 use App\Support\Env;
 
+$appEnv = Env::get('APP_ENV', 'production');
+$forceHttps = Env::bool('FORCE_HTTPS', $appEnv === 'production');
+
 return [
     'app' => [
-        'env' => Env::get('APP_ENV', 'production'),
-        'debug' => Env::bool('APP_DEBUG', false),
+        'env' => $appEnv,
+        'debug' => $appEnv === 'local' && Env::bool('APP_DEBUG', false),
         'url' => Env::get('APP_URL', 'http://localhost:8080'),
         'cors_allowed_origins' => Env::csv('CORS_ALLOWED_ORIGINS', ['http://localhost:5173']),
+        'force_https' => $forceHttps,
+        'admin_cookie_name' => Env::get('ADMIN_COOKIE_NAME', 'aditi_admin'),
+        'admin_cookie_secure' => Env::bool('ADMIN_COOKIE_SECURE', $forceHttps),
+        'admin_cookie_samesite' => Env::get('ADMIN_COOKIE_SAMESITE', 'Lax'),
     ],
     'database' => [
         'host' => Env::get('DB_HOST', '127.0.0.1'),

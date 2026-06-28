@@ -75,6 +75,13 @@ final class Request
         return trim($matches[1]);
     }
 
+    public function cookie(string $name): ?string
+    {
+        $value = $_COOKIE[$name] ?? null;
+
+        return is_string($value) && $value !== '' ? $value : null;
+    }
+
     public function origin(): ?string
     {
         return $this->header('Origin');
@@ -91,6 +98,23 @@ final class Request
         }
 
         return $ip;
+    }
+
+    public function isHttps(): bool
+    {
+        $https = $this->server['HTTPS'] ?? '';
+        $forwardedProto = $this->header('X-Forwarded-Proto');
+
+        return $https === 'on' || $https === '1' || $forwardedProto === 'https';
+    }
+
+    public function fullUrl(): string
+    {
+        $host = $this->server['HTTP_HOST'] ?? 'localhost';
+        $requestUri = $this->server['REQUEST_URI'] ?? $this->path;
+        $scheme = $this->isHttps() ? 'https' : 'http';
+
+        return $scheme . '://' . $host . $requestUri;
     }
 
     private static function headersFromServer(array $server): array

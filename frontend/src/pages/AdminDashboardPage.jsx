@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL, formatRupees } from "@/lib/api";
-import { ADMIN_TOKEN_KEY } from "@/pages/AdminLoginPage";
 
 const USERS_PER_PAGE = 7;
+const LEGACY_ADMIN_TOKEN_KEY = "aditi_admin_token";
 
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
@@ -33,24 +33,16 @@ export default function AdminDashboardPage() {
   }, [activePage, users]);
 
   const loadUsers = useCallback(async () => {
-    const token = localStorage.getItem(ADMIN_TOKEN_KEY);
-
-    if (!token) {
-      navigate("/admin/login");
-      return;
-    }
-
     setStatus("loading");
     setMessage("");
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
       const data = await response.json();
 
       if (response.status === 401) {
-        localStorage.removeItem(ADMIN_TOKEN_KEY);
         navigate("/admin/login");
         return;
       }
@@ -69,6 +61,8 @@ export default function AdminDashboardPage() {
   }, [navigate]);
 
   useEffect(() => {
+    localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
+
     const timerId = window.setTimeout(() => {
       loadUsers();
     }, 0);
@@ -77,16 +71,10 @@ export default function AdminDashboardPage() {
   }, [loadUsers]);
 
   async function logout() {
-    const token = localStorage.getItem(ADMIN_TOKEN_KEY);
-
-    if (token) {
-      await fetch(`${API_BASE_URL}/api/admin/logout`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      }).catch(() => {});
-    }
-
-    localStorage.removeItem(ADMIN_TOKEN_KEY);
+    await fetch(`${API_BASE_URL}/api/admin/logout`, {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {});
     navigate("/admin/login");
   }
 

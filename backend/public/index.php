@@ -26,6 +26,16 @@ set_exception_handler(function (Throwable $exception) use ($config): void {
 
 $request = Request::capture();
 Response::cors($config['app']['cors_allowed_origins'], $request);
+Response::securityHeaders($config['app'], $request);
+
+if (($config['app']['force_https'] ?? false) === true && !$request->isHttps()) {
+    if ($request->method() === 'GET') {
+        header('Location: ' . preg_replace('#^http:#', 'https:', $request->fullUrl()), true, 308);
+        exit;
+    }
+
+    Response::json(['error' => 'HTTPS is required'], 403);
+}
 
 if ($request->method() === 'OPTIONS') {
     Response::empty(204);
@@ -59,7 +69,12 @@ if ($route === 'POST /api/admin/login') {
         Response::json(['error' => 'Invalid admin credentials'], 401);
     }
 
-    Response::json($session);
+    issueAdminCookie($session['token'], $session['expires_at']);
+
+    Response::json([
+        'expires_at' => $session['expires_at'],
+        'admin' => $session['admin'],
+    ]);
 }
 
 if ($route === 'GET /api/admin/users') {
@@ -71,7 +86,8 @@ if ($route === 'GET /api/admin/users') {
 }
 
 if ($route === 'POST /api/admin/logout') {
-    $admins->logout($request->bearerToken());
+    $admins->logout(adminTokenFromRequest($request));
+    clearAdminCookie();
 
     Response::json(['message' => 'Logged out']);
 }
@@ -392,11 +408,49 @@ function requireClaims(Request $request, ClerkJwtVerifier $verifier): array
 
 function requireAdmin(Request $request, AdminRepository $admins): array
 {
-    $admin = $admins->adminFromToken($request->bearerToken());
+    $admin = $admins->adminFromToken(adminTokenFromRequest($request));
 
     if ($admin === null) {
         Response::json(['error' => 'Admin login required'], 401);
     }
 
     return $admin;
+}
+
+function adminTokenFromRequest(Request $request): ?string
+{
+    global $config;
+
+    return $request->cookie($config['app']['admin_cookie_name']) ?? $request->bearerToken();
+}
+
+function issueAdminCookie(string $token, string $expiresAt): void
+{
+    global $config;
+
+    $secure = (bool) $config['app']['admin_cookie_secure'];
+    $cookieName = (string) $config['app']['admin_cookie_name'];
+    $sameSite = (string) $config['app']['admin_cookie_samesite'];
+    $expires = strtotime($expiresAt) ?: (time() + 3600);
+
+    setcookie($cookieName, $token, [
+        'expires' => $expires,
+        'path' => '/',
+        'secure' => $secure,
+        'httponly' => true,
+        'samesite' => in_array($sameSite, ['Strict', 'Lax', 'None'], true) ? $sameSite : 'Lax',
+    ]);
+}
+
+function clearAdminCookie(): void
+{
+    global $config;
+
+    setcookie((string) $config['app']['admin_cookie_name'], '', [
+        'expires' => time() - 3600,
+        'path' => '/',
+        'secure' => (bool) $config['app']['admin_cookie_secure'],
+        'httponly' => true,
+        'samesite' => (string) $config['app']['admin_cookie_samesite'],
+    ]);
 }

@@ -20,6 +20,20 @@ final class Response
         exit;
     }
 
+    public static function securityHeaders(array $appConfig, Request $request): void
+    {
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: DENY');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self)');
+        header('Cross-Origin-Opener-Policy: same-origin');
+        header("Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+
+        if (($appConfig['force_https'] ?? false) === true || $request->isHttps()) {
+            header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+        }
+    }
+
     public static function cors(array $allowedOrigins, Request $request): void
     {
         $origin = $request->origin();

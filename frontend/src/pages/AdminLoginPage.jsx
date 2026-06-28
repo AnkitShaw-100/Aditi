@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LockKeyhole } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL } from "@/lib/api";
 
-const ADMIN_TOKEN_KEY = "aditi_admin_token";
+const LEGACY_ADMIN_TOKEN_KEY = "aditi_admin_token";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -13,6 +13,10 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
+  }, []);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -22,6 +26,7 @@ export default function AdminLoginPage() {
     try {
       const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
@@ -31,7 +36,7 @@ export default function AdminLoginPage() {
         throw new Error(data.error || "Admin login failed");
       }
 
-      localStorage.setItem(ADMIN_TOKEN_KEY, data.token);
+      localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
       navigate("/admin");
     } catch (error) {
       setMessage(error.message);
@@ -89,6 +94,3 @@ export default function AdminLoginPage() {
     </section>
   );
 }
-
-export { ADMIN_TOKEN_KEY };
-
