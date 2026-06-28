@@ -367,15 +367,19 @@
 }
 
 .marquee-track {
-  animation: none;
-  width: 100%;
-  flex-wrap: wrap;
-  justify-content: center;
-  text-align: center;
+  width: max-content;
+  min-width: 200%;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  text-align: left;
+  animation: marquee 24s linear infinite;
+  will-change: transform;
 }
 
 .marquee-track__item {
   flex: 0 0 auto;
+  min-width: max-content;
+  white-space: nowrap;
 }
 
 .marquee-band {
@@ -394,17 +398,7 @@
 
 @media (min-width: 768px) {
   .marquee-track {
-    width: max-content;
-    min-width: 200%;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    text-align: left;
     animation: marquee 24s linear infinite;
-    will-change: transform;
-  }
-
-  .marquee-track__item {
-    min-width: max-content;
   }
 }
 
@@ -2534,11 +2528,7 @@ body.menu-open {
 
 @media (max-width: 767px) {
   .marquee-track {
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-    text-align: center;
-    animation: none;
+    animation-duration: 18s;
   }
 
   .marquee-band {
@@ -2546,8 +2536,15 @@ body.menu-open {
   }
 
   .marquee-band .marquee-track {
-    gap: 0.9rem 1.25rem;
-    white-space: normal;
+    gap: 1.5rem;
+    font-size: clamp(0.72rem, 3vw, 0.9rem) !important;
+    letter-spacing: 0.12em;
+    line-height: 1;
+  }
+
+  .marquee-track__item {
+    min-width: max-content;
+    white-space: nowrap;
   }
 }
 
@@ -3323,13 +3320,66 @@ body.menu-open {
 }
 
 .auth-widget {
-  width: min(100%, 26rem);
+  display: grid;
+  width: min(100%, 28rem);
+  justify-items: center;
+}
+
+.auth-widget .cl-rootBox {
+  width: 100%;
+}
+
+.cl-modalBackdrop {
+  display: grid !important;
+  place-items: center !important;
+  padding: 1rem !important;
+}
+
+.cl-modalContent {
+  position: static !important;
+  margin: auto !important;
+  width: min(100%, 28rem) !important;
+  max-height: calc(100dvh - 2rem) !important;
+  overflow-y: auto !important;
 }
 
 .auth-widget [data-localization-key],
 .auth-widget button,
 .auth-widget input {
   font-family: "IBM Plex Sans", sans-serif;
+}
+
+.cl-socialButtonsBlockButton,
+.cl-formFieldInput {
+  color: var(--color-chalk) !important;
+}
+
+.cl-socialButtonsBlockButtonText,
+.cl-formFieldInput::placeholder {
+  color: var(--color-chalk) !important;
+  opacity: 1 !important;
+}
+
+.cl-userButtonPopoverCard,
+.cl-userButtonPopoverActionButton,
+.cl-userButtonPopoverActionButtonText,
+.cl-userPreviewMainIdentifier,
+.cl-userPreviewSecondaryIdentifier {
+  color: var(--color-chalk) !important;
+}
+
+.cl-userPreviewSecondaryIdentifier,
+.cl-userButtonPopoverActionButtonText {
+  color: var(--color-ash) !important;
+}
+
+.cl-userButtonPopoverActionButton:hover,
+.cl-userButtonPopoverActionButton:hover .cl-userButtonPopoverActionButtonText {
+  color: var(--color-chalk) !important;
+}
+
+.cl-userButtonPopoverActionButtonIcon {
+  color: var(--color-ember) !important;
 }
 
 .account-field {

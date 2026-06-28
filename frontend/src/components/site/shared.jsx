@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Minus, Plus, Star } from "lucide-react";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { apiRequest } from "@/lib/api";
+import { addMagazineToCart } from "@/lib/cart";
 
 export function RadarCursor() {
   const canvasRef = useRef(null);
@@ -376,6 +376,7 @@ export function AuthorCard({ author }) {
 
 export function ArticleCard({ article }) {
   const isPremium = article.type === "premium";
+  const navigate = useNavigate();
   const media = (
     <>
       <img
@@ -403,38 +404,38 @@ export function ArticleCard({ article }) {
         if (event.target.closest("a, button")) {
           return;
         }
-        window.location.href = article.href;
+        navigate(article.href);
       }}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          window.location.href = article.href;
+          navigate(article.href);
         }
       }}
     >
       {isPremium ? (
         <div className="relative h-[11.25rem] md:h-[13.75rem]">{media}</div>
       ) : (
-        <a
-          href={article.href}
+        <Link
+          to={article.href}
           className="relative block h-[11.25rem] md:h-[13.75rem]"
           onClick={(event) => event.stopPropagation()}
         >
           {media}
-        </a>
+        </Link>
       )}
       <div className="p-4">
         <h3 className="article-title font-rajdhani text-[1.15rem] font-bold leading-tight text-chalk">
           {isPremium ? (
             article.title
           ) : (
-            <a
-              href={article.href}
+            <Link
+              to={article.href}
               className="text-current hover:text-ember"
               onClick={(event) => event.stopPropagation()}
             >
               {article.title}
-            </a>
+            </Link>
           )}
         </h3>
         <p className="article-teaser mt-3 font-lora text-[0.88rem] leading-[1.65] text-ash">
@@ -456,9 +457,9 @@ export function ArticleCard({ article }) {
                 variant="ghost"
                 className="inline-flex min-h-11 items-center py-3 font-plex text-sm font-medium text-ember hover:bg-transparent hover:text-chalk"
               >
-                <a href={article.href} onClick={(event) => event.stopPropagation()}>
+                <Link to={article.href} onClick={(event) => event.stopPropagation()}>
                   {article.cta} <ArrowRight className="size-4" />
-                </a>
+                </Link>
               </Button>
             )}
           </span>
@@ -477,8 +478,10 @@ export function AddToCartButton({ article, className, children, stopPropagation 
   const authUrl = `/auth?redirect=${encodeURIComponent("/checkout")}&magazine_slug=${encodeURIComponent(article.slug)}`;
 
   async function addToCart(event) {
+    event?.preventDefault();
+
     if (stopPropagation) {
-      event.stopPropagation();
+      event?.stopPropagation();
     }
 
     if (!isSignedIn) {
@@ -489,23 +492,12 @@ export function AddToCartButton({ article, className, children, stopPropagation 
     setStatus("adding");
 
     try {
-      await apiRequest(getToken, "/api/auth/sync-user", {
-        method: "POST",
-        body: JSON.stringify({
-          user_name: user?.fullName || user?.username,
-          gmail: user?.primaryEmailAddress?.emailAddress,
-          phone_number: user?.primaryPhoneNumber?.phoneNumber,
-        }),
-      });
-      await apiRequest(getToken, "/api/cart", {
-        method: "POST",
-        body: JSON.stringify({ magazine_slug: article.slug }),
-      });
-      setStatus("idle");
+      await addMagazineToCart({ getToken, user, magazineSlug: article.slug });
       navigate("/checkout");
     } catch (error) {
       setStatus("error");
-      window.alert(error.message);
+      window.alert(error.message || "Unable to add magazine to cart.");
+      setStatus("idle");
     }
   }
 

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { DISPATCHES } from "@/data/siteContent";
-import { apiRequest } from "@/lib/api";
+import { addMagazineToCart } from "@/lib/cart";
 
 const SHOW_DELAY_MS = 2500;
 const VISIBLE_DURATION_MS = 8000;
@@ -69,24 +69,14 @@ export default function PurchaseNudgePopup() {
     setStatus("adding");
 
     try {
-      await apiRequest(getToken, "/api/auth/sync-user", {
-        method: "POST",
-        body: JSON.stringify({
-          user_name: user?.fullName || user?.username,
-          gmail: user?.primaryEmailAddress?.emailAddress,
-          phone_number: user?.primaryPhoneNumber?.phoneNumber,
-        }),
-      });
-      await apiRequest(getToken, "/api/cart", {
-        method: "POST",
-        body: JSON.stringify({ magazine_slug: featuredArticle.slug }),
-      });
+      await addMagazineToCart({ getToken, user, magazineSlug: featuredArticle.slug });
       setIsVisible(false);
       setIsDismissed(true);
       navigate("/checkout");
     } catch (error) {
       setStatus("error");
       window.alert(error.message || "Unable to continue checkout.");
+      setStatus("idle");
     }
   }
 

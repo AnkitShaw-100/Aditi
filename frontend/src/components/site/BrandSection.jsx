@@ -71,7 +71,10 @@ export default function BrandSection() {
           </Card>
 
           <div className="brand-side-layout flex flex-col gap-5">
-            <Card className="brand-box brand-box--reading brand-card-equal h-full min-h-[320px] gap-0 overflow-hidden rounded-2xl p-0 shadow-[0_0_45px_rgba(200,133,58,0.16)]">
+            <Card
+              id="premium-magazine"
+              className="brand-box brand-box--reading brand-card-equal h-full min-h-[320px] scroll-mt-24 gap-0 overflow-hidden rounded-2xl p-0 shadow-[0_0_45px_rgba(200,133,58,0.16)]"
+            >
               <img
                 src={magazineMockup}
                 alt="ADITI Strategy and Defence Magazine mockup"
@@ -92,7 +95,7 @@ export default function BrandSection() {
                     <AddToCartButton
                       article={premiumMagazine}
                       stopPropagation={false}
-                      className="mt-2 min-h-11 rounded-full bg-ember px-6 py-3 font-rajdhani text-base font-bold text-void transition hover:bg-[#ddb255] hover:text-void"
+                      className="mt-2 min-h-11 rounded-full bg-ember px-6 py-3 font-rajdhani text-base font-bold text-void transition hover:bg-chalk hover:text-void"
                     >
                       Buy Now
                     </AddToCartButton>

@@ -11,6 +11,7 @@ import { LogIn, ShoppingCart, UserRound } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
+import { clerkUserButtonAppearance } from "@/lib/clerkAppearance";
 import { cn } from "@/lib/utils";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8080";
@@ -91,19 +92,7 @@ export default function AuthNavButton({ mobile = false, compact = false }) {
             </Link>
           </Button>
           {!compact ? <UserLabel /> : null}
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: cn(
-                  "h-8 w-8 rounded-full border-0 shadow-none"
-                ),
-                userButtonPopoverCard:
-                  "rounded-none border border-[#3b402f] bg-[#090b08] text-[#f2eada]",
-                userButtonPopoverActionButton:
-                  "font-plex text-[#d8d2c0] hover:bg-[#202719] hover:text-[#f2eada]",
-              },
-            }}
-          />
+          <UserButton appearance={clerkUserButtonAppearance} />
         </div>
       </SignedIn>
     </div>

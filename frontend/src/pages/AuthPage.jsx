@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { SignIn, SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
 import { ArrowRight } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -19,6 +19,12 @@ export default function AuthPage() {
   const redirectTo = safeRedirectPath(searchParams.get("redirect"));
   const magazineSlug = searchParams.get("magazine_slug") || "";
 
+  useLayoutEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }, [magazineSlug, redirectTo]);
+
   const completionUrl = useMemo(() => {
     const params = new URLSearchParams({ redirect: redirectTo });
 
@@ -30,8 +36,8 @@ export default function AuthPage() {
   }, [magazineSlug, redirectTo]);
 
   return (
-    <section className="account-page min-h-screen px-4 pb-16 pt-28 md:px-8">
-      <div className="mx-auto grid max-w-3xl justify-items-center">
+    <section className="account-page grid min-h-screen place-items-center px-4 py-20 md:px-8">
+      <div className="mx-auto grid w-full max-w-3xl justify-items-center">
         <SignedOut>
           <div className="auth-widget auth-widget--standalone">
             <SignIn routing="hash" forceRedirectUrl={completionUrl} />

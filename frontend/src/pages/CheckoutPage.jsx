@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { SignInButton, SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
 import { ArrowLeft, CreditCard, Download, Trash2, UserRound } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { apiRequest, downloadProtectedFile, formatRupees } from "@/lib/api";
 
 export default function CheckoutPage() {
+  useLayoutEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <section className="account-page min-h-screen px-4 pb-16 pt-28 md:px-8">
       <div className="mx-auto max-w-5xl">
