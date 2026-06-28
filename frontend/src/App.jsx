@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import SiteHeader from "@/components/site/Header";
 import SiteFooter from "@/components/site/SiteFooter";
@@ -10,6 +10,7 @@ import AuthPage from "@/pages/AuthPage";
 import ArticlePage from "@/pages/ArticlePage";
 import AdminLoginPage from "@/pages/AdminLoginPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
+import { ADMIN_DASHBOARD_PATH, ADMIN_ENTRY_PATH } from "@/lib/adminRoutes";
 
 function App() {
   return (
@@ -24,8 +25,10 @@ function App() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/articles/:slug" element={<ArticlePage />} />
-          <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path={ADMIN_ENTRY_PATH} element={<AdminLoginPage />} />
+          <Route path={ADMIN_DASHBOARD_PATH} element={<AdminDashboardPage />} />
+          <Route path="/admin" element={<Navigate to="/" replace />} />
+          <Route path="/admin/login" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 

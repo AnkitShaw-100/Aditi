@@ -1,15 +1,16 @@
 CREATE TABLE users (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     clerk_user_id VARCHAR(191) NOT NULL UNIQUE,
-    gmail VARCHAR(255) NULL,
+    email VARCHAR(255) NULL,
     phone_number VARCHAR(40) NULL,
-    address TEXT NULL,
-    user_name VARCHAR(255) NULL,
+    dob DATE NULL,
+    username VARCHAR(255) NULL,
     profile_image_url VARCHAR(2048) NULL,
+    profile_completed_at DATETIME NULL,
     last_sign_in_at DATETIME NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_users_gmail (gmail)
+    INDEX idx_users_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE sign_in_events (

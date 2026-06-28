@@ -14,23 +14,23 @@ final class UserRepository
 
     public function syncUserFromAuth(string $clerkUserId, array $profile, array $meta): array
     {
-        $gmail = $this->firstNonEmpty($profile['gmail'] ?? null, $profile['email'] ?? null);
+        $email = $this->firstNonEmpty($profile['email'] ?? null);
         $phone = $this->firstNonEmpty($profile['phone_number'] ?? null);
-        $address = $this->firstNonEmpty($profile['address'] ?? null);
-        $name = $this->firstNonEmpty($profile['user_name'] ?? null, $profile['name'] ?? null);
+        $dob = $this->dateValue($profile['dob'] ?? null);
+        $name = $this->firstNonEmpty($profile['username'] ?? null, $profile['name'] ?? null);
         $image = $this->firstNonEmpty($profile['profile_image_url'] ?? null);
 
         try {
             $this->pdo->beginTransaction();
 
             $statement = $this->pdo->prepare(
-                'INSERT INTO users (clerk_user_id, gmail, phone_number, address, user_name, profile_image_url, last_sign_in_at)
-                 VALUES (:clerk_user_id, :gmail, :phone_number, :address, :user_name, :profile_image_url, NOW())
+                'INSERT INTO users (clerk_user_id, email, phone_number, dob, username, profile_image_url, last_sign_in_at)
+                 VALUES (:clerk_user_id, :email, :phone_number, :dob, :username, :profile_image_url, NOW())
                  ON DUPLICATE KEY UPDATE
-                    gmail = COALESCE(VALUES(gmail), gmail),
+                    email = COALESCE(VALUES(email), email),
                     phone_number = COALESCE(VALUES(phone_number), phone_number),
-                    address = COALESCE(VALUES(address), address),
-                    user_name = COALESCE(VALUES(user_name), user_name),
+                    dob = COALESCE(VALUES(dob), dob),
+                    username = COALESCE(VALUES(username), username),
                     profile_image_url = COALESCE(VALUES(profile_image_url), profile_image_url),
                     last_sign_in_at = NOW(),
                     updated_at = NOW()'
@@ -38,10 +38,10 @@ final class UserRepository
 
             $statement->execute([
                 'clerk_user_id' => $clerkUserId,
-                'gmail' => $gmail,
+                'email' => $email,
                 'phone_number' => $phone,
-                'address' => $address,
-                'user_name' => $name,
+                'dob' => $dob,
+                'username' => $name,
                 'profile_image_url' => $image,
             ]);
 
@@ -80,23 +80,23 @@ final class UserRepository
         }
 
         $statement = $this->pdo->prepare(
-            'INSERT INTO users (clerk_user_id, gmail, phone_number, address, user_name, profile_image_url)
-             VALUES (:clerk_user_id, :gmail, :phone_number, :address, :user_name, :profile_image_url)
+            'INSERT INTO users (clerk_user_id, email, phone_number, dob, username, profile_image_url)
+             VALUES (:clerk_user_id, :email, :phone_number, :dob, :username, :profile_image_url)
              ON DUPLICATE KEY UPDATE
-                gmail = COALESCE(VALUES(gmail), gmail),
+                email = COALESCE(VALUES(email), email),
                 phone_number = COALESCE(VALUES(phone_number), phone_number),
-                address = COALESCE(VALUES(address), address),
-                user_name = COALESCE(VALUES(user_name), user_name),
+                dob = COALESCE(VALUES(dob), dob),
+                username = COALESCE(VALUES(username), username),
                 profile_image_url = COALESCE(VALUES(profile_image_url), profile_image_url),
                 updated_at = NOW()'
         );
 
         $statement->execute([
             'clerk_user_id' => $clerkUserId,
-            'gmail' => $this->emailFromClerkUser($clerkUser),
+            'email' => $this->emailFromClerkUser($clerkUser),
             'phone_number' => $this->phoneFromClerkUser($clerkUser),
-            'address' => $this->addressFromClerkUser($clerkUser),
-            'user_name' => $this->nameFromClerkUser($clerkUser),
+            'dob' => $this->dobFromClerkUser($clerkUser),
+            'username' => $this->nameFromClerkUser($clerkUser),
             'profile_image_url' => $this->firstNonEmpty($clerkUser['image_url'] ?? null),
         ]);
 
@@ -140,26 +140,36 @@ final class UserRepository
             return null;
         }
 
-        if ($this->profileIsComplete($current)) {
+        if ($this->firstNonEmpty($current['profile_completed_at'] ?? null) !== null) {
             throw new \RuntimeException('Profile details can only be saved once. Contact support if a correction is needed.');
+        }
+
+        $email = $this->firstNonEmpty($profile['email'] ?? null, $current['email'] ?? null);
+        $phoneNumber = $this->firstNonEmpty($profile['phone_number'] ?? null);
+        $dob = $this->dateValue($profile['dob'] ?? null);
+        $username = $this->firstNonEmpty($profile['username'] ?? null, $profile['name'] ?? null, $current['username'] ?? null);
+
+        if ($email === null || $phoneNumber === null || $dob === null || $username === null) {
+            throw new \InvalidArgumentException('Name, email, phone number, and date of birth are required.');
         }
 
         $statement = $this->pdo->prepare(
             'UPDATE users
-             SET gmail = COALESCE(:gmail, gmail),
+             SET email = :email,
                  phone_number = :phone_number,
-                 address = :address,
-                 user_name = COALESCE(:user_name, user_name),
+                 dob = :dob,
+                 username = :username,
+                 profile_completed_at = NOW(),
                  updated_at = NOW()
              WHERE clerk_user_id = :clerk_user_id'
         );
 
         $statement->execute([
             'clerk_user_id' => $clerkUserId,
-            'gmail' => $this->firstNonEmpty($profile['gmail'] ?? null, $profile['email'] ?? null),
-            'phone_number' => $this->firstNonEmpty($profile['phone_number'] ?? null),
-            'address' => $this->firstNonEmpty($profile['address'] ?? null),
-            'user_name' => $this->firstNonEmpty($profile['user_name'] ?? null, $profile['name'] ?? null),
+            'email' => $email,
+            'phone_number' => $phoneNumber,
+            'dob' => $dob,
+            'username' => $username,
         ]);
 
         return $this->findProfileByClerkId($clerkUserId);
@@ -378,8 +388,8 @@ final class UserRepository
     private function findUserRowByClerkId(string $clerkUserId): ?array
     {
         $statement = $this->pdo->prepare(
-            'SELECT id, clerk_user_id, gmail, phone_number, address, user_name, profile_image_url,
-                    last_sign_in_at, created_at, updated_at
+            'SELECT id, clerk_user_id, email, phone_number, dob, username, profile_image_url,
+                    profile_completed_at, last_sign_in_at, created_at, updated_at
              FROM users
              WHERE clerk_user_id = :clerk_user_id
              LIMIT 1'
@@ -408,10 +418,10 @@ final class UserRepository
 
     private function profileIsComplete(array $user): bool
     {
-        return $this->firstNonEmpty($user['user_name'] ?? null) !== null
-            && $this->firstNonEmpty($user['gmail'] ?? null) !== null
+        return $this->firstNonEmpty($user['username'] ?? null) !== null
+            && $this->firstNonEmpty($user['email'] ?? null) !== null
             && $this->firstNonEmpty($user['phone_number'] ?? null) !== null
-            && $this->firstNonEmpty($user['address'] ?? null) !== null;
+            && $this->firstNonEmpty($user['dob'] ?? null) !== null;
     }
 
     private function firstNonEmpty(mixed ...$values): ?string
@@ -423,6 +433,27 @@ final class UserRepository
         }
 
         return null;
+    }
+
+    private function dateValue(mixed $value): ?string
+    {
+        $date = $this->firstNonEmpty($value);
+
+        if ($date === null) {
+            return null;
+        }
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            throw new \InvalidArgumentException('Date of birth must use YYYY-MM-DD format.');
+        }
+
+        [$year, $month, $day] = array_map('intval', explode('-', $date));
+
+        if (!checkdate($month, $day, $year)) {
+            throw new \InvalidArgumentException('Date of birth is invalid.');
+        }
+
+        return $date;
     }
 
     private function emailFromClerkUser(array $user): ?string
@@ -451,13 +482,25 @@ final class UserRepository
         return $this->firstNonEmpty($user['phone_numbers'][0]['phone_number'] ?? null);
     }
 
-    private function addressFromClerkUser(array $user): ?string
+    private function dobFromClerkUser(array $user): ?string
     {
-        $publicAddress = $user['public_metadata']['address'] ?? null;
-        $privateAddress = $user['private_metadata']['address'] ?? null;
-        $unsafeAddress = $user['unsafe_metadata']['address'] ?? null;
+        $publicDob = $user['public_metadata']['dob'] ?? null;
+        $privateDob = $user['private_metadata']['dob'] ?? null;
+        $unsafeDob = $user['unsafe_metadata']['dob'] ?? null;
+        $publicDateOfBirth = $user['public_metadata']['date_of_birth'] ?? null;
+        $privateDateOfBirth = $user['private_metadata']['date_of_birth'] ?? null;
+        $unsafeDateOfBirth = $user['unsafe_metadata']['date_of_birth'] ?? null;
 
-        return $this->firstNonEmpty($publicAddress, $privateAddress, $unsafeAddress);
+        return $this->dateValue(
+            $this->firstNonEmpty(
+                $publicDob,
+                $privateDob,
+                $unsafeDob,
+                $publicDateOfBirth,
+                $privateDateOfBirth,
+                $unsafeDateOfBirth
+            )
+        );
     }
 
     private function nameFromClerkUser(array $user): ?string

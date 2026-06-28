@@ -1,6 +1,6 @@
 import HeroSection from "@/components/site/HeroSection";
 import MissionSection from "@/components/site/MissionSection";
-import BrandSection from "@/components/site/BrandSection";
+// import BrandSection from "@/components/site/BrandSection";
 import IssueContentsSection from "@/components/site/IssueContentsSection";
 import AuthorsSection from "@/components/site/AuthorsSection";
 import ShowcaseStrip from "@/components/site/ShowcaseStrip";
@@ -17,7 +17,7 @@ export default function LandingPage() {
       <PurchaseNudgePopup />
       <HeroSection />
       <MissionSection />
-      <BrandSection />
+      {/* <BrandSection /> */}
       <IssueContentsSection />
       <AuthorsSection />
       <ShowcaseStrip />

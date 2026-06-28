@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL, formatRupees } from "@/lib/api";
+import { ADMIN_ENTRY_PATH } from "@/lib/adminRoutes";
 
 const USERS_PER_PAGE = 7;
 const LEGACY_ADMIN_TOKEN_KEY = "aditi_admin_token";
@@ -43,7 +44,7 @@ export default function AdminDashboardPage() {
       const data = await response.json();
 
       if (response.status === 401) {
-        navigate("/admin/login");
+        navigate(ADMIN_ENTRY_PATH);
         return;
       }
 
@@ -75,7 +76,7 @@ export default function AdminDashboardPage() {
       method: "POST",
       credentials: "include",
     }).catch(() => {});
-    navigate("/admin/login");
+    navigate(ADMIN_ENTRY_PATH);
   }
 
   return (
@@ -131,7 +132,7 @@ export default function AdminDashboardPage() {
                   <tr>
                     <th>User</th>
                     <th>Contact</th>
-                    <th>Address</th>
+                    <th>DOB</th>
                     <th>Cart</th>
                     <th>Bought</th>
                   </tr>
@@ -140,14 +141,14 @@ export default function AdminDashboardPage() {
                   {paginatedUsers.map((user) => (
                     <tr key={user.id}>
                       <td>
-                        <b>{user.user_name || "Unnamed"}</b>
+                        <b>{user.username || "Unnamed"}</b>
                         <span>{user.clerk_user_id}</span>
                       </td>
                       <td>
-                        <b>{user.gmail || "No email"}</b>
+                        <b>{user.email || "No email"}</b>
                         <span>{user.phone_number || "No phone"}</span>
                       </td>
-                      <td>{user.address || "No address"}</td>
+                      <td>{user.dob || "No DOB"}</td>
                       <td>
                         <AdminList
                           empty="No cart"

@@ -155,7 +155,7 @@ if ($route === 'POST /api/auth/sync-user') {
     );
 
     $profile = array_merge(
-        $request->only(['gmail', 'email', 'phone_number', 'address', 'user_name', 'name']),
+        $request->only(['email', 'phone_number', 'dob', 'username', 'name']),
         $clerkProfile
     );
 
@@ -188,8 +188,10 @@ if ($route === 'PUT /api/me') {
     try {
         $user = $users->updateProfile(
             (string) $claims['sub'],
-            $request->only(['gmail', 'email', 'phone_number', 'address', 'user_name', 'name'])
+            $request->only(['email', 'phone_number', 'dob', 'username', 'name'])
         );
+    } catch (InvalidArgumentException $exception) {
+        Response::json(['error' => $exception->getMessage()], 422);
     } catch (RuntimeException $exception) {
         Response::json(['error' => $exception->getMessage()], 409);
     }
@@ -261,10 +263,6 @@ if ($route === 'POST /api/payments/razorpay/order') {
         'amount' => $summary['total_paise'],
         'currency' => $summary['currency'],
         'receipt' => $receipt,
-        'notes' => [
-            'clerk_user_id' => $clerkUserId,
-            'items' => implode(',', array_column($summary['cart'], 'slug')),
-        ],
     ]);
 
     $orderId = $order['id'] ?? null;

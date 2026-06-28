@@ -44,9 +44,9 @@ final class ClerkUserClient
         }
 
         return [
-            'gmail' => $this->primaryEmail($user),
+            'email' => $this->primaryEmail($user),
             'phone_number' => $this->primaryPhone($user),
-            'user_name' => $this->displayName($user),
+            'username' => $this->displayName($user),
             'profile_image_url' => $user['image_url'] ?? null,
         ];
     }
@@ -92,4 +92,3 @@ final class ClerkUserClient
         return $user['username'] ?? null;
     }
 }
-

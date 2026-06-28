@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL } from "@/lib/api";
+import { ADMIN_DASHBOARD_PATH } from "@/lib/adminRoutes";
 
 const LEGACY_ADMIN_TOKEN_KEY = "aditi_admin_token";
 
@@ -37,7 +38,7 @@ export default function AdminLoginPage() {
       }
 
       localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
-      navigate("/admin");
+      navigate(ADMIN_DASHBOARD_PATH);
     } catch (error) {
       setMessage(error.message);
       setStatus("error");

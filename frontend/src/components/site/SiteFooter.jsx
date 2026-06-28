@@ -61,12 +61,6 @@ export default function SiteFooter() {
             >
               Browse Dispatches
             </a>
-            <a
-              href="/admin/login"
-              className="inline-flex min-h-10 items-center rounded-full border border-steel px-4 font-plex text-xs uppercase tracking-[0.16em] text-fog transition hover:border-ember/50 hover:text-chalk"
-            >
-              Login
-            </a>
           </div>
         </div>
       </div>

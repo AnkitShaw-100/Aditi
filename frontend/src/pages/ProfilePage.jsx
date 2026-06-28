@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { apiRequest, downloadProtectedFile } from "@/lib/api";
 
 const emptyProfile = {
-  user_name: "",
-  gmail: "",
+  username: "",
+  email: "",
   phone_number: "",
-  address: "",
+  dob: "",
+  profile_completed_at: "",
 };
 
 export default function ProfilePage() {
@@ -66,8 +67,8 @@ function ProfilePanel() {
         await apiRequest(getToken, "/api/auth/sync-user", {
           method: "POST",
           body: JSON.stringify({
-            user_name: user?.fullName || user?.username,
-            gmail: user?.primaryEmailAddress?.emailAddress,
+            username: user?.fullName || user?.username,
+            email: user?.primaryEmailAddress?.emailAddress,
             phone_number: user?.primaryPhoneNumber?.phoneNumber,
           }),
         });
@@ -76,10 +77,11 @@ function ProfilePanel() {
         if (!active) return;
 
         setProfile({
-          user_name: data.user?.user_name ?? "",
-          gmail: data.user?.gmail ?? "",
+          username: data.user?.username ?? "",
+          email: data.user?.email ?? "",
           phone_number: data.user?.phone_number ?? "",
-          address: data.user?.address ?? "",
+          dob: data.user?.dob ?? "",
+          profile_completed_at: data.user?.profile_completed_at ?? "",
         });
         setMagazines(data.user?.magazines_bought ?? []);
         setStatus("ready");
@@ -98,10 +100,10 @@ function ProfilePanel() {
   }, [getToken, user]);
 
   const isComplete = useMemo(
-    () => profile.user_name && profile.gmail && profile.phone_number && profile.address,
+    () => profile.username && profile.email && profile.phone_number && profile.dob,
     [profile]
   );
-  const profileLocked = status === "ready" && Boolean(isComplete);
+  const profileLocked = status === "ready" && Boolean(profile.profile_completed_at);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -115,10 +117,11 @@ function ProfilePanel() {
       });
 
       setProfile({
-        user_name: data.user?.user_name ?? "",
-        gmail: data.user?.gmail ?? "",
+        username: data.user?.username ?? "",
+        email: data.user?.email ?? "",
         phone_number: data.user?.phone_number ?? "",
-        address: data.user?.address ?? "",
+        dob: data.user?.dob ?? "",
+        profile_completed_at: data.user?.profile_completed_at ?? "",
       });
       setMagazines(data.user?.magazines_bought ?? []);
       setStatus("ready");
@@ -157,16 +160,16 @@ function ProfilePanel() {
         <div className="mt-7 grid gap-4 sm:grid-cols-2">
           <ProfileField
             label="Name"
-            value={profile.user_name}
+            value={profile.username}
             disabled={profileLocked}
-            onChange={(value) => setProfile((current) => ({ ...current, user_name: value }))}
+            onChange={(value) => setProfile((current) => ({ ...current, username: value }))}
           />
           <ProfileField
-            label="Gmail"
+            label="Email"
             type="email"
-            value={profile.gmail}
+            value={profile.email}
             disabled={profileLocked}
-            onChange={(value) => setProfile((current) => ({ ...current, gmail: value }))}
+            onChange={(value) => setProfile((current) => ({ ...current, email: value }))}
           />
           <ProfileField
             label="Phone Number"
@@ -174,17 +177,13 @@ function ProfilePanel() {
             disabled={profileLocked}
             onChange={(value) => setProfile((current) => ({ ...current, phone_number: value }))}
           />
-          <label className="account-field sm:col-span-2">
-            <span>Address</span>
-            <textarea
-              value={profile.address}
-              disabled={profileLocked}
-              onChange={(event) =>
-                setProfile((current) => ({ ...current, address: event.target.value }))
-              }
-              rows={4}
-            />
-          </label>
+          <ProfileField
+            label="Date of Birth"
+            type="date"
+            value={profile.dob}
+            disabled={profileLocked}
+            onChange={(value) => setProfile((current) => ({ ...current, dob: value }))}
+          />
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -217,12 +216,18 @@ function ProfilePanel() {
         </p>
         <div className="mt-4 border-t border-steel/50 pt-4">
           <p className="font-rajdhani text-2xl font-bold text-chalk">
-            {isComplete ? "Ready for checkout" : "Profile needs details"}
+            {profileLocked
+              ? "Ready for checkout"
+              : isComplete
+                ? "Review and save"
+                : "Profile needs details"}
           </p>
           <p className="mt-3 font-plex text-sm leading-7 text-ash">
-            {isComplete
+            {profileLocked
               ? "These details are saved and cannot be edited again from this page."
-              : "Name, Gmail, phone number, and address are required before payment."}
+              : isComplete
+                ? "Press Save Profile to confirm these details and unlock checkout."
+                : "Name, email, phone number, and date of birth are required before payment."}
           </p>
         </div>
         <div className="mt-6 border-t border-steel/50 pt-4">

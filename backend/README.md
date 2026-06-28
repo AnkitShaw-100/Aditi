@@ -5,7 +5,7 @@ This backend is the first PHP/MySQL slice for the LP flow:
 1. User signs in with Clerk on the frontend.
 2. Frontend sends the Clerk session token to this backend.
 3. Backend verifies the Clerk JWT with Clerk JWKS.
-4. Backend upserts the user into MySQL with Gmail/email, phone number, address, name, and purchased magazines.
+4. Backend upserts the user into MySQL with Clerk email, phone number, date of birth, username, and purchased magazines.
 
 ## Setup
 
@@ -59,10 +59,10 @@ Body fields are optional. Use them for profile fields Clerk does not include in 
 
 ```json
 {
-  "user_name": "Aditi Reader",
-  "gmail": "reader@gmail.com",
+  "username": "Aditi Reader",
+  "email": "reader@example.com",
   "phone_number": "+919999999999",
-  "address": "Delhi, India"
+  "dob": "1995-08-15"
 }
 ```
 
@@ -76,10 +76,10 @@ Updates profile fields collected before checkout:
 
 ```json
 {
-  "user_name": "Aditi Reader",
-  "gmail": "reader@gmail.com",
+  "username": "Aditi Reader",
+  "email": "reader@example.com",
   "phone_number": "+919999999999",
-  "address": "Delhi, India"
+  "dob": "1995-08-15"
 }
 ```
 
@@ -184,10 +184,10 @@ await fetch("http://localhost:8080/api/auth/sync-user", {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    user_name: user.fullName,
-    gmail: user.primaryEmailAddress?.emailAddress,
+    username: user.fullName,
+    email: user.primaryEmailAddress?.emailAddress,
     phone_number: user.primaryPhoneNumber?.phoneNumber,
-    address,
+    dob,
   }),
 });
 ```

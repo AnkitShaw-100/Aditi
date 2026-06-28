@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { heroVideo } from "@/data/siteContent";
+import { AddToCartButton } from "@/components/site/shared";
+import { DISPATCHES, heroVideo } from "@/data/siteContent";
 
 export default function HeroSection() {
   const [isMuted, setIsMuted] = useState(true);
   const heroVideoRef = useRef(null);
+  const premiumMagazine = DISPATCHES.find((item) => item.type === "premium");
 
   useEffect(() => {
     const video = heroVideoRef.current;
@@ -83,11 +85,13 @@ export default function HeroSection() {
             <div className="mt-4 h-px w-12 bg-ember" id="heroRule" />
             <h1 className="mt-5 font-rajdhani text-[clamp(1.8rem,7vw,3.5rem)] font-bold leading-[1.1] text-chalk text-balance">
               For a century,
-India was read by others.
+              <br />
+              India was read by others.
             </h1>
             <p className="mt-4 font-plex text-base font-light text-ash">
-             This is India,
-read by India.
+              This is India,
+              <br />
+              read by India.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-stretch">
               <Button
@@ -96,13 +100,15 @@ read by India.
               >
                 <a href="#read">Read 3 free</a>
               </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="h-12 rounded-full border border-white/15 bg-white/5 px-6 font-rajdhani text-base font-bold uppercase tracking-[0.14em] text-chalk hover:bg-white/10 hover:text-chalk"
-              >
-                <a href="#premium-magazine">Own Issue I · ₹350</a>
-              </Button>
+              {premiumMagazine ? (
+                <AddToCartButton
+                  article={premiumMagazine}
+                  stopPropagation={false}
+                  className="hero-issue-button h-12 rounded-full border border-white/15 bg-white/5 px-6 font-rajdhani text-base font-bold uppercase tracking-[0.14em] text-chalk hover:bg-white/10 hover:text-chalk"
+                >
+                  Own Issue I {"\u00B7"} {"\u20B9"}350
+                </AddToCartButton>
+              ) : null}
             </div>
           </div>
         </div>

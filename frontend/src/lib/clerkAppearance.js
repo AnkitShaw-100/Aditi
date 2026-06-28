@@ -72,6 +72,23 @@ export const clerkUserButtonAppearance = {
   variables: clerkAppearance.variables,
   elements: {
     avatarBox: "h-8 w-8 rounded-full border-0 shadow-none ring-1 ring-ember/40",
+    modalBackdrop:
+      "!fixed !inset-0 !grid !place-items-center overflow-y-auto bg-void/85 p-4 backdrop-blur-xl",
+    modalContent:
+      "!static !m-auto w-[min(100%,58rem)] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-xl",
+    userProfileRoot: "w-full max-w-[58rem] overflow-hidden rounded-xl border border-steel/60 !bg-bunker",
+    userProfileNavbar: "min-w-[13rem] !bg-bunker/95",
+    userProfilePage: "min-w-0 !bg-bunker !text-chalk",
+    profileSection: "min-w-0",
+    profileSectionContent: "min-w-0",
+    form: "w-full min-w-0 max-w-[34rem]",
+    formField: "w-full gap-2",
+    formFieldInput: `${inputField} w-full`,
+    formFieldLabel:
+      "font-plex text-xs font-medium uppercase tracking-[0.16em] !text-ember",
+    formFieldInputShowPasswordButton: "text-fog transition hover:text-ember",
+    formButtonPrimary: primaryButton,
+    formButtonReset: actionLink,
     userButtonPopoverCard:
       "rounded-xl border border-steel/60 !bg-bunker !text-chalk shadow-2xl",
     userButtonPopoverActionButton:

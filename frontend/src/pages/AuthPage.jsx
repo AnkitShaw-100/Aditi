@@ -70,8 +70,8 @@ function PendingCartRedirect({ redirectTo, magazineSlug }) {
         await apiRequest(getToken, "/api/auth/sync-user", {
           method: "POST",
           body: JSON.stringify({
-            user_name: user?.fullName || user?.username,
-            gmail: user?.primaryEmailAddress?.emailAddress,
+            username: user?.fullName || user?.username,
+            email: user?.primaryEmailAddress?.emailAddress,
             phone_number: user?.primaryPhoneNumber?.phoneNumber,
           }),
         });

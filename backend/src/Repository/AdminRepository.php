@@ -118,8 +118,8 @@ final class AdminRepository
     public function listUsers(): array
     {
         $statement = $this->pdo->query(
-            'SELECT id, clerk_user_id, gmail, phone_number, address, user_name,
-                    profile_image_url, last_sign_in_at, created_at, updated_at
+            'SELECT id, clerk_user_id, email, phone_number, dob, username,
+                    profile_image_url, profile_completed_at, last_sign_in_at, created_at, updated_at
              FROM users
              ORDER BY created_at DESC'
         );
@@ -163,4 +163,3 @@ final class AdminRepository
         return $statement->fetchAll();
     }
 }
-

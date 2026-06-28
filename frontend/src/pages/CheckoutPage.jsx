@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { SignInButton, SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
-import { ArrowLeft, CreditCard, Download, Trash2, UserRound } from "lucide-react";
+import { CreditCard, Download, Trash2, UserRound } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -57,8 +57,8 @@ function CheckoutPanel() {
       await apiRequest(getToken, "/api/auth/sync-user", {
         method: "POST",
         body: JSON.stringify({
-          user_name: user?.fullName || user?.username,
-          gmail: user?.primaryEmailAddress?.emailAddress,
+          username: user?.fullName || user?.username,
+          email: user?.primaryEmailAddress?.emailAddress,
           phone_number: user?.primaryPhoneNumber?.phoneNumber,
         }),
       });
@@ -114,12 +114,9 @@ function CheckoutPanel() {
         description: "ADITI Strategy & Defence Magazine",
         order_id: data.order.id,
         prefill: {
-          name: profile?.user_name ?? user?.fullName ?? "",
-          email: profile?.gmail ?? user?.primaryEmailAddress?.emailAddress ?? "",
+          name: profile?.username ?? user?.fullName ?? "",
+          email: profile?.email ?? user?.primaryEmailAddress?.emailAddress ?? "",
           contact: profile?.phone_number ?? user?.primaryPhoneNumber?.phoneNumber ?? "",
-        },
-        notes: {
-          address: profile?.address ?? "",
         },
         theme: {
           color: "#c99a4a",
@@ -174,7 +171,11 @@ function CheckoutPanel() {
   );
 
   const profileComplete = Boolean(
-    profile?.user_name && profile?.gmail && profile?.phone_number && profile?.address
+    profile?.username &&
+      profile?.email &&
+      profile?.phone_number &&
+      profile?.dob &&
+      profile?.profile_completed_at
   );
 
   return (
@@ -189,16 +190,6 @@ function CheckoutPanel() {
               Your cart.
             </h1>
           </div>
-          <Button
-            asChild
-            variant="ghost"
-            className="h-10 rounded-none border border-steel/70 px-4 font-rajdhani text-base font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk"
-          >
-            <Link to="/#read">
-              <ArrowLeft className="size-4" />
-              Browse
-            </Link>
-          </Button>
         </div>
 
         <div className="mt-7 grid gap-3">
@@ -207,16 +198,16 @@ function CheckoutPanel() {
           ) : cart.length ? (
             cart.map((item) => (
               <article key={item.cart_item_id} className="cart-row">
-                <div>
-                  <p className="font-rajdhani text-xl font-bold leading-tight text-chalk">
+                <div className="cart-row-copy">
+                  <p className="cart-row-title font-rajdhani text-xl font-bold leading-tight text-chalk">
                     {item.title}
                   </p>
-                  <p className="mt-1 font-plex text-xs uppercase tracking-[0.16em] text-fog">
+                  <p className="cart-row-sku mt-1 font-plex text-xs uppercase tracking-[0.16em] text-fog">
                     {item.sku}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-rajdhani text-xl font-bold text-ember">
+                <div className="cart-row-actions">
+                  <span className="cart-row-price font-rajdhani text-xl font-bold text-ember">
                     {formatRupees(item.price_paise)}
                   </span>
                   <Button
@@ -262,7 +253,7 @@ function CheckoutPanel() {
               Complete profile first
             </p>
             <p className="mt-2 font-plex text-sm leading-6 text-ash">
-              Phone number and address are needed before payment and invoice generation.
+              Save your profile with phone number and date of birth before payment and invoice generation.
             </p>
             <Button
               asChild
@@ -281,7 +272,7 @@ function CheckoutPanel() {
           type="button"
           disabled={!cart.length || !profileComplete || paymentStatus === "creating" || paymentStatus === "verifying"}
           onClick={continueToPayment}
-          className="final-button mt-5 h-11 w-full rounded-none px-6 font-rajdhani text-base font-bold"
+          className="final-button checkout-pay-button mt-5 h-11 w-full rounded-none px-6 font-rajdhani text-base font-bold"
         >
           <CreditCard className="size-4" />
           {paymentStatus === "creating"

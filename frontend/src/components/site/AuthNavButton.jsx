@@ -92,7 +92,10 @@ export default function AuthNavButton({ mobile = false, compact = false }) {
             </Link>
           </Button>
           {!compact ? <UserLabel /> : null}
-          <UserButton appearance={clerkUserButtonAppearance} />
+          <UserButton
+            appearance={clerkUserButtonAppearance}
+            userProfileProps={{ appearance: clerkUserButtonAppearance }}
+          />
         </div>
       </SignedIn>
     </div>
@@ -139,10 +142,9 @@ function SyncClerkUser() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_name: user.fullName || user.username,
-          gmail: user.primaryEmailAddress?.emailAddress,
+          username: user.fullName || user.username,
+          email: user.primaryEmailAddress?.emailAddress,
           phone_number: user.primaryPhoneNumber?.phoneNumber,
-          address: user.publicMetadata?.address,
         }),
         signal: controller.signal,
       });
