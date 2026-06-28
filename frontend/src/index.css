@@ -854,6 +854,212 @@ body.menu-open {
   white-space: nowrap;
 }
 
+.issue-contents-section {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(201, 154, 74, 0.12), transparent 24rem),
+    radial-gradient(circle at 82% 18%, rgba(128, 135, 83, 0.1), transparent 22rem),
+    linear-gradient(180deg, #090b08 0%, #0d110c 56%, #11160e 100%);
+}
+
+.issue-contents-layout {
+  display: grid;
+  gap: clamp(2rem, 5vw, 5.5rem);
+  align-items: center;
+}
+
+.issue-contents-cover {
+  position: relative;
+  width: min(100%, 28rem);
+  margin: 0 auto;
+  padding: clamp(0.45rem, 1vw, 0.65rem);
+  border: 1px solid rgba(242, 234, 218, 0.22);
+  background: rgba(242, 234, 218, 0.92);
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.32);
+}
+
+.issue-contents-cover__image {
+  display: block;
+  aspect-ratio: 4 / 5.1;
+  width: 100%;
+  object-fit: cover;
+}
+
+.issue-contents-copy {
+  min-width: 0;
+}
+
+.issue-contents-kicker {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: #c99a4a;
+}
+
+.issue-contents-kicker::before {
+  content: "";
+  display: inline-block;
+  width: 1.2rem;
+  height: 1px;
+  margin-right: 0.65rem;
+  transform: translateY(-0.22rem);
+  background: #c99a4a;
+}
+
+.issue-contents-title {
+  max-width: 12.5ch;
+  margin-top: 1.25rem;
+  font-family: "Rajdhani", sans-serif;
+  font-size: clamp(2.35rem, 6vw, 4.25rem);
+  font-weight: 700;
+  line-height: 0.92;
+  color: #f2eada;
+}
+
+.issue-contents-title span {
+  font-family: "Lora", serif;
+  font-style: italic;
+  font-weight: 600;
+  color: #d9bd79;
+}
+
+.issue-contents-question {
+  max-width: 39rem;
+  margin-top: clamp(1.5rem, 3vw, 2rem);
+  border-left: 2px solid #c99a4a;
+  padding-left: 1.4rem;
+  font-family: "Lora", serif;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  font-style: italic;
+  line-height: 1.7;
+  color: #f2eada;
+}
+
+.issue-contents-body {
+  max-width: 42rem;
+  margin-top: 1.55rem;
+  font-family: "Lora", serif;
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  line-height: 1.85;
+  color: #d8d2c0;
+}
+
+.issue-contents-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 3vw, 2.4rem);
+  max-width: 30rem;
+  margin-top: clamp(1.8rem, 4vw, 2.8rem);
+}
+
+.issue-contents-stat {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.issue-contents-stat strong {
+  font-family: "Rajdhani", sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 0.85;
+  color: #c99a4a;
+}
+
+.issue-contents-stat span {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #a8aa9d;
+}
+
+.issue-contents-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.6rem;
+  margin-top: clamp(1.8rem, 4vw, 3rem);
+}
+
+.issue-contents-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.75rem;
+  font-family: "Rajdhani", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #d9bd79;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.issue-contents-link:hover {
+  transform: translateX(0.18rem);
+  color: #f2eada;
+}
+
+.issue-contents-link svg,
+.issue-contents-primary svg {
+  flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+  .issue-contents-layout {
+    grid-template-columns: minmax(19rem, 0.84fr) minmax(0, 1.16fr);
+  }
+
+  .issue-contents-cover {
+    justify-self: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .issue-contents-section {
+    padding-top: 3rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .issue-contents-layout {
+    gap: 2rem;
+  }
+
+  .issue-contents-cover {
+    width: min(100%, 20rem);
+  }
+
+  .issue-contents-kicker {
+    letter-spacing: 0.24em;
+  }
+
+  .issue-contents-title {
+    max-width: 11.5ch;
+  }
+
+  .issue-contents-question {
+    padding-left: 1rem;
+  }
+
+  .issue-contents-stats {
+    gap: 0.85rem;
+  }
+
+  .issue-contents-actions,
+  .issue-contents-primary {
+    width: 100%;
+  }
+
+  .issue-contents-link {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .authors-section {
   background:
     radial-gradient(circle at 16% 20%, rgba(201, 154, 74, 0.09), transparent 24rem),
@@ -2211,7 +2417,7 @@ body.menu-open {
   height: 2.75rem;
   border-right: 2px solid rgba(201, 154, 74, 0.85);
   border-bottom: 2px solid rgba(201, 154, 74, 0.85);
-  border-radius: 0 0 0.65rem 0;
+  border-radius: 0;
   animation: pageflip-corner-pulse 2.8s ease-in-out infinite;
   pointer-events: none;
 }
@@ -2233,7 +2439,7 @@ body.menu-open {
   touch-action: pan-y;
   overscroll-behavior: contain;
   user-select: none;
-  border-radius: 1rem;
+  border-radius: 0;
   overflow: hidden;
   margin-inline: auto;
   transform: translateZ(0);
@@ -2243,7 +2449,7 @@ body.menu-open {
 .pageflip-page {
   overflow: hidden;
   border: 1px solid rgba(242, 234, 218, 0.16);
-  border-radius: 0.85rem;
+  border-radius: 0;
   background:
     linear-gradient(145deg, rgba(18, 21, 15, 0.98), rgba(9, 11, 8, 0.97));
   color: #f2eada;
@@ -2254,18 +2460,18 @@ body.menu-open {
   display: flex;
   height: 100%;
   flex-direction: column;
-  padding: clamp(0.4rem, 1vw, 0.75rem);
-  border-radius: 0.75rem;
+  padding: 0;
+  border-radius: 0;
   overflow: hidden;
 }
 
 .pageflip-page-image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
-  background: #f5f1e8;
-  border-radius: 0.7rem;
+  background: transparent;
+  border-radius: 0;
   transform: translateZ(0);
 }
 
@@ -2316,11 +2522,11 @@ body.menu-open {
 .mobile-magazine-viewer__frame {
   position: relative;
   width: 100%;
-  aspect-ratio: 5 / 7;
+  aspect-ratio: 510 / 660;
   overflow: hidden;
   isolation: isolate;
   contain: layout paint;
-  border-radius: 1rem;
+  border-radius: 0;
   border: 1px solid rgba(242, 234, 218, 0.16);
   background: linear-gradient(145deg, rgba(18, 21, 15, 0.98), rgba(9, 11, 8, 0.97));
   box-shadow: 0 22px 55px rgba(0, 0, 0, 0.35);
@@ -2387,7 +2593,7 @@ body.menu-open {
   flex: 0 0 100%;
   width: 100%;
   height: 100%;
-  padding: 0.35rem;
+  padding: 0;
   scroll-snap-align: start;
   scroll-snap-stop: always;
   transition:
@@ -2431,7 +2637,7 @@ body.menu-open {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 0.85rem;
+  border-radius: 0;
   border: 1px solid rgba(242, 234, 218, 0.16);
   background:
     linear-gradient(145deg, rgba(18, 21, 15, 0.98), rgba(9, 11, 8, 0.97));
@@ -2441,9 +2647,9 @@ body.menu-open {
 .mobile-magazine-page__image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   display: block;
-  background: #f5f1e8;
+  background: transparent;
 }
 
 @media (max-width: 767px) {
@@ -2483,7 +2689,7 @@ body.menu-open {
   }
 
   .mobile-magazine-viewer__frame {
-    aspect-ratio: 0.76;
+    aspect-ratio: 510 / 660;
   }
 
   .pageflip-shell__book-wrap {
@@ -2494,21 +2700,21 @@ body.menu-open {
   }
 
   .pageflip-page-inner {
-    padding: 0.35rem;
+    padding: 0;
   }
 
   .pageflip-page-image {
-    border-radius: 0.6rem;
+    border-radius: 0;
   }
 
   .pageflip-book {
-    border-radius: 0.85rem;
+    border-radius: 0;
     margin-inline: auto;
     max-width: 100%;
   }
 
   .pageflip-page {
-    border-radius: 0.75rem;
+    border-radius: 0;
   }
 
   .pageflip-mobile-controls {
@@ -3573,9 +3779,155 @@ body.menu-open {
   padding: clamp(1.25rem, 4vw, 2.25rem);
 }
 
+.issue-offer-section {
+  background:
+    radial-gradient(circle at 50% 12%, rgba(201, 154, 74, 0.12), transparent 24rem),
+    linear-gradient(180deg, #090b08 0%, #0d110c 54%, #090b08 100%);
+}
+
+.issue-offer-heading {
+  display: grid;
+  justify-items: center;
+}
+
+.issue-offer-heading p:first-child::before {
+  content: "";
+  display: inline-block;
+  width: 1.2rem;
+  height: 1px;
+  margin-right: 0.65rem;
+  transform: translateY(-0.22rem);
+  background: #c99a4a;
+}
+
+.issue-offer-card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: min(100%, 41rem);
+  margin: clamp(2.5rem, 5vw, 3.75rem) auto 0;
+  padding: clamp(2.5rem, 6vw, 4rem) clamp(1.25rem, 5vw, 3rem) clamp(2rem, 5vw, 3rem);
+  border: 1px solid rgba(201, 154, 74, 0.72);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(201, 154, 74, 0.1), transparent 22rem),
+    linear-gradient(180deg, rgba(22, 27, 20, 0.96), rgba(9, 11, 8, 0.96));
+}
+
+.issue-offer-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.55rem 1rem;
+  background: #c99a4a;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: #090b08;
+  white-space: nowrap;
+}
+
+.issue-offer-price {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  color: #f2eada;
+}
+
+.issue-offer-price span {
+  margin-top: 0.7rem;
+  font-family: "Rajdhani", sans-serif;
+  font-size: clamp(1.7rem, 5vw, 2.45rem);
+  font-weight: 700;
+  color: #c99a4a;
+}
+
+.issue-offer-price strong {
+  font-family: "Rajdhani", sans-serif;
+  font-size: clamp(5rem, 18vw, 7.5rem);
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: 0;
+}
+
+.issue-offer-card h3 {
+  margin-top: 0.85rem;
+  font-family: "Rajdhani", sans-serif;
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  font-weight: 700;
+  line-height: 1;
+  color: #f2eada;
+}
+
+.issue-offer-subtitle {
+  margin-top: 1.2rem;
+  font-family: "Lora", serif;
+  font-size: 0.98rem;
+  font-style: italic;
+  line-height: 1.7;
+  text-align: center;
+  color: #a8aa9d;
+}
+
+.issue-offer-list {
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 31rem);
+  margin-top: clamp(1.8rem, 4vw, 2.6rem);
+}
+
+.issue-offer-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: start;
+  font-family: "Lora", serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #f2eada;
+}
+
+.issue-offer-list svg {
+  margin-top: 0.28rem;
+  color: #c99a4a;
+}
+
+.issue-offer-button {
+  width: min(100%, 33rem) !important;
+  margin-top: clamp(1.8rem, 4vw, 2.5rem);
+}
+
+.issue-offer-footnote {
+  margin-top: 1.2rem;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  line-height: 1.6;
+  text-align: center;
+  text-transform: uppercase;
+  color: rgba(168, 170, 157, 0.58);
+}
+
 @media (max-width: 767px) {
   .dispatch-carousel {
     margin-top: 1.7rem;
+  }
+
+  .issue-offer-section {
+    padding-top: 3rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .issue-offer-heading h2 {
+    max-width: 10ch;
+  }
+
+  .issue-offer-card {
+    margin-top: 2.6rem;
   }
 
   .dispatch-carousel-arrows {

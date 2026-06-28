@@ -13,13 +13,14 @@ export default function AuthorsSection() {
           <div className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
             <div>
               <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
-                Meet the Contributors
+                Who writes it
               </p>
               <h2 className="mt-3 max-w-xl font-rajdhani text-[clamp(2rem,6vw,4rem)] font-bold leading-[0.96] text-chalk">
-                Strategic voices with rank, field knowledge, and technical range.
+                Read the people who
+made the decisions.
               </h2>
               <p className="mt-4 max-w-lg font-plex text-base font-light leading-[1.85] text-ash">
-                This section highlights the people behind the arguments, with concise context on the expertise each contributor brings into the reading experience.
+                Issue I is written by some of the senior-most ranks of the Indian armed forces and the country's leading strategic minds — Air Marshals, Lieutenant Generals, Major Generals, a Commodore, Brigadiers, and one of India's foremost authorities on China.
               </p>
             </div>
 

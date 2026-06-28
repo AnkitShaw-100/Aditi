@@ -1,7 +1,6 @@
 import heroVideo from "../../media/aditi-hero-video.mp4";
 import westernTheatreImage from "../../media/image2.webp";
 import biotechnologyImage from "../../media/thumbnail_Serum-Institute-of-India-Pune--scaled.webp";
-import builderPsycheImage from "../../media/INS-scaled.webp";
 import frameworkBg from "../../media/Terrain-w-scaled.webp";
 import logoMark from "../../media/logo.png";
 import bookPage1 from "../../media/book-image-1.png";
@@ -261,7 +260,7 @@ export const DISPATCHES = [
     href: "/articles/builders-psyche-atmanirbharta-defence",
     slug: "builders-psyche-atmanirbharta-defence",
     contentPath: "/articles/builders-psyche-atmanirbharta-defence.txt",
-    image: builderPsycheImage,
+    image: "/article-banners/builders-psyche-atmanirbharta-defence.webp",
     tag: "Initiative",
     title: "The Need for a Builder's Psyche in Defence",
     teaser:
@@ -277,7 +276,7 @@ export const DISPATCHES = [
     href: "/articles/china-western-theatre-command-evolving-posture",
     slug: "china-western-theatre-command-evolving-posture",
     contentPath: "/articles/china-western-theatre-command-evolving-posture.txt",
-    image: westernTheatreImage,
+    image: "/article-banners/china-western-theatre-command-evolving-posture.webp",
     tag: "Armament",
     title: "China's Western Theatre Command and PLA's Evolving Posture",
     teaser:

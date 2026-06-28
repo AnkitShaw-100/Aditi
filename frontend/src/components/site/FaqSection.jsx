@@ -69,15 +69,9 @@ export default function FaqSection() {
         </div>
 
         <div className="faq-final-cta">
-          <h3 className="font-rajdhani font-bold text-chalk">
-            Article. At {"\u20B9"}350.
-          </h3>
-          <p className="mx-auto mt-3 max-w-xl font-lora text-base italic leading-relaxed">
-            One dispatch. One complete argument. No noise.
-          </p>
           <Button
             asChild
-            className="final-button mt-6 inline-flex h-11 rounded-none px-8 py-4 font-rajdhani text-lg font-bold"
+            className="final-button inline-flex h-11 rounded-none px-8 py-4 font-rajdhani text-lg font-bold"
           >
             <a href="#read">
               Browse Dispatches <ArrowRight className="size-4" />

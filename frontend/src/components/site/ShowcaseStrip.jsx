@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { PAGEFLIP_PAGES } from "@/data/siteContent";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+const BOOK_PAGE_FRAME_RATIO = 1.2941176471;
+
 function loopPage(page, pageCount) {
   if (pageCount <= 0) {
     return 0;
@@ -75,7 +77,7 @@ function ReactPageFlipShowcase() {
     stageWidth < 768
       ? Math.min(Math.max((stageWidth - 28) * 0.6, 190), 240)
       : Math.min(Math.max(stageWidth * 0.37, 300), 456);
-  const bookHeight = Math.round(bookWidth * 1.42);
+  const bookHeight = Math.round(bookWidth * BOOK_PAGE_FRAME_RATIO);
 
   useEffect(() => {
     if (isMobile) {
@@ -193,8 +195,8 @@ function ReactPageFlipShowcase() {
                         size="fixed"
                         minWidth={190}
                         maxWidth={456}
-                        minHeight={243}
-                        maxHeight={584}
+                        minHeight={246}
+                        maxHeight={590}
                         showCover={false}
                         drawShadow
                         flippingTime={760}

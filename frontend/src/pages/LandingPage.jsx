@@ -1,10 +1,12 @@
 import HeroSection from "@/components/site/HeroSection";
 import MissionSection from "@/components/site/MissionSection";
 import BrandSection from "@/components/site/BrandSection";
+import IssueContentsSection from "@/components/site/IssueContentsSection";
 import AuthorsSection from "@/components/site/AuthorsSection";
 import ShowcaseStrip from "@/components/site/ShowcaseStrip";
 import FrameworkSection from "@/components/site/FrameworkSection";
 import DispatchesSection from "@/components/site/DispatchesSection";
+import IssueOfferSection from "@/components/site/IssueOfferSection";
 import FaqSection from "@/components/site/FaqSection";
 import ReaderFeedbackSection from "@/components/site/ReaderFeedbackSection";
 import PurchaseNudgePopup from "@/components/site/PurchaseNudgePopup";
@@ -16,10 +18,12 @@ export default function LandingPage() {
       <HeroSection />
       <MissionSection />
       <BrandSection />
+      <IssueContentsSection />
       <AuthorsSection />
       <ShowcaseStrip />
       <FrameworkSection />
       <DispatchesSection />
+      <IssueOfferSection />
       {/* <EditionsSection /> */}
       {/* <OjasSection /> */}
       <FaqSection />
