@@ -20,18 +20,20 @@ export default function MissionSection() {
             A.D.I.T.I.
           </p>
           <h2 className="mt-5 max-w-4xl font-rajdhani text-[clamp(1.65rem,4.6vw,3.3rem)] font-bold leading-[1] text-chalk">
-            ADITI exists for readers who want India's strategic future argued for, debated, and understood.
-          </h2>
+            There is a kind of Indian who is no longer content to have their country explained to them. Who wants the argument, not the headline. The reasoning, not the noise.
+
+</h2>
           <p className="mission-subtext mt-5 max-w-3xl font-plex text-[clamp(1rem,1.8vw,1.18rem)] font-light leading-[1.9] text-ash">
-            ADITI is India's foremost platform for strategic and geopolitical analysis on defence. We don't chase what happened. We interrogate why it happened, what it shifts in the balance of power, and what India should do next.
-          </p>
+            ADITI is India's strategy magazine — one deep argument per issue on the questions shaping Indian power, written by the soldiers, air marshals and scholars who built the doctrine. Issue I is out now.</p>
           <div className="mission-rail mt-8" aria-hidden="true">
             <span />
             <span />
             <span />
           </div>
           <p className="mission-note mt-7 max-w-2xl font-lora text-[1rem] italic leading-relaxed text-fog">
-            Written by practitioners. Read by professionals. Built, proudly, for an India that demands clarity.
+            
+            This magazine is for The ADITI Reader
+
           </p>
         </div>
       </div>

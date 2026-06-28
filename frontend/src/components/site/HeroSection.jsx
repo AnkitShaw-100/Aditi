@@ -82,24 +82,26 @@ export default function HeroSection() {
           <div className="max-w-3xl">
             <div className="mt-4 h-px w-12 bg-ember" id="heroRule" />
             <h1 className="mt-5 font-rajdhani text-[clamp(1.8rem,7vw,3.5rem)] font-bold leading-[1.1] text-chalk text-balance">
-              We do not report the war. We understand it.
+              For a century,
+India was read by others.
             </h1>
             <p className="mt-4 font-plex text-base font-light text-ash">
-              Strategy. Independent. Deliberately contrarian. Rigorously analytical. Proudly Indian
+             This is India,
+read by India.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-stretch">
               <Button
                 asChild
                 className="h-12 rounded-full bg-ember px-6 font-rajdhani text-base font-bold text-void hover:bg-[#ddb255]"
               >
-                <a href="#read">Read for Free</a>
+                <a href="#read">Read 3 free</a>
               </Button>
               <Button
                 asChild
                 variant="outline"
                 className="h-12 rounded-full border border-white/15 bg-white/5 px-6 font-rajdhani text-base font-bold uppercase tracking-[0.14em] text-chalk hover:bg-white/10 hover:text-chalk"
               >
-                <a href="#premium-magazine">Buy Now</a>
+                <a href="#premium-magazine">Own Issue I · ₹350</a>
               </Button>
             </div>
           </div>
