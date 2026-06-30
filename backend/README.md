@@ -29,6 +29,12 @@ Then import:
 mysql -u root -p aditi < backend\database\migrations\001_create_auth_users_and_magazines.sql
 ```
 
+Apply later migrations in order when updating an existing database:
+
+```powershell
+Get-Content backend\database\migrations\007_create_receipts.sql | mysql -u root -p aditi
+```
+
 For an existing database, replace the old dummy magazine catalogue with the real ADITI issue:
 
 ```powershell
@@ -128,6 +134,7 @@ Set these values in `backend/.env`:
 ```env
 RAZORPAY_KEY_ID=rzp_test_xxxxx
 RAZORPAY_KEY_SECRET=xxxxx
+RAZORPAY_WEBHOOK_SECRET=xxxxx
 ```
 
 The checkout flow creates a Razorpay order from the signed-in user's cart, verifies the Razorpay signature after payment, marks `user_magazines.status` as `paid`, clears the purchased item from cart, and enables protected PDF download through:
@@ -135,6 +142,55 @@ The checkout flow creates a Razorpay order from the signed-in user's cart, verif
 ```text
 GET /api/magazines/{slug}/download
 ```
+
+For production payment recovery, configure Razorpay Dashboard -> Developers -> Webhooks to call:
+
+```text
+POST https://read.aditidefence.in/api/webhooks/razorpay
+```
+
+Subscribe to:
+
+```text
+payment.captured
+order.paid
+payment.failed
+```
+
+The webhook is the server-side fallback for cases where Razorpay captures payment but the user's browser closes, loses network, or fails to call the frontend verification endpoint. The webhook verifies `X-Razorpay-Signature` using `RAZORPAY_WEBHOOK_SECRET`, then marks matching `razorpay_order_id` purchases as `paid` and clears the user's cart.
+
+There is also an authenticated recovery endpoint for signed-in users:
+
+```text
+POST /api/payments/razorpay/recover
+```
+
+It checks the user's pending `razorpay_order_id` records against Razorpay's order payments API. If Razorpay reports a captured payment or a paid order, the backend marks the purchase as `paid`, clears the cart item, and the profile page shows the PDF and invoice buttons.
+
+## Receipt Emails
+
+Receipt emails are generated from `backend/templates/receipt-email.html` and sent only after the backend marks a Razorpay order as paid. Configure the frontend URL and mail settings:
+
+```env
+FRONTEND_URL=https://read.aditidefence.in
+MAIL_ENABLED=true
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=receipts@aditidefence.in
+MAIL_FROM_NAME="ADITI"
+```
+
+Run the receipts migration before enabling receipt emails:
+
+```powershell
+Get-Content backend\database\migrations\007_create_receipts.sql | mysql -u root -p aditi
+```
+
+The `receipts` table stores one receipt record per Razorpay order, including receipt number, amount, recipient email, send time, and last send error. This prevents duplicate receipt emails when frontend verification, webhook verification, and payment recovery all confirm the same order.
 
 For local testing, expose the PHP backend with a tunnel such as ngrok:
 

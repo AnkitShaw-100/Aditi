@@ -7,6 +7,7 @@ use App\Auth\ClerkUserClient;
 use App\Auth\SvixWebhookVerifier;
 use App\Http\Request;
 use App\Http\Response;
+use App\Mail\Mailer;
 use App\Repository\AdminRepository;
 use App\Repository\UserRepository;
 use App\Support\Database;
@@ -53,6 +54,7 @@ if ($route === 'GET /api/health') {
 $pdo = Database::connect($config['database']);
 $admins = new AdminRepository($pdo);
 $users = new UserRepository($pdo);
+$mailer = new Mailer($config['mail']);
 
 if ($route === 'POST /api/admin/login') {
     $body = $request->body();
@@ -140,6 +142,85 @@ if ($route === 'POST /api/webhooks/clerk') {
     Response::json([
         'message' => 'Webhook ignored',
         'type' => $type,
+    ]);
+}
+
+if ($route === 'POST /api/webhooks/razorpay') {
+    $webhookSecret = $config['razorpay']['webhook_secret'] ?? '';
+    $signature = $request->header('X-Razorpay-Signature');
+
+    if (!is_string($webhookSecret) || $webhookSecret === '') {
+        Response::json(['error' => 'Razorpay webhook secret is not configured'], 500);
+    }
+
+    if (!is_string($signature) || $signature === '') {
+        Response::json(['error' => 'Missing Razorpay webhook signature'], 401);
+    }
+
+    $expected = hash_hmac('sha256', $request->rawBody(), $webhookSecret);
+
+    if (!hash_equals($expected, $signature)) {
+        Response::json(['error' => 'Invalid Razorpay webhook signature'], 401);
+    }
+
+    $event = $request->body();
+    $eventName = $event['event'] ?? '';
+
+    if (!is_string($eventName) || $eventName === '') {
+        Response::json(['message' => 'Razorpay webhook ignored: missing event name']);
+    }
+
+    [$orderId, $paymentId] = razorpayWebhookPaymentIdentifiers($event);
+
+    if (in_array($eventName, ['payment.captured', 'order.paid'], true)) {
+        if ($orderId === null) {
+            Response::json([
+                'message' => 'Razorpay paid webhook ignored: missing order id',
+                'event' => $eventName,
+            ], 202);
+        }
+
+        $result = $users->markRazorpayOrderPaidByOrderId($orderId, $paymentId);
+
+        if ($result['matched']) {
+            sendReceiptEmailForOrder($users, $mailer, $config, $orderId);
+        }
+
+        Response::json([
+            'message' => $result['matched']
+                ? 'Razorpay order marked paid'
+                : 'Razorpay paid webhook accepted but no pending order matched',
+            'event' => $eventName,
+            'order_id' => $orderId,
+            'payment_id' => $paymentId,
+            'matched' => $result['matched'],
+        ]);
+    }
+
+    if ($eventName === 'payment.failed') {
+        if ($orderId === null) {
+            Response::json([
+                'message' => 'Razorpay failed webhook ignored: missing order id',
+                'event' => $eventName,
+            ], 202);
+        }
+
+        $result = $users->markRazorpayOrderFailedByOrderId($orderId, $paymentId);
+
+        Response::json([
+            'message' => $result['matched']
+                ? 'Razorpay order marked failed'
+                : 'Razorpay failed webhook accepted but no pending order matched',
+            'event' => $eventName,
+            'order_id' => $orderId,
+            'payment_id' => $paymentId,
+            'matched' => $result['matched'],
+        ]);
+    }
+
+    Response::json([
+        'message' => 'Razorpay webhook ignored',
+        'event' => $eventName,
     ]);
 }
 
@@ -303,11 +384,77 @@ if ($route === 'POST /api/payments/razorpay/verify') {
     }
 
     $purchases = $users->markRazorpayOrderPaid((string) $claims['sub'], $orderId, $paymentId);
+    sendReceiptEmailForOrder($users, $mailer, $config, $orderId);
 
     Response::json([
         'message' => 'Payment verified',
         'purchases' => $purchases,
     ]);
+}
+
+if ($route === 'POST /api/payments/razorpay/recover') {
+    $claims = requireClaims($request, $verifier);
+    $clerkUserId = (string) $claims['sub'];
+    $razorpay = $config['razorpay'];
+
+    if ($razorpay['key_id'] === '' || $razorpay['key_secret'] === '') {
+        Response::json(['error' => 'Razorpay keys are not configured'], 500);
+    }
+
+    $pendingOrderIds = $users->pendingRazorpayOrderIdsForUser($clerkUserId);
+    $results = [];
+    $recovered = 0;
+
+    foreach ($pendingOrderIds as $orderId) {
+        $paymentState = razorpayPaymentStateForOrder($razorpay, $orderId);
+
+        if ($paymentState['status'] === 'paid') {
+            $users->markRazorpayOrderPaid($clerkUserId, $orderId, $paymentState['payment_id']);
+            sendReceiptEmailForOrder($users, $mailer, $config, $orderId);
+            $recovered++;
+        }
+
+        if ($paymentState['status'] === 'failed') {
+            $users->markRazorpayOrderFailedByOrderId($orderId, $paymentState['payment_id']);
+        }
+
+        $results[] = [
+            'order_id' => $orderId,
+            'status' => $paymentState['status'],
+            'payment_id' => $paymentState['payment_id'],
+            'razorpay_order_status' => $paymentState['order_status'],
+        ];
+    }
+
+    Response::json([
+        'message' => $recovered > 0
+            ? 'Payment recovered. Your downloads are ready.'
+            : 'No captured payment found for pending orders yet.',
+        'recovered_count' => $recovered,
+        'checked_count' => count($pendingOrderIds),
+        'results' => $results,
+        'user' => $users->findProfileByClerkId($clerkUserId),
+    ]);
+}
+
+if ($request->method() === 'GET' && preg_match('#^/api/orders/([^/]+)/invoice$#', $request->path(), $matches)) {
+    $claims = requireClaims($request, $verifier);
+    $orderId = rawurldecode($matches[1]);
+    $invoice = $users->paidOrderInvoice((string) $claims['sub'], $orderId);
+
+    if ($invoice === null) {
+        Response::json(['error' => 'Paid order not found for this user'], 404);
+    }
+
+    $payload = generateInvoicePdf($invoice);
+    $filename = safeDownloadFilename('aditi-invoice-' . $orderId . '.pdf');
+
+    http_response_code(200);
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Content-Length: ' . strlen($payload));
+    echo $payload;
+    exit;
 }
 
 if ($request->method() === 'GET' && preg_match('#^/api/magazines/([^/]+)/download$#', $request->path(), $matches)) {
@@ -347,16 +494,18 @@ function razorpayRequest(array $config, string $method, string $path, array $pay
         'Authorization: Basic ' . base64_encode($config['key_id'] . ':' . $config['key_secret']),
         'Content-Type: application/json',
     ];
+    $httpOptions = [
+        'method' => $method,
+        'header' => implode("\r\n", $headers),
+        'ignore_errors' => true,
+        'timeout' => 20,
+    ];
 
-    $context = stream_context_create([
-        'http' => [
-            'method' => $method,
-            'header' => implode("\r\n", $headers),
-            'content' => $body === false ? '{}' : $body,
-            'ignore_errors' => true,
-            'timeout' => 20,
-        ],
-    ]);
+    if ($method !== 'GET' || $payload !== []) {
+        $httpOptions['content'] = $body === false ? '{}' : $body;
+    }
+
+    $context = stream_context_create(['http' => $httpOptions]);
 
     $response = file_get_contents($url, false, $context);
     $statusLine = $http_response_header[0] ?? '';
@@ -366,7 +515,7 @@ function razorpayRequest(array $config, string $method, string $path, array $pay
 
     if ($status < 200 || $status >= 300 || !is_array($data)) {
         Response::json([
-            'error' => 'Unable to create Razorpay order',
+            'error' => 'Unable to contact Razorpay',
             'details' => is_array($data) ? ($data['error']['description'] ?? $data) : null,
         ], 502);
     }
@@ -374,11 +523,343 @@ function razorpayRequest(array $config, string $method, string $path, array $pay
     return $data;
 }
 
+function razorpayPaymentStateForOrder(array $config, string $orderId): array
+{
+    $order = razorpayRequest($config, 'GET', '/v1/orders/' . rawurlencode($orderId));
+    $payments = razorpayRequest($config, 'GET', '/v1/orders/' . rawurlencode($orderId) . '/payments');
+    $items = is_array($payments['items'] ?? null) ? $payments['items'] : [];
+    $paymentId = null;
+
+    foreach ($items as $payment) {
+        if (!is_array($payment)) {
+            continue;
+        }
+
+        if (($payment['status'] ?? null) === 'captured') {
+            return [
+                'status' => 'paid',
+                'payment_id' => firstNonEmptyString($payment['id'] ?? null),
+                'order_status' => is_string($order['status'] ?? null) ? $order['status'] : null,
+            ];
+        }
+
+        $paymentId ??= firstNonEmptyString($payment['id'] ?? null);
+    }
+
+    if (($order['status'] ?? null) === 'paid') {
+        return [
+            'status' => 'paid',
+            'payment_id' => $paymentId,
+            'order_status' => 'paid',
+        ];
+    }
+
+    $hasFailedPayment = false;
+
+    foreach ($items as $payment) {
+        if (is_array($payment) && ($payment['status'] ?? null) === 'failed') {
+            $hasFailedPayment = true;
+            $paymentId ??= firstNonEmptyString($payment['id'] ?? null);
+        }
+    }
+
+    if ($hasFailedPayment && in_array($order['status'] ?? null, ['attempted', 'created'], true)) {
+        return [
+            'status' => 'failed',
+            'payment_id' => $paymentId,
+            'order_status' => is_string($order['status'] ?? null) ? $order['status'] : null,
+        ];
+    }
+
+    return [
+        'status' => 'pending',
+        'payment_id' => $paymentId,
+        'order_status' => is_string($order['status'] ?? null) ? $order['status'] : null,
+    ];
+}
+
+function razorpayWebhookPaymentIdentifiers(array $event): array
+{
+    $payment = $event['payload']['payment']['entity'] ?? [];
+    $order = $event['payload']['order']['entity'] ?? [];
+
+    if (!is_array($payment)) {
+        $payment = [];
+    }
+
+    if (!is_array($order)) {
+        $order = [];
+    }
+
+    return [
+        firstNonEmptyString($payment['order_id'] ?? null, $order['id'] ?? null),
+        firstNonEmptyString($payment['id'] ?? null, $order['payment_id'] ?? null),
+    ];
+}
+
+function firstNonEmptyString(mixed ...$values): ?string
+{
+    foreach ($values as $value) {
+        if (is_string($value) && trim($value) !== '') {
+            return trim($value);
+        }
+    }
+
+    return null;
+}
+
 function safeDownloadFilename(string $filename): string
 {
     $filename = preg_replace('/[^A-Za-z0-9._-]+/', '-', $filename) ?: 'aditi-magazine.pdf';
 
     return str_ends_with(strtolower($filename), '.pdf') ? $filename : $filename . '.pdf';
+}
+
+function generateInvoicePdf(array $invoice): string
+{
+    $orderId = (string) $invoice['order_id'];
+    $paymentId = (string) ($invoice['payment_id'] ?? '');
+    $invoiceNumber = 'ADITI-' . strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $orderId) ?: 'ORDER', -10));
+    $purchasedAt = strtotime((string) ($invoice['purchased_at'] ?? '')) ?: time();
+    $date = date('d M Y', $purchasedAt);
+    $user = $invoice['user'] ?? [];
+    $items = $invoice['items'] ?? [];
+    $total = formatInvoiceRupees((int) ($invoice['total_paise'] ?? 0));
+    $ops = [];
+
+    pdfText($ops, 346, 720, 'I N V O I C E', 'R', 31);
+    pdfTextRight($ops, 498, 694, '#' . $invoiceNumber, 'R', 8);
+
+    pdfText($ops, 86, 656, 'BILLED TO:', 'B', 9);
+    pdfText($ops, 170, 656, (string) ($user['username'] ?? 'ADITI Reader'), 'B', 9);
+    pdfText($ops, 170, 640, (string) ($user['email'] ?? ''), 'R', 9);
+    pdfText($ops, 170, 624, (string) ($user['phone_number'] ?? ''), 'R', 9);
+
+    pdfText($ops, 86, 596, 'PAYMENT:', 'B', 9);
+    pdfText($ops, 170, 596, 'Razorpay', 'B', 9);
+    pdfText($ops, 170, 580, 'Order ' . $orderId, 'R', 8);
+    pdfText($ops, 170, 564, 'Payment ' . $paymentId, 'R', 8);
+    pdfText($ops, 170, 548, 'Paid on ' . $date, 'R', 8);
+
+    pdfText($ops, 86, 488, 'DESCRIPTION', 'B', 8);
+    pdfTextRight($ops, 354, 488, 'RATE', 'B', 8);
+    pdfTextRight($ops, 416, 488, 'QTY', 'B', 8);
+    pdfTextRight($ops, 498, 488, 'AMOUNT', 'B', 8);
+    pdfLine($ops, 86, 472, 498, 472);
+
+    $y = 452;
+
+    foreach ($items as $item) {
+        $amount = formatInvoiceRupees((int) ($item['price_paise'] ?? 0));
+        $titleLines = explode("\n", wordwrap((string) ($item['title'] ?? 'ADITI Magazine'), 42, "\n", true));
+
+        foreach ($titleLines as $index => $titleLine) {
+            pdfText($ops, 86, $y, $titleLine, $index === 0 ? 'R' : 'R', 9);
+
+            if ($index === 0) {
+                pdfTextRight($ops, 354, $y, $amount, 'R', 9);
+                pdfTextRight($ops, 416, $y, '1', 'R', 9);
+                pdfTextRight($ops, 498, $y, $amount, 'R', 9);
+            }
+
+            $y -= 14;
+        }
+
+        pdfLine($ops, 86, $y + 2, 498, $y + 2);
+        $y -= 16;
+
+        if ($y < 222) {
+            pdfText($ops, 86, $y, 'Additional paid items are included in the total.', 'R', 8);
+            break;
+        }
+    }
+
+    pdfText($ops, 86, 200, 'Sub-Total', 'R', 9);
+    pdfTextRight($ops, 498, 200, $total, 'R', 9);
+    pdfLine($ops, 86, 186, 498, 186);
+    pdfText($ops, 86, 164, 'TOTAL', 'B', 11);
+    pdfTextRight($ops, 498, 164, $total, 'B', 11);
+
+    pdfText($ops, 86, 108, 'Your payment has been received. This invoice was automatically generated by ADITI.', 'R', 9);
+    pdfText($ops, 86, 84, 'Thank you for your business.', 'R', 9);
+
+    return buildSimplePdf(implode("\n", $ops));
+}
+
+function formatInvoiceRupees(int $pricePaise): string
+{
+    return 'INR ' . number_format($pricePaise / 100, 0);
+}
+
+function pdfText(array &$ops, int $x, int $y, string $text, string $font = 'R', int $size = 10): void
+{
+    $fontName = $font === 'B' ? 'F2' : 'F1';
+    $ops[] = 'BT /' . $fontName . ' ' . $size . ' Tf ' . $x . ' ' . $y . ' Td (' . pdfEscape($text) . ') Tj ET';
+}
+
+function pdfTextRight(array &$ops, int $rightX, int $y, string $text, string $font = 'R', int $size = 10): void
+{
+    $x = $rightX - pdfApproxTextWidth($text, $size);
+    pdfText($ops, $x, $y, $text, $font, $size);
+}
+
+function pdfApproxTextWidth(string $text, int $size): int
+{
+    return (int) ceil(strlen(pdfEscape($text)) * $size * 0.5);
+}
+
+function pdfLine(array &$ops, int $x1, int $y1, int $x2, int $y2): void
+{
+    $ops[] = '0.72 0.56 0.29 RG 0.75 w ' . $x1 . ' ' . $y1 . ' m ' . $x2 . ' ' . $y2 . ' l S';
+}
+
+function pdfEscape(string $text): string
+{
+    $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
+
+    if (!is_string($ascii)) {
+        $ascii = preg_replace('/[^\x20-\x7E]/', '', $text) ?? '';
+    }
+
+    return str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $ascii);
+}
+
+function buildSimplePdf(string $content): string
+{
+    $objects = [
+        1 => '<< /Type /Catalog /Pages 2 0 R >>',
+        2 => '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+        3 => '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>',
+        4 => '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+        5 => '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>',
+        6 => '<< /Length ' . strlen($content) . " >>\nstream\n" . $content . "\nendstream",
+    ];
+    $pdf = "%PDF-1.4\n";
+    $offsets = [0];
+
+    foreach ($objects as $number => $object) {
+        $offsets[$number] = strlen($pdf);
+        $pdf .= $number . " 0 obj\n" . $object . "\nendobj\n";
+    }
+
+    $xrefOffset = strlen($pdf);
+    $pdf .= "xref\n0 " . (count($objects) + 1) . "\n";
+    $pdf .= "0000000000 65535 f \n";
+
+    for ($number = 1; $number <= count($objects); $number++) {
+        $pdf .= sprintf("%010d 00000 n \n", $offsets[$number]);
+    }
+
+    $pdf .= "trailer\n<< /Size " . (count($objects) + 1) . " /Root 1 0 R >>\n";
+    $pdf .= "startxref\n" . $xrefOffset . "\n%%EOF";
+
+    return $pdf;
+}
+
+function sendReceiptEmailForOrder(
+    UserRepository $users,
+    Mailer $mailer,
+    array $config,
+    string $orderId
+): void {
+    $receiptPayload = null;
+
+    try {
+        $receiptPayload = $users->createReceiptForPaidOrder($orderId);
+
+        if ($receiptPayload === null) {
+            return;
+        }
+
+        $receipt = $receiptPayload['receipt'] ?? [];
+        $receiptId = (int) ($receipt['id'] ?? 0);
+        $emailTo = (string) ($receipt['email_to'] ?? '');
+
+        if (!empty($receipt['email_sent_at'])) {
+            return;
+        }
+
+        if (($config['mail']['enabled'] ?? false) !== true) {
+            return;
+        }
+
+        if ($receiptId <= 0 || $emailTo === '') {
+            if ($receiptId > 0) {
+                $users->markReceiptEmailFailed($receiptId, 'Receipt email address is missing.');
+            }
+
+            return;
+        }
+
+        $html = renderReceiptEmailHtml($receiptPayload, $config);
+        $subject = 'ADITI receipt ' . (string) $receipt['receipt_number'];
+
+        $mailer->sendHtml($emailTo, $subject, $html);
+        $users->markReceiptEmailSent($receiptId);
+    } catch (Throwable $exception) {
+        $receiptId = (int) ($receiptPayload['receipt']['id'] ?? 0);
+
+        if ($receiptId > 0) {
+            $users->markReceiptEmailFailed($receiptId, $exception->getMessage());
+        }
+    }
+}
+
+function renderReceiptEmailHtml(array $receiptPayload, array $config): string
+{
+    $template = file_get_contents(__DIR__ . '/../templates/receipt-email.html');
+
+    if ($template === false) {
+        throw new RuntimeException('Receipt email template is missing.');
+    }
+
+    $user = $receiptPayload['user'] ?? [];
+    $items = $receiptPayload['items'] ?? [];
+    $receipt = $receiptPayload['receipt'] ?? [];
+    $purchaseTimestamp = strtotime((string) ($receiptPayload['purchased_at'] ?? '')) ?: time();
+    $magazineTitle = implode(', ', array_map(
+        static fn (array $item): string => (string) ($item['title'] ?? 'ADITI Magazine'),
+        $items
+    ));
+    $magazineSku = implode(', ', array_filter(array_map(
+        static fn (array $item): string => (string) ($item['sku'] ?? ''),
+        $items
+    )));
+    $itemCount = count($items);
+    $frontendUrl = rtrim((string) ($config['app']['frontend_url'] ?? ''), '/');
+    $downloadUrl = ($frontendUrl !== '' ? $frontendUrl : 'https://read.aditidefence.in') . '/profile';
+    $currency = (string) ($receiptPayload['currency'] ?? 'INR');
+    $amountRupees = $currency . ' ' . number_format(((int) ($receiptPayload['total_paise'] ?? 0)) / 100, 0);
+    $values = [
+        'user_name' => (string) ($user['username'] ?? 'ADITI Reader'),
+        'user_email' => (string) ($user['email'] ?? ''),
+        'phone_number' => (string) ($user['phone_number'] ?? ''),
+        'magazine_title' => $magazineTitle,
+        'magazine_sku' => $magazineSku,
+        'item_count' => (string) $itemCount,
+        'order_id' => (string) ($receiptPayload['order_id'] ?? ''),
+        'payment_id' => (string) ($receiptPayload['payment_id'] ?? ''),
+        'receipt_number' => (string) ($receipt['receipt_number'] ?? ''),
+        'purchase_date' => date('d M Y, h:i A', $purchaseTimestamp),
+        'payment_method' => 'Razorpay',
+        'payment_status' => 'Paid',
+        'order_status' => 'Completed',
+        'subtotal_rupees' => $amountRupees,
+        'amount_rupees' => $amountRupees,
+        'currency' => $currency,
+        'download_url' => $downloadUrl,
+    ];
+
+    foreach ($values as $key => $value) {
+        $template = str_replace('{{' . $key . '}}', escapeEmailHtml($value), $template);
+    }
+
+    return $template;
+}
+
+function escapeEmailHtml(string $value): string
+{
+    return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
 function requireClaims(Request $request, ClerkJwtVerifier $verifier): array

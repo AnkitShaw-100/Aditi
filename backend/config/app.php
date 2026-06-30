@@ -12,6 +12,7 @@ return [
         'env' => $appEnv,
         'debug' => $appEnv === 'local' && Env::bool('APP_DEBUG', false),
         'url' => Env::get('APP_URL', 'http://localhost:8080'),
+        'frontend_url' => Env::get('FRONTEND_URL', 'http://localhost:5173'),
         'cors_allowed_origins' => Env::csv('CORS_ALLOWED_ORIGINS', ['http://localhost:5173']),
         'force_https' => $forceHttps,
         'admin_cookie_name' => Env::get('ADMIN_COOKIE_NAME', 'aditi_admin'),
@@ -38,5 +39,17 @@ return [
     'razorpay' => [
         'key_id' => Env::get('RAZORPAY_KEY_ID', ''),
         'key_secret' => Env::get('RAZORPAY_KEY_SECRET', ''),
+        'webhook_secret' => Env::get('RAZORPAY_WEBHOOK_SECRET', ''),
+    ],
+    'mail' => [
+        'enabled' => Env::bool('MAIL_ENABLED', false),
+        'mailer' => Env::get('MAIL_MAILER', 'mail'),
+        'host' => Env::get('MAIL_HOST', ''),
+        'port' => Env::int('MAIL_PORT', 587),
+        'username' => Env::get('MAIL_USERNAME', ''),
+        'password' => Env::get('MAIL_PASSWORD', ''),
+        'encryption' => Env::get('MAIL_ENCRYPTION', 'tls'),
+        'from_address' => Env::get('MAIL_FROM_ADDRESS', ''),
+        'from_name' => Env::get('MAIL_FROM_NAME', 'ADITI'),
     ],
 ];

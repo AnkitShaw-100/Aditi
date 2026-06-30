@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{receipt_number}}</title>
+    <style>
+      @media only screen and (max-width: 640px) {
+        .shell {
+          width: 100% !important;
+        }
+
+        .card {
+          padding: 24px !important;
+        }
+
+        .two-col {
+          display: block !important;
+        }
+
+        .two-col td {
+          display: block !important;
+          width: 100% !important;
+          padding-right: 0 !important;
+          padding-bottom: 18px !important;
+        }
+
+        .title {
+          font-size: 30px !important;
+        }
+
+        .cta {
+          display: block !important;
+          text-align: center !important;
+        }
+      }
+    </style>
+  </head>
+  <body style="margin:0;background:#eef1f5;font-family:Arial,Helvetica,sans-serif;color:#111827;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#eef1f5;padding:28px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" class="shell" width="640" cellspacing="0" cellpadding="0" style="width:640px;max-width:100%;">
+            <tr>
+              <td style="background:#0b1320;border-radius:18px 18px 0 0;padding:30px 34px;border-bottom:4px solid #c99a4a;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td>
+                      <div style="font-size:13px;letter-spacing:8px;color:#f9fafb;font-weight:700;">ADITI</div>
+                      <div style="margin-top:8px;font-size:13px;color:#c99a4a;letter-spacing:2px;text-transform:uppercase;">Strategy & Defence Magazine</div>
+                    </td>
+                    <td align="right" style="font-size:12px;color:#e5e7eb;">
+                      Receipt<br>
+                      <strong style="color:#ffffff;">{{receipt_number}}</strong>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="card" style="background:#ffffff;padding:34px;border-radius:0 0 18px 18px;box-shadow:0 18px 44px rgba(15,23,42,0.12);">
+                <h1 class="title" style="margin:0;font-size:38px;line-height:1.05;color:#111827;letter-spacing:0.02em;">Payment received</h1>
+                <p style="margin:12px 0 0;font-size:15px;line-height:1.7;color:#4b5563;">
+                  Thank you, {{user_name}}. Your ADITI magazine purchase has been confirmed.
+                </p>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" class="two-col" style="margin-top:30px;">
+                  <tr>
+                    <td width="50%" valign="top" style="padding-right:18px;">
+                      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c99a4a;font-weight:700;">Billed To</div>
+                      <div style="margin-top:10px;font-size:15px;line-height:1.7;color:#111827;">
+                        <strong>{{user_name}}</strong><br>
+                        {{user_email}}<br>
+                        {{phone_number}}
+                      </div>
+                    </td>
+                    <td width="50%" valign="top">
+                      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#c99a4a;font-weight:700;">Payment</div>
+                      <div style="margin-top:10px;font-size:15px;line-height:1.7;color:#111827;">
+                        Method: <strong>{{payment_method}}</strong><br>
+                        Date: <strong>{{purchase_date}}</strong><br>
+                        Payment Status: <strong>{{payment_status}}</strong><br>
+                        Order Status: <strong>{{order_status}}</strong>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:30px;border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:12px 0;border-bottom:1px solid #d1d5db;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#111827;font-weight:700;">Description</td>
+                    <td align="center" style="padding:12px 0;border-bottom:1px solid #d1d5db;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#111827;font-weight:700;">Qty</td>
+                    <td align="right" style="padding:12px 0;border-bottom:1px solid #d1d5db;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#111827;font-weight:700;">Amount</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:18px 0;border-bottom:1px solid #e5e7eb;font-size:15px;line-height:1.6;color:#111827;">
+                      <strong>{{magazine_title}}</strong><br>
+                      <span style="font-size:12px;color:#6b7280;">SKU: {{magazine_sku}}</span>
+                    </td>
+                    <td align="center" style="padding:18px 0;border-bottom:1px solid #e5e7eb;font-size:15px;color:#111827;">{{item_count}}</td>
+                    <td align="right" style="padding:18px 0;border-bottom:1px solid #e5e7eb;font-size:15px;color:#111827;font-weight:700;">{{amount_rupees}}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="padding:18px 0 0;font-size:14px;color:#374151;">Subtotal</td>
+                    <td align="right" style="padding:18px 0 0;font-size:14px;color:#374151;">{{subtotal_rupees}}</td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" style="padding:10px 0 0;font-size:16px;color:#111827;font-weight:700;">Total Paid</td>
+                    <td align="right" style="padding:18px 0 0;font-size:18px;color:#111827;font-weight:700;">{{amount_rupees}}</td>
+                  </tr>
+                </table>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:28px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;">
+                  <tr>
+                    <td style="padding:18px;font-size:13px;line-height:1.8;color:#374151;">
+                      <strong>Receipt No:</strong> {{receipt_number}}<br>
+                      <strong>Order ID:</strong> {{order_id}}<br>
+                      <strong>Payment ID:</strong> {{payment_id}}<br>
+                      <strong>Currency:</strong> {{currency}}<br>
+                      <strong>Account Email:</strong> {{user_email}}
+                    </td>
+                  </tr>
+                </table>
+
+                <div style="margin-top:30px;">
+                  <a class="cta" href="{{download_url}}" style="display:inline-block;background:#c99a4a;color:#0b1320;text-decoration:none;padding:14px 22px;border-radius:4px;font-size:15px;font-weight:700;">
+                    Download Magazine
+                  </a>
+                </div>
+
+                <p style="margin:30px 0 0;font-size:12px;line-height:1.7;color:#6b7280;">
+                  This is a computer-generated receipt and does not require a signature.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

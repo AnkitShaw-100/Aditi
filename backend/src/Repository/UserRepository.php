@@ -123,7 +123,32 @@ final class UserRepository
              FROM user_magazines um
              INNER JOIN magazines m ON m.id = um.magazine_id
              WHERE um.user_id = :user_id
-             ORDER BY um.purchased_at DESC'
+                AND um.id = (
+                    SELECT um2.id
+                    FROM user_magazines um2
+                    WHERE um2.user_id = um.user_id
+                      AND um2.magazine_id = um.magazine_id
+                    ORDER BY
+                        CASE um2.status
+                            WHEN "paid" THEN 1
+                            WHEN "pending" THEN 2
+                            WHEN "failed" THEN 3
+                            ELSE 4
+                        END,
+                        um2.purchased_at DESC,
+                        um2.updated_at DESC,
+                        um2.id DESC
+                    LIMIT 1
+                )
+             ORDER BY
+                CASE um.status
+                    WHEN "paid" THEN 1
+                    WHEN "pending" THEN 2
+                    WHEN "failed" THEN 3
+                    ELSE 4
+                END,
+                um.purchased_at DESC,
+                um.updated_at DESC'
         );
         $statement->execute(['user_id' => $user['id']]);
 
@@ -295,7 +320,7 @@ final class UserRepository
     public function markRazorpayOrderPaid(
         string $clerkUserId,
         string $razorpayOrderId,
-        string $razorpayPaymentId
+        ?string $razorpayPaymentId
     ): array {
         $user = $this->findUserRowByClerkId($clerkUserId);
 
@@ -303,6 +328,89 @@ final class UserRepository
             throw new \RuntimeException('User profile not found.');
         }
 
+        $this->markPaidForUserOrder((int) $user['id'], $razorpayOrderId, $razorpayPaymentId);
+
+        return $this->findProfileByClerkId($clerkUserId)['magazines_bought'] ?? [];
+    }
+
+    public function markRazorpayOrderPaidByOrderId(string $razorpayOrderId, ?string $razorpayPaymentId): array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT DISTINCT user_id
+             FROM user_magazines
+             WHERE razorpay_order_id = :razorpay_order_id'
+        );
+        $statement->execute(['razorpay_order_id' => $razorpayOrderId]);
+        $userIds = array_map(
+            static fn (array $row): int => (int) $row['user_id'],
+            $statement->fetchAll()
+        );
+
+        foreach ($userIds as $userId) {
+            $this->markPaidForUserOrder($userId, $razorpayOrderId, $razorpayPaymentId);
+        }
+
+        return [
+            'matched' => $userIds !== [],
+            'user_ids' => $userIds,
+        ];
+    }
+
+    public function markRazorpayOrderFailedByOrderId(string $razorpayOrderId, ?string $razorpayPaymentId): array
+    {
+        $statement = $this->pdo->prepare(
+            'UPDATE user_magazines
+             SET status = "failed",
+                 razorpay_payment_id = COALESCE(:razorpay_payment_id, razorpay_payment_id),
+                 updated_at = NOW()
+             WHERE razorpay_order_id = :razorpay_order_id
+               AND status = "pending"'
+        );
+        $statement->execute([
+            'razorpay_order_id' => $razorpayOrderId,
+            'razorpay_payment_id' => $razorpayPaymentId,
+        ]);
+
+        return [
+            'matched' => $statement->rowCount() > 0,
+            'updated_count' => $statement->rowCount(),
+        ];
+    }
+
+    public function pendingRazorpayOrderIdsForUser(string $clerkUserId): array
+    {
+        $user = $this->findUserRowByClerkId($clerkUserId);
+
+        if ($user === null) {
+            return [];
+        }
+
+        $statement = $this->pdo->prepare(
+            'SELECT DISTINCT razorpay_order_id
+             FROM user_magazines
+             WHERE user_id = :user_id
+               AND status = "pending"
+               AND razorpay_order_id IS NOT NULL
+               AND razorpay_order_id <> ""
+             ORDER BY razorpay_order_id DESC'
+        );
+        $statement->execute(['user_id' => $user['id']]);
+
+        return array_values(array_filter(
+            array_map(
+                static fn (array $row): ?string => is_string($row['razorpay_order_id'] ?? null)
+                    ? $row['razorpay_order_id']
+                    : null,
+                $statement->fetchAll()
+            )
+        ));
+    }
+
+    private function markPaidForUserOrder(
+        int $userId,
+        string $razorpayOrderId,
+        ?string $razorpayPaymentId
+    ): void {
         try {
             $this->pdo->beginTransaction();
 
@@ -312,7 +420,7 @@ final class UserRepository
                  WHERE user_id = :user_id AND razorpay_order_id = :razorpay_order_id'
             );
             $purchaseIds->execute([
-                'user_id' => $user['id'],
+                'user_id' => $userId,
                 'razorpay_order_id' => $razorpayOrderId,
             ]);
             $magazineIds = array_map(
@@ -327,13 +435,13 @@ final class UserRepository
             $update = $this->pdo->prepare(
                 'UPDATE user_magazines
                  SET status = "paid",
-                     razorpay_payment_id = :razorpay_payment_id,
-                     purchased_at = NOW(),
+                     razorpay_payment_id = COALESCE(:razorpay_payment_id, razorpay_payment_id),
+                     purchased_at = COALESCE(purchased_at, NOW()),
                      updated_at = NOW()
                  WHERE user_id = :user_id AND razorpay_order_id = :razorpay_order_id'
             );
             $update->execute([
-                'user_id' => $user['id'],
+                'user_id' => $userId,
                 'razorpay_order_id' => $razorpayOrderId,
                 'razorpay_payment_id' => $razorpayPaymentId,
             ]);
@@ -343,7 +451,7 @@ final class UserRepository
                 "DELETE FROM user_cart_items
                  WHERE user_id = ? AND magazine_id IN ($placeholders)"
             );
-            $delete->execute([$user['id'], ...$magazineIds]);
+            $delete->execute([$userId, ...$magazineIds]);
 
             $this->pdo->commit();
         } catch (\Throwable $exception) {
@@ -353,8 +461,188 @@ final class UserRepository
 
             throw $exception;
         }
+    }
 
-        return $this->findProfileByClerkId($clerkUserId)['magazines_bought'] ?? [];
+    public function paidOrderInvoice(string $clerkUserId, string $razorpayOrderId): ?array
+    {
+        $user = $this->findUserRowByClerkId($clerkUserId);
+
+        if ($user === null) {
+            return null;
+        }
+
+        $statement = $this->pdo->prepare(
+            'SELECT m.id, m.sku, m.slug, m.title, m.price_paise, m.currency,
+                    um.status, um.razorpay_order_id, um.razorpay_payment_id, um.purchased_at
+             FROM user_magazines um
+             INNER JOIN magazines m ON m.id = um.magazine_id
+             WHERE um.user_id = :user_id
+               AND um.razorpay_order_id = :razorpay_order_id
+               AND um.status = "paid"
+             ORDER BY um.purchased_at DESC, m.title ASC'
+        );
+        $statement->execute([
+            'user_id' => $user['id'],
+            'razorpay_order_id' => $razorpayOrderId,
+        ]);
+
+        $items = $statement->fetchAll();
+
+        if ($items === []) {
+            return null;
+        }
+
+        return [
+            'user' => $user,
+            'items' => $items,
+            'order_id' => $razorpayOrderId,
+            'payment_id' => $items[0]['razorpay_payment_id'] ?? '',
+            'purchased_at' => $items[0]['purchased_at'] ?? null,
+            'currency' => $items[0]['currency'] ?? 'INR',
+            'total_paise' => array_reduce(
+                $items,
+                static fn (int $sum, array $item): int => $sum + (int) ($item['price_paise'] ?? 0),
+                0
+            ),
+        ];
+    }
+
+    public function createReceiptForPaidOrder(string $razorpayOrderId): ?array
+    {
+        $invoice = $this->paidOrderReceiptByOrderId($razorpayOrderId);
+
+        if ($invoice === null) {
+            return null;
+        }
+
+        $receiptNumber = $this->receiptNumberForOrder($razorpayOrderId);
+        $statement = $this->pdo->prepare(
+            'INSERT INTO receipts (
+                user_id, razorpay_order_id, razorpay_payment_id, receipt_number,
+                amount_paise, currency, purchase_date, email_to
+             )
+             VALUES (
+                :user_id, :razorpay_order_id, :razorpay_payment_id, :receipt_number,
+                :amount_paise, :currency, :purchase_date, :email_to
+             )
+             ON DUPLICATE KEY UPDATE
+                razorpay_payment_id = COALESCE(VALUES(razorpay_payment_id), razorpay_payment_id),
+                amount_paise = VALUES(amount_paise),
+                currency = VALUES(currency),
+                purchase_date = COALESCE(VALUES(purchase_date), purchase_date),
+                email_to = COALESCE(VALUES(email_to), email_to),
+                updated_at = NOW()'
+        );
+        $statement->execute([
+            'user_id' => $invoice['user']['id'],
+            'razorpay_order_id' => $razorpayOrderId,
+            'razorpay_payment_id' => $invoice['payment_id'],
+            'receipt_number' => $receiptNumber,
+            'amount_paise' => $invoice['total_paise'],
+            'currency' => $invoice['currency'],
+            'purchase_date' => $invoice['purchased_at'],
+            'email_to' => $invoice['user']['email'] ?? null,
+        ]);
+
+        return $this->receiptPayloadByOrderId($razorpayOrderId);
+    }
+
+    public function markReceiptEmailSent(int $receiptId): void
+    {
+        $statement = $this->pdo->prepare(
+            'UPDATE receipts
+             SET email_sent_at = NOW(), email_last_error = NULL, updated_at = NOW()
+             WHERE id = :id'
+        );
+        $statement->execute(['id' => $receiptId]);
+    }
+
+    public function markReceiptEmailFailed(int $receiptId, string $error): void
+    {
+        $statement = $this->pdo->prepare(
+            'UPDATE receipts
+             SET email_last_error = :email_last_error, updated_at = NOW()
+             WHERE id = :id'
+        );
+        $statement->execute([
+            'id' => $receiptId,
+            'email_last_error' => substr($error, 0, 2000),
+        ]);
+    }
+
+    private function paidOrderReceiptByOrderId(string $razorpayOrderId): ?array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT u.id AS user_id, u.email, u.phone_number, u.username,
+                    m.id, m.sku, m.slug, m.title, m.price_paise, m.currency,
+                    um.status, um.razorpay_order_id, um.razorpay_payment_id, um.purchased_at
+             FROM user_magazines um
+             INNER JOIN users u ON u.id = um.user_id
+             INNER JOIN magazines m ON m.id = um.magazine_id
+             WHERE um.razorpay_order_id = :razorpay_order_id
+               AND um.status = "paid"
+             ORDER BY um.purchased_at DESC, m.title ASC'
+        );
+        $statement->execute(['razorpay_order_id' => $razorpayOrderId]);
+        $rows = $statement->fetchAll();
+
+        if ($rows === []) {
+            return null;
+        }
+
+        $first = $rows[0];
+
+        return [
+            'user' => [
+                'id' => (int) $first['user_id'],
+                'username' => $first['username'],
+                'email' => $first['email'],
+                'phone_number' => $first['phone_number'],
+            ],
+            'items' => $rows,
+            'order_id' => $razorpayOrderId,
+            'payment_id' => $first['razorpay_payment_id'] ?? '',
+            'purchased_at' => $first['purchased_at'] ?? null,
+            'currency' => $first['currency'] ?? 'INR',
+            'total_paise' => array_reduce(
+                $rows,
+                static fn (int $sum, array $item): int => $sum + (int) ($item['price_paise'] ?? 0),
+                0
+            ),
+        ];
+    }
+
+    private function receiptPayloadByOrderId(string $razorpayOrderId): ?array
+    {
+        $invoice = $this->paidOrderReceiptByOrderId($razorpayOrderId);
+
+        if ($invoice === null) {
+            return null;
+        }
+
+        $statement = $this->pdo->prepare(
+            'SELECT id, receipt_number, email_to, email_sent_at, email_last_error
+             FROM receipts
+             WHERE razorpay_order_id = :razorpay_order_id
+             LIMIT 1'
+        );
+        $statement->execute(['razorpay_order_id' => $razorpayOrderId]);
+        $receipt = $statement->fetch();
+
+        if ($receipt === false) {
+            return null;
+        }
+
+        $invoice['receipt'] = $receipt;
+
+        return $invoice;
+    }
+
+    private function receiptNumberForOrder(string $razorpayOrderId): string
+    {
+        $safeOrderId = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $razorpayOrderId) ?: 'ORDER');
+
+        return 'ADITI-RCPT-' . substr($safeOrderId, -10);
     }
 
     public function paidMagazineFile(string $clerkUserId, string $slug): ?array

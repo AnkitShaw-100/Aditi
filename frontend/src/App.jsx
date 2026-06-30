@@ -6,6 +6,7 @@ import { RadarCursor } from "@/components/site/shared";
 import LandingPage from "@/pages/LandingPage";
 import ProfilePage from "@/pages/ProfilePage";
 import CheckoutPage from "@/pages/CheckoutPage";
+import PaymentSuccessPage from "@/pages/PaymentSuccessPage";
 import AuthPage from "@/pages/AuthPage";
 import ArticlePage from "@/pages/ArticlePage";
 import AdminLoginPage from "@/pages/AdminLoginPage";
@@ -23,6 +24,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/articles/:slug" element={<ArticlePage />} />
           <Route path={ADMIN_ENTRY_PATH} element={<AdminLoginPage />} />

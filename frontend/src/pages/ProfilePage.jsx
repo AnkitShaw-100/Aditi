@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { SignInButton, SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
-import { ArrowRight, Download, Save } from "lucide-react";
+import { ArrowRight, Download, RefreshCw, Save } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,30 @@ const emptyProfile = {
   dob: "",
   profile_completed_at: "",
 };
+
+const statusRank = {
+  paid: 1,
+  pending: 2,
+  failed: 3,
+  refunded: 4,
+};
+
+function uniqueMagazinesByBestStatus(purchases = []) {
+  const bestByMagazine = new Map();
+
+  purchases.forEach((purchase) => {
+    const key = purchase.slug || purchase.id || purchase.razorpay_order_id;
+    const current = bestByMagazine.get(key);
+    const purchaseRank = statusRank[purchase.status] ?? 9;
+    const currentRank = statusRank[current?.status] ?? 9;
+
+    if (!current || purchaseRank < currentRank) {
+      bestByMagazine.set(key, purchase);
+    }
+  });
+
+  return Array.from(bestByMagazine.values());
+}
 
 export default function ProfilePage() {
   return (
@@ -40,7 +64,7 @@ function AuthRequiredPanel() {
         Sign in to complete your profile.
       </h1>
       <p className="mt-4 font-plex text-sm leading-7 text-ash">
-        Your profile details are used for order records, invoice data, and magazine access.
+        Your profile details are used for order records and magazine access.
       </p>
       <SignInButton mode="modal" forceRedirectUrl="/profile">
         <Button className="signin-button mt-6 h-11 rounded-none px-8 font-rajdhani text-lg font-bold">
@@ -57,53 +81,89 @@ function ProfilePanel() {
   const [profile, setProfile] = useState(emptyProfile);
   const [magazines, setMagazines] = useState([]);
   const [status, setStatus] = useState("loading");
+  const [recoveryStatus, setRecoveryStatus] = useState("idle");
+  const [autoRecoveryAttempted, setAutoRecoveryAttempted] = useState(false);
   const [message, setMessage] = useState("");
+
+  const loadProfile = useCallback(async (shouldApply = () => true) => {
+    try {
+      await apiRequest(getToken, "/api/auth/sync-user", {
+        method: "POST",
+        body: JSON.stringify({
+          username: user?.fullName || user?.username,
+          email: user?.primaryEmailAddress?.emailAddress,
+          phone_number: user?.primaryPhoneNumber?.phoneNumber,
+        }),
+      });
+      const data = await apiRequest(getToken, "/api/me");
+
+      if (!shouldApply()) return;
+
+      setProfile({
+        username: data.user?.username ?? "",
+        email: data.user?.email ?? "",
+        phone_number: data.user?.phone_number ?? "",
+        dob: data.user?.dob ?? "",
+        profile_completed_at: data.user?.profile_completed_at ?? "",
+      });
+      setMagazines(uniqueMagazinesByBestStatus(data.user?.magazines_bought ?? []));
+      setStatus("ready");
+    } catch (error) {
+      if (!shouldApply()) return;
+      setStatus("error");
+      setMessage(error.message);
+    }
+  }, [getToken, user]);
 
   useEffect(() => {
     let active = true;
 
-    async function loadProfile() {
-      try {
-        await apiRequest(getToken, "/api/auth/sync-user", {
-          method: "POST",
-          body: JSON.stringify({
-            username: user?.fullName || user?.username,
-            email: user?.primaryEmailAddress?.emailAddress,
-            phone_number: user?.primaryPhoneNumber?.phoneNumber,
-          }),
-        });
-        const data = await apiRequest(getToken, "/api/me");
-
-        if (!active) return;
-
-        setProfile({
-          username: data.user?.username ?? "",
-          email: data.user?.email ?? "",
-          phone_number: data.user?.phone_number ?? "",
-          dob: data.user?.dob ?? "",
-          profile_completed_at: data.user?.profile_completed_at ?? "",
-        });
-        setMagazines(data.user?.magazines_bought ?? []);
-        setStatus("ready");
-      } catch (error) {
-        if (!active) return;
-        setStatus("error");
-        setMessage(error.message);
-      }
-    }
-
-    loadProfile();
+    loadProfile(() => active);
 
     return () => {
       active = false;
     };
-  }, [getToken, user]);
+  }, [loadProfile]);
 
   const isComplete = useMemo(
     () => profile.username && profile.email && profile.phone_number && profile.dob,
     [profile]
   );
   const profileLocked = status === "ready" && Boolean(profile.profile_completed_at);
+  const hasPendingPurchase = magazines.some((magazine) => magazine.status === "pending");
+
+  const recoverPendingPayments = useCallback(async ({ automatic = false } = {}) => {
+    setRecoveryStatus("checking");
+
+    if (!automatic) {
+      setMessage("");
+    }
+
+    try {
+      const data = await apiRequest(getToken, "/api/payments/razorpay/recover", {
+        method: "POST",
+      });
+
+      setMagazines(uniqueMagazinesByBestStatus(data.user?.magazines_bought ?? []));
+      setRecoveryStatus("idle");
+      setMessage(data.message || "Payment check completed.");
+    } catch (error) {
+      setRecoveryStatus("error");
+
+      if (!automatic) {
+        setMessage(error.message);
+      }
+    }
+  }, [getToken]);
+
+  useEffect(() => {
+    if (status !== "ready" || !hasPendingPurchase || autoRecoveryAttempted) {
+      return;
+    }
+
+    setAutoRecoveryAttempted(true);
+    recoverPendingPayments({ automatic: true });
+  }, [autoRecoveryAttempted, hasPendingPurchase, recoverPendingPayments, status]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -123,7 +183,7 @@ function ProfilePanel() {
         dob: data.user?.dob ?? "",
         profile_completed_at: data.user?.profile_completed_at ?? "",
       });
-      setMagazines(data.user?.magazines_bought ?? []);
+      setMagazines(uniqueMagazinesByBestStatus(data.user?.magazines_bought ?? []));
       setStatus("ready");
       setMessage("Profile saved.");
     } catch (error) {
@@ -154,7 +214,7 @@ function ProfilePanel() {
           Complete your access details.
         </h1>
         <p className="mt-4 max-w-2xl font-plex text-sm leading-7 text-ash">
-          These details stay in the PHP/MySQL backend and will be used for checkout, invoice records, and magazine access.
+          These details stay in the PHP/MySQL backend and will be used for checkout, receipt email, and magazine access.
         </p>
 
         <div className="mt-7 grid gap-4 sm:grid-cols-2">
@@ -231,24 +291,40 @@ function ProfilePanel() {
           </p>
         </div>
         <div className="mt-6 border-t border-steel/50 pt-4">
-          <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-fog">
-            Bought Magazines
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-fog">
+              Bought Magazines
+            </p>
+            {hasPendingPurchase ? (
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={recoveryStatus === "checking"}
+                className="h-9 rounded-none border border-ember/50 px-3 font-rajdhani text-sm font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk"
+                onClick={() => recoverPendingPayments()}
+              >
+                <RefreshCw className="size-4" />
+                {recoveryStatus === "checking" ? "Checking" : "Verify Payment"}
+              </Button>
+            ) : null}
+          </div>
           <div className="mt-3 grid gap-3">
             {magazines.length ? (
               magazines.map((magazine) => (
-                <div key={`${magazine.id}-${magazine.razorpay_order_id}`} className="account-mini-row">
-                  <span>{magazine.title}</span>
+                <div key={`${magazine.id}-${magazine.razorpay_order_id}`} className="account-mini-row account-purchase-row">
+                  <span className="account-purchase-title">{magazine.title}</span>
                   {magazine.status === "paid" ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="h-9 rounded-none border border-steel/70 px-3 font-rajdhani text-sm font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk"
-                      onClick={() => downloadMagazine(magazine)}
-                    >
-                      <Download className="size-4" />
-                      PDF
-                    </Button>
+                    <div className="account-download-actions">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-12 rounded-none border border-steel/70 px-4 font-rajdhani text-base font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk"
+                        onClick={() => downloadMagazine(magazine)}
+                      >
+                        <Download className="size-4" />
+                        PDF
+                      </Button>
+                    </div>
                   ) : (
                     <b>{magazine.status}</b>
                   )}

@@ -1136,12 +1136,12 @@ body.menu-open {
 }
 
 .issue-contents-title {
-  max-width: 12.5ch;
+  max-width: 14ch;
   margin-top: 1.25rem;
   font-family: "Rajdhani", sans-serif;
-  font-size: clamp(2.35rem, 6vw, 4.25rem);
+  font-size: clamp(2rem, 4.8vw, 3.35rem);
   font-weight: 700;
-  line-height: 0.92;
+  line-height: 1;
   color: #f2eada;
 }
 
@@ -1158,7 +1158,7 @@ body.menu-open {
   border-left: 2px solid #c99a4a;
   padding-left: 1.4rem;
   font-family: "Lora", serif;
-  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  font-size: clamp(0.98rem, 1.55vw, 1.12rem);
   font-style: italic;
   line-height: 1.7;
   color: #f2eada;
@@ -1168,8 +1168,8 @@ body.menu-open {
   max-width: 42rem;
   margin-top: 1.55rem;
   font-family: "Lora", serif;
-  font-size: clamp(1rem, 1.5vw, 1.15rem);
-  line-height: 1.85;
+  font-size: clamp(0.94rem, 1.25vw, 1rem);
+  line-height: 1.78;
   color: #d8d2c0;
 }
 
@@ -1188,7 +1188,7 @@ body.menu-open {
 
 .issue-contents-stat strong {
   font-family: "Rajdhani", sans-serif;
-  font-size: clamp(2.2rem, 5vw, 3rem);
+  font-size: clamp(1.85rem, 4vw, 2.45rem);
   font-weight: 700;
   line-height: 0.85;
   color: #c99a4a;
@@ -1264,22 +1264,22 @@ body.menu-open {
   }
 
   .issue-contents-title {
-    max-width: 11.5ch;
+    max-width: 13ch;
     margin-top: 1rem;
-    font-size: clamp(2.1rem, 11vw, 3.1rem);
-    line-height: 0.98;
+    font-size: clamp(1.85rem, 9vw, 2.65rem);
+    line-height: 1.02;
   }
 
   .issue-contents-question {
     margin-top: 1.45rem;
     padding-left: 1rem;
-    font-size: 1rem;
+    font-size: 0.94rem;
     line-height: 1.75;
   }
 
   .issue-contents-body {
     margin-top: 1.35rem;
-    font-size: 0.98rem;
+    font-size: 0.92rem;
     line-height: 1.72;
   }
 
@@ -1289,7 +1289,7 @@ body.menu-open {
   }
 
   .issue-contents-stat strong {
-    font-size: clamp(1.9rem, 9vw, 2.35rem);
+    font-size: clamp(1.65rem, 8vw, 2.05rem);
   }
 
   .issue-contents-stat span {
@@ -3872,6 +3872,37 @@ body.menu-open {
   box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
 }
 
+.payment-success-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.payment-success-hero::after {
+  content: "";
+  position: absolute;
+  right: -7rem;
+  bottom: -8rem;
+  width: 22rem;
+  height: 22rem;
+  border: 1px solid rgba(201, 154, 74, 0.18);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(201, 154, 74, 0.14), transparent 68%);
+  pointer-events: none;
+}
+
+.payment-success-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.payment-notice {
+  border: 1px solid rgba(201, 154, 74, 0.38);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(201, 154, 74, 0.12), transparent 16rem),
+    rgba(242, 234, 218, 0.035);
+  padding: clamp(1rem, 3vw, 1.35rem);
+}
+
 .auth-widget {
   display: grid;
   width: min(100%, 28rem);
@@ -4069,13 +4100,74 @@ body.menu-open {
 .account-mini-row span {
   min-width: 0;
   color: #d8d2c0;
+  overflow-wrap: anywhere;
 }
 
 .account-mini-row b {
+  min-width: 0;
   color: #c99a4a;
   font-family: "Rajdhani", sans-serif;
   font-size: 1.05rem;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.account-purchase-row {
+  display: flex;
+  min-height: 12.5rem;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.15rem;
+}
+
+.account-download-actions {
+  display: flex;
+  width: 100%;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.account-download-actions [data-slot="button"] {
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: 100%;
+  justify-content: center;
+  white-space: normal;
+}
+
+.account-purchase-title {
+  display: block;
+  width: 100%;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: clamp(0.95rem, 1.6vw, 1.08rem);
+  line-height: 1.6;
+  color: #f2eada !important;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.download-action {
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 1rem;
+  white-space: normal !important;
+}
+
+.download-action span {
+  min-width: 0;
+  flex: 1 1 auto;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.download-action svg {
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
 }
 
 .cart-row {
@@ -4165,6 +4257,21 @@ body.menu-open {
 }
 
 @media (max-width: 767px) {
+  .account-mini-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .account-mini-row [data-slot="button"] {
+    width: 100%;
+  }
+
+  .account-download-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
   .cart-row {
     display: grid;
     min-height: 12rem;
@@ -4329,25 +4436,25 @@ body.menu-open {
 }
 
 .issue-offer-price span {
-  margin-top: 0.7rem;
+  margin-top: 0.5rem;
   font-family: "Rajdhani", sans-serif;
-  font-size: clamp(1.7rem, 5vw, 2.45rem);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
   font-weight: 700;
   color: #c99a4a;
 }
 
 .issue-offer-price strong {
   font-family: "Rajdhani", sans-serif;
-  font-size: clamp(5rem, 18vw, 7.5rem);
+  font-size: clamp(3.6rem, 12vw, 5.35rem);
   font-weight: 700;
-  line-height: 0.82;
+  line-height: 0.88;
   letter-spacing: 0;
 }
 
 .issue-offer-card h3 {
   margin-top: 0.85rem;
   font-family: "Rajdhani", sans-serif;
-  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  font-size: clamp(1.1rem, 2.2vw, 1.3rem);
   font-weight: 700;
   line-height: 1;
   color: #f2eada;
@@ -4356,7 +4463,7 @@ body.menu-open {
 .issue-offer-subtitle {
   margin-top: 1.2rem;
   font-family: "Lora", serif;
-  font-size: 0.98rem;
+  font-size: 0.9rem;
   font-style: italic;
   line-height: 1.7;
   text-align: center;
@@ -4376,7 +4483,7 @@ body.menu-open {
   gap: 0.8rem;
   align-items: start;
   font-family: "Lora", serif;
-  font-size: 1rem;
+  font-size: 0.92rem;
   line-height: 1.6;
   color: #f2eada;
 }
@@ -4414,7 +4521,7 @@ body.menu-open {
   }
 
   .issue-offer-heading h2 {
-    max-width: 10ch;
+    max-width: 12ch;
   }
 
   .issue-offer-card {

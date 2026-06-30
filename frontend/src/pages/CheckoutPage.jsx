@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { SignInButton, SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
-import { CreditCard, Download, Trash2, UserRound } from "lucide-react";
-import { Link } from "react-router-dom";
+import { CreditCard, Trash2, UserRound } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
-import { apiRequest, downloadProtectedFile, formatRupees } from "@/lib/api";
+import { apiRequest, formatRupees } from "@/lib/api";
 
 export default function CheckoutPage() {
   useLayoutEffect(() => {
@@ -43,11 +43,11 @@ export default function CheckoutPage() {
 function CheckoutPanel() {
   const { getToken } = useAuth();
   const { user } = useUser();
+  const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const [profile, setProfile] = useState(null);
   const [status, setStatus] = useState("loading");
   const [paymentStatus, setPaymentStatus] = useState("idle");
-  const [paidPurchases, setPaidPurchases] = useState([]);
   const [message, setMessage] = useState("");
 
   const loadCheckout = useCallback(async () => {
@@ -130,9 +130,23 @@ function CheckoutPanel() {
             });
 
             setCart([]);
-            setPaidPurchases(verified.purchases ?? []);
             setPaymentStatus("paid");
-            setMessage("Payment successful. Your magazine is ready to download.");
+            window.sessionStorage.setItem(
+              "aditi:last-paid-order",
+              JSON.stringify({
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                purchases: verified.purchases ?? [],
+              })
+            );
+            navigate(`/payment-success?order=${encodeURIComponent(response.razorpay_order_id)}`, {
+              replace: true,
+              state: {
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                purchases: verified.purchases ?? [],
+              },
+            });
           } catch (error) {
             setPaymentStatus("error");
             setMessage(error.message);
@@ -149,18 +163,6 @@ function CheckoutPanel() {
       razorpay.open();
     } catch (error) {
       setPaymentStatus("error");
-      setMessage(error.message);
-    }
-  }
-
-  async function downloadMagazine(magazine) {
-    try {
-      await downloadProtectedFile(
-        getToken,
-        `/api/magazines/${encodeURIComponent(magazine.slug)}/download`,
-        `${magazine.slug}.pdf`
-      );
-    } catch (error) {
       setMessage(error.message);
     }
   }
@@ -253,7 +255,7 @@ function CheckoutPanel() {
               Complete profile first
             </p>
             <p className="mt-2 font-plex text-sm leading-6 text-ash">
-              Save your profile with phone number and date of birth before payment and invoice generation.
+              Save your profile with phone number and date of birth before payment and receipt email generation.
             </p>
             <Button
               asChild
@@ -282,30 +284,8 @@ function CheckoutPanel() {
               : "Continue to Payment"}
         </Button>
         <p className="mt-3 font-plex text-xs leading-5 text-fog">
-          Secure payment opens through Razorpay. After successful verification, the PDF download appears here and in your profile.
+          Secure payment opens through Razorpay. After successful verification, you will be taken to your download page and the receipt will be emailed.
         </p>
-
-        {paidPurchases.length ? (
-          <div className="mt-5 border-t border-steel/50 pt-5">
-            <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
-              Ready to Download
-            </p>
-            <div className="mt-3 grid gap-3">
-              {paidPurchases.map((magazine) => (
-                <Button
-                  key={`${magazine.slug}-${magazine.razorpay_order_id}`}
-                  type="button"
-                  variant="ghost"
-                  className="h-auto justify-between rounded-none border border-steel/70 px-4 py-3 text-left font-rajdhani text-base font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk"
-                  onClick={() => downloadMagazine(magazine)}
-                >
-                  <span>{magazine.title}</span>
-                  <Download className="size-4" />
-                </Button>
-              ))}
-            </div>
-          </div>
-        ) : null}
       </aside>
     </div>
   );

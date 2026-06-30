@@ -27,10 +27,10 @@ export default function IssueOfferSection() {
             <p className="font-plex text-xs font-medium uppercase tracking-[0.28em] text-ember">
               The Offer
             </p>
-            <h2 className="mt-3 font-rajdhani text-[clamp(2.5rem,7vw,4.8rem)] font-bold leading-[0.92] text-chalk">
+            <h2 className="mt-3 font-rajdhani text-[clamp(2rem,5vw,3.35rem)] font-bold leading-[0.98] text-chalk">
               Start with one issue.
             </h2>
-            <p className="mx-auto mt-5 max-w-3xl font-lora text-base leading-[1.85] text-ash md:text-lg">
+            <p className="mx-auto mt-5 max-w-3xl font-lora text-sm leading-[1.8] text-ash md:text-base">
               No commitment. No account to manage. Just the complete first issue
               {" "}&mdash; yours the moment you buy it.
             </p>
