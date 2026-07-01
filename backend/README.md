@@ -35,6 +35,7 @@ Apply later migrations in order when updating an existing database:
 Get-Content backend\database\migrations\007_create_receipts.sql | mysql -u root -p aditi
 Get-Content backend\database\migrations\008_create_payment_events.sql | mysql -u root -p aditi
 Get-Content backend\database\migrations\009_add_receipt_snapshots.sql | mysql -u root -p aditi
+Get-Content backend\database\migrations\010_set_aditi_magazine_price_350.sql | mysql -u root -p aditi
 ```
 
 For an existing database, replace the old dummy magazine catalogue with the real ADITI issue:
