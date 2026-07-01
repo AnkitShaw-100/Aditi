@@ -178,6 +178,11 @@ final class UserRepository
             throw new \InvalidArgumentException('Name, email, phone number, and date of birth are required.');
         }
 
+        $email = $this->validEmail($email);
+        $phoneNumber = $this->validPhoneNumber($phoneNumber);
+        $username = $this->validName($username);
+        $this->assertNotFutureDate($dob);
+
         $statement = $this->pdo->prepare(
             'UPDATE users
              SET email = :email,
@@ -406,6 +411,53 @@ final class UserRepository
         ));
     }
 
+    public function userIdForClerkId(string $clerkUserId): ?int
+    {
+        $user = $this->findUserRowByClerkId($clerkUserId);
+
+        return $user === null ? null : (int) $user['id'];
+    }
+
+    public function recordPaymentEvent(
+        ?int $userId,
+        ?string $razorpayOrderId,
+        ?string $razorpayPaymentId,
+        string $source,
+        string $eventType,
+        string $status,
+        ?string $message = null,
+        array $payload = []
+    ): void {
+        try {
+            $statement = $this->pdo->prepare(
+                'INSERT INTO payment_events (
+                    user_id, razorpay_order_id, razorpay_payment_id, source,
+                    event_type, status, message, payload_json
+                 )
+                 VALUES (
+                    :user_id, :razorpay_order_id, :razorpay_payment_id, :source,
+                    :event_type, :status, :message, :payload_json
+                 )'
+            );
+            $encodedPayload = $payload === []
+                ? null
+                : json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+            $statement->execute([
+                'user_id' => $userId,
+                'razorpay_order_id' => $razorpayOrderId,
+                'razorpay_payment_id' => $razorpayPaymentId,
+                'source' => substr($source, 0, 40),
+                'event_type' => substr($eventType, 0, 80),
+                'status' => substr($status, 0, 40),
+                'message' => $message === null ? null : substr($message, 0, 255),
+                'payload_json' => is_string($encodedPayload) ? $encodedPayload : null,
+            ]);
+        } catch (\Throwable) {
+            // Payment logs are operational support only; never block checkout or recovery.
+        }
+    }
+
     private function markPaidForUserOrder(
         int $userId,
         string $razorpayOrderId,
@@ -568,6 +620,27 @@ final class UserRepository
             'id' => $receiptId,
             'email_last_error' => substr($error, 0, 2000),
         ]);
+    }
+
+    public function storeReceiptEmailSnapshot(int $receiptId, string $html): void
+    {
+        try {
+            $statement = $this->pdo->prepare(
+                'UPDATE receipts
+                 SET payment_method = "Razorpay",
+                     payment_status = "Paid",
+                     order_status = "Completed",
+                     receipt_html = :receipt_html,
+                     updated_at = NOW()
+                 WHERE id = :id'
+            );
+            $statement->execute([
+                'id' => $receiptId,
+                'receipt_html' => $html,
+            ]);
+        } catch (\Throwable) {
+            // Older databases may not have snapshot columns until migration 009 is applied.
+        }
     }
 
     private function paidOrderReceiptByOrderId(string $razorpayOrderId): ?array
@@ -742,6 +815,48 @@ final class UserRepository
         }
 
         return $date;
+    }
+
+    private function validName(string $value): string
+    {
+        $name = trim($value);
+
+        if (strlen($name) < 2 || strlen($name) > 255) {
+            throw new \InvalidArgumentException('Enter a valid name.');
+        }
+
+        return $name;
+    }
+
+    private function validEmail(string $value): string
+    {
+        $email = trim($value);
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('Enter a valid email address.');
+        }
+
+        return $email;
+    }
+
+    private function validPhoneNumber(string $value): string
+    {
+        $trimmed = trim($value);
+        $digits = preg_replace('/\D+/', '', $trimmed) ?? '';
+        $length = strlen($digits);
+
+        if ($length < 10 || $length > 15) {
+            throw new \InvalidArgumentException('Enter a valid phone number.');
+        }
+
+        return str_starts_with($trimmed, '+') ? '+' . $digits : $digits;
+    }
+
+    private function assertNotFutureDate(string $date): void
+    {
+        if (strtotime($date) > strtotime(date('Y-m-d'))) {
+            throw new \InvalidArgumentException('Date of birth cannot be in the future.');
+        }
     }
 
     private function emailFromClerkUser(array $user): ?string

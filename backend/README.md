@@ -33,6 +33,8 @@ Apply later migrations in order when updating an existing database:
 
 ```powershell
 Get-Content backend\database\migrations\007_create_receipts.sql | mysql -u root -p aditi
+Get-Content backend\database\migrations\008_create_payment_events.sql | mysql -u root -p aditi
+Get-Content backend\database\migrations\009_add_receipt_snapshots.sql | mysql -u root -p aditi
 ```
 
 For an existing database, replace the old dummy magazine catalogue with the real ADITI issue:
@@ -165,7 +167,7 @@ There is also an authenticated recovery endpoint for signed-in users:
 POST /api/payments/razorpay/recover
 ```
 
-It checks the user's pending `razorpay_order_id` records against Razorpay's order payments API. If Razorpay reports a captured payment or a paid order, the backend marks the purchase as `paid`, clears the cart item, and the profile page shows the PDF and invoice buttons.
+It checks the user's pending `razorpay_order_id` records against Razorpay's order payments API. If Razorpay reports a captured payment or a paid order, the backend marks the purchase as `paid`, clears the cart item, and the profile page shows the PDF download button. Receipt/invoice details are sent by email only.
 
 ## Receipt Emails
 
@@ -188,9 +190,13 @@ Run the receipts migration before enabling receipt emails:
 
 ```powershell
 Get-Content backend\database\migrations\007_create_receipts.sql | mysql -u root -p aditi
+Get-Content backend\database\migrations\008_create_payment_events.sql | mysql -u root -p aditi
+Get-Content backend\database\migrations\009_add_receipt_snapshots.sql | mysql -u root -p aditi
 ```
 
-The `receipts` table stores one receipt record per Razorpay order, including receipt number, amount, recipient email, send time, and last send error. This prevents duplicate receipt emails when frontend verification, webhook verification, and payment recovery all confirm the same order.
+The `receipts` table stores one receipt record per Razorpay order, including receipt number, amount, recipient email, send time, last send error, and the generated receipt HTML snapshot. This prevents duplicate receipt emails when frontend verification, webhook verification, and payment recovery all confirm the same order.
+
+The `payment_events` table stores operational payment events from checkout, Razorpay webhooks, user recovery, admin recovery, and receipt email sending. Logging is best-effort and does not block checkout if the table is unavailable.
 
 For local testing, expose the PHP backend with a tunnel such as ngrok:
 
@@ -223,8 +229,20 @@ Admin endpoints:
 ```text
 POST /api/admin/login
 GET /api/admin/users
+GET /api/admin/payments
+POST /api/admin/payments/recover
 POST /api/admin/logout
 ```
+
+`POST /api/admin/payments/recover` accepts:
+
+```json
+{
+  "razorpay_order_id": "order_xxxxx"
+}
+```
+
+It checks Razorpay directly, updates the local purchase status when possible, and retries receipt email generation for paid orders.
 
 ## Frontend Call Shape
 

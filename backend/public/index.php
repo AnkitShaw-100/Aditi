@@ -87,6 +87,65 @@ if ($route === 'GET /api/admin/users') {
     ]);
 }
 
+if ($route === 'GET /api/admin/payments') {
+    requireAdmin($request, $admins);
+
+    Response::json([
+        'orders' => $admins->listPaymentOrders(),
+        'events' => $admins->listPaymentEvents(),
+    ]);
+}
+
+if ($route === 'POST /api/admin/payments/recover') {
+    requireAdmin($request, $admins);
+    $body = $request->body();
+    $orderId = $body['razorpay_order_id'] ?? null;
+    $razorpay = $config['razorpay'];
+
+    if (!is_string($orderId) || trim($orderId) === '') {
+        Response::json(['error' => 'razorpay_order_id is required'], 422);
+    }
+
+    if ($razorpay['key_id'] === '' || $razorpay['key_secret'] === '') {
+        Response::json(['error' => 'Razorpay keys are not configured'], 500);
+    }
+
+    $orderId = trim($orderId);
+    $paymentState = razorpayPaymentStateForOrder($razorpay, $orderId);
+    $result = ['matched' => false];
+
+    if ($paymentState['status'] === 'paid') {
+        $result = $users->markRazorpayOrderPaidByOrderId($orderId, $paymentState['payment_id']);
+        sendReceiptEmailForOrder($users, $mailer, $config, $orderId);
+    }
+
+    if ($paymentState['status'] === 'failed') {
+        $result = $users->markRazorpayOrderFailedByOrderId($orderId, $paymentState['payment_id']);
+    }
+
+    recordPaymentEventSafe(
+        $users,
+        null,
+        $orderId,
+        $paymentState['payment_id'],
+        'admin',
+        'manual_recovery',
+        $paymentState['status'],
+        $result['matched'] ? 'Admin recovery matched local order.' : 'Admin recovery checked Razorpay but no local order matched.',
+        $paymentState
+    );
+
+    Response::json([
+        'message' => $result['matched']
+            ? 'Payment status recovered from Razorpay.'
+            : 'Razorpay was checked, but no matching local order was updated.',
+        'matched' => $result['matched'],
+        'payment_state' => $paymentState,
+        'orders' => $admins->listPaymentOrders(),
+        'events' => $admins->listPaymentEvents(),
+    ]);
+}
+
 if ($route === 'POST /api/admin/logout') {
     $admins->logout(adminTokenFromRequest($request));
     clearAdminCookie();
@@ -174,6 +233,7 @@ if ($route === 'POST /api/webhooks/razorpay') {
 
     if (in_array($eventName, ['payment.captured', 'order.paid'], true)) {
         if ($orderId === null) {
+            recordPaymentEventSafe($users, null, null, $paymentId, 'webhook', $eventName, 'ignored', 'Paid webhook was missing order id.');
             Response::json([
                 'message' => 'Razorpay paid webhook ignored: missing order id',
                 'event' => $eventName,
@@ -185,6 +245,19 @@ if ($route === 'POST /api/webhooks/razorpay') {
         if ($result['matched']) {
             sendReceiptEmailForOrder($users, $mailer, $config, $orderId);
         }
+
+        recordPaymentEventSafe(
+            $users,
+            $result['user_ids'][0] ?? null,
+            $orderId,
+            $paymentId,
+            'webhook',
+            $eventName,
+            $result['matched'] ? 'paid' : 'unmatched',
+            $result['matched']
+                ? 'Webhook marked order paid.'
+                : 'Webhook accepted but no local pending order matched.'
+        );
 
         Response::json([
             'message' => $result['matched']
@@ -199,6 +272,7 @@ if ($route === 'POST /api/webhooks/razorpay') {
 
     if ($eventName === 'payment.failed') {
         if ($orderId === null) {
+            recordPaymentEventSafe($users, null, null, $paymentId, 'webhook', $eventName, 'ignored', 'Failed webhook was missing order id.');
             Response::json([
                 'message' => 'Razorpay failed webhook ignored: missing order id',
                 'event' => $eventName,
@@ -206,6 +280,18 @@ if ($route === 'POST /api/webhooks/razorpay') {
         }
 
         $result = $users->markRazorpayOrderFailedByOrderId($orderId, $paymentId);
+        recordPaymentEventSafe(
+            $users,
+            null,
+            $orderId,
+            $paymentId,
+            'webhook',
+            $eventName,
+            $result['matched'] ? 'failed' : 'unmatched',
+            $result['matched']
+                ? 'Webhook marked pending order failed.'
+                : 'Webhook accepted but no local pending order matched.'
+        );
 
         Response::json([
             'message' => $result['matched']
@@ -353,6 +439,17 @@ if ($route === 'POST /api/payments/razorpay/order') {
     }
 
     $users->createPendingPurchasesForCart($clerkUserId, $orderId);
+    recordPaymentEventSafe(
+        $users,
+        $users->userIdForClerkId($clerkUserId),
+        $orderId,
+        null,
+        'checkout',
+        'order_created',
+        'pending',
+        'Razorpay order created and pending purchases saved.',
+        ['amount_paise' => $summary['total_paise'], 'currency' => $summary['currency']]
+    );
 
     Response::json([
         'key_id' => $razorpay['key_id'],
@@ -380,11 +477,31 @@ if ($route === 'POST /api/payments/razorpay/verify') {
     $expected = hash_hmac('sha256', $orderId . '|' . $paymentId, $secret);
 
     if (!hash_equals($expected, $signature)) {
+        recordPaymentEventSafe(
+            $users,
+            $users->userIdForClerkId((string) $claims['sub']),
+            $orderId,
+            $paymentId,
+            'checkout',
+            'signature_verify',
+            'failed',
+            'Invalid Razorpay payment signature.'
+        );
         Response::json(['error' => 'Invalid Razorpay payment signature'], 401);
     }
 
     $purchases = $users->markRazorpayOrderPaid((string) $claims['sub'], $orderId, $paymentId);
     sendReceiptEmailForOrder($users, $mailer, $config, $orderId);
+    recordPaymentEventSafe(
+        $users,
+        $users->userIdForClerkId((string) $claims['sub']),
+        $orderId,
+        $paymentId,
+        'checkout',
+        'signature_verify',
+        'paid',
+        'Payment signature verified and order marked paid.'
+    );
 
     Response::json([
         'message' => 'Payment verified',
@@ -417,6 +534,20 @@ if ($route === 'POST /api/payments/razorpay/recover') {
         if ($paymentState['status'] === 'failed') {
             $users->markRazorpayOrderFailedByOrderId($orderId, $paymentState['payment_id']);
         }
+
+        recordPaymentEventSafe(
+            $users,
+            $users->userIdForClerkId($clerkUserId),
+            $orderId,
+            $paymentState['payment_id'],
+            'recovery',
+            'user_recovery',
+            $paymentState['status'],
+            $paymentState['status'] === 'paid'
+                ? 'User recovery unlocked paid order.'
+                : 'User recovery checked Razorpay order state.',
+            $paymentState
+        );
 
         $results[] = [
             'order_id' => $orderId,
@@ -608,6 +739,20 @@ function firstNonEmptyString(mixed ...$values): ?string
     return null;
 }
 
+function recordPaymentEventSafe(
+    UserRepository $users,
+    ?int $userId,
+    ?string $orderId,
+    ?string $paymentId,
+    string $source,
+    string $eventType,
+    string $status,
+    ?string $message = null,
+    array $payload = []
+): void {
+    $users->recordPaymentEvent($userId, $orderId, $paymentId, $source, $eventType, $status, $message, $payload);
+}
+
 function safeDownloadFilename(string $filename): string
 {
     $filename = preg_replace('/[^A-Za-z0-9._-]+/', '-', $filename) ?: 'aditi-magazine.pdf';
@@ -776,10 +921,16 @@ function sendReceiptEmailForOrder(
         $emailTo = (string) ($receipt['email_to'] ?? '');
 
         if (!empty($receipt['email_sent_at'])) {
-            return;
-        }
-
-        if (($config['mail']['enabled'] ?? false) !== true) {
+            recordPaymentEventSafe(
+                $users,
+                (int) ($receiptPayload['user']['id'] ?? 0) ?: null,
+                $orderId,
+                firstNonEmptyString($receiptPayload['payment_id'] ?? null),
+                'email',
+                'receipt_email',
+                'already_sent',
+                'Receipt email was already sent for this order.'
+            );
             return;
         }
 
@@ -788,20 +939,67 @@ function sendReceiptEmailForOrder(
                 $users->markReceiptEmailFailed($receiptId, 'Receipt email address is missing.');
             }
 
+            recordPaymentEventSafe(
+                $users,
+                (int) ($receiptPayload['user']['id'] ?? 0) ?: null,
+                $orderId,
+                firstNonEmptyString($receiptPayload['payment_id'] ?? null),
+                'email',
+                'receipt_email',
+                'failed',
+                'Receipt email address is missing.'
+            );
             return;
         }
 
         $html = renderReceiptEmailHtml($receiptPayload, $config);
+        $users->storeReceiptEmailSnapshot($receiptId, $html);
+
+        if (($config['mail']['enabled'] ?? false) !== true) {
+            recordPaymentEventSafe(
+                $users,
+                (int) ($receiptPayload['user']['id'] ?? 0) ?: null,
+                $orderId,
+                firstNonEmptyString($receiptPayload['payment_id'] ?? null),
+                'email',
+                'receipt_email',
+                'disabled',
+                'Receipt email was generated but MAIL_ENABLED is false.'
+            );
+            return;
+        }
+
         $subject = 'ADITI receipt ' . (string) $receipt['receipt_number'];
 
         $mailer->sendHtml($emailTo, $subject, $html);
         $users->markReceiptEmailSent($receiptId);
+        recordPaymentEventSafe(
+            $users,
+            (int) ($receiptPayload['user']['id'] ?? 0) ?: null,
+            $orderId,
+            firstNonEmptyString($receiptPayload['payment_id'] ?? null),
+            'email',
+            'receipt_email',
+            'sent',
+            'Receipt email sent successfully.'
+        );
     } catch (Throwable $exception) {
         $receiptId = (int) ($receiptPayload['receipt']['id'] ?? 0);
 
         if ($receiptId > 0) {
             $users->markReceiptEmailFailed($receiptId, $exception->getMessage());
         }
+
+        recordPaymentEventSafe(
+            $users,
+            (int) ($receiptPayload['user']['id'] ?? 0) ?: null,
+            $orderId,
+            firstNonEmptyString($receiptPayload['payment_id'] ?? null),
+            'email',
+            'receipt_email',
+            'failed',
+            $exception->getMessage()
+        );
     }
 }
 

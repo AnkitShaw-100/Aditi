@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LogOut, RefreshCw } from "lucide-react";
+import { CreditCard, LogOut, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,11 @@ const LEGACY_ADMIN_TOKEN_KEY = "aditi_admin_token";
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [paymentOrders, setPaymentOrders] = useState([]);
+  const [paymentEvents, setPaymentEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [status, setStatus] = useState("loading");
+  const [recoveringOrderId, setRecoveringOrderId] = useState("");
   const [message, setMessage] = useState("");
 
   const totals = useMemo(
@@ -21,8 +24,9 @@ export default function AdminDashboardPage() {
       users: users.length,
       carts: users.reduce((total, user) => total + (user.cart_items?.length ?? 0), 0),
       purchases: users.reduce((total, user) => total + (user.magazines_bought?.length ?? 0), 0),
+      pendingPayments: paymentOrders.filter((order) => order.status === "pending").length,
     }),
-    [users]
+    [paymentOrders, users]
   );
 
   const pageCount = Math.max(1, Math.ceil(users.length / USERS_PER_PAGE));
@@ -38,8 +42,55 @@ export default function AdminDashboardPage() {
     setMessage("");
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+      const [usersResponse, paymentsResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/admin/users`, {
+          credentials: "include",
+        }),
+        fetch(`${API_BASE_URL}/api/admin/payments`, {
+          credentials: "include",
+        }),
+      ]);
+      const data = await usersResponse.json();
+
+      if (usersResponse.status === 401 || paymentsResponse.status === 401) {
+        navigate(ADMIN_ENTRY_PATH);
+        return;
+      }
+
+      if (!usersResponse.ok) {
+        throw new Error(data.error || "Unable to load users");
+      }
+
+      setUsers(data.users ?? []);
+      setCurrentPage(1);
+
+      if (paymentsResponse.ok) {
+        const paymentData = await paymentsResponse.json();
+        setPaymentOrders(paymentData.orders ?? []);
+        setPaymentEvents(paymentData.events ?? []);
+      } else {
+        setPaymentOrders([]);
+        setPaymentEvents([]);
+        setMessage("Users loaded, but payment operations could not load. Run the latest migrations.");
+      }
+
+      setStatus("ready");
+    } catch (error) {
+      setMessage(error.message);
+      setStatus("error");
+    }
+  }, [navigate]);
+
+  async function recoverPayment(orderId) {
+    setRecoveringOrderId(orderId);
+    setMessage("");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/admin/payments/recover`, {
+        method: "POST",
         credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ razorpay_order_id: orderId }),
       });
       const data = await response.json();
 
@@ -49,17 +100,18 @@ export default function AdminDashboardPage() {
       }
 
       if (!response.ok) {
-        throw new Error(data.error || "Unable to load users");
+        throw new Error(data.error || "Unable to recover payment");
       }
 
-      setUsers(data.users ?? []);
-      setCurrentPage(1);
-      setStatus("ready");
+      setPaymentOrders(data.orders ?? []);
+      setPaymentEvents(data.events ?? []);
+      setMessage(data.message || "Payment recovery completed.");
     } catch (error) {
       setMessage(error.message);
-      setStatus("error");
+    } finally {
+      setRecoveringOrderId("");
     }
-  }, [navigate]);
+  }
 
   useEffect(() => {
     localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
@@ -117,10 +169,105 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="mt-7 grid gap-3 md:grid-cols-3">
+          <div className="mt-7 grid gap-3 md:grid-cols-4">
             <AdminStat label="Users" value={totals.users} />
             <AdminStat label="Cart Items" value={totals.carts} />
             <AdminStat label="Purchases" value={totals.purchases} />
+            <AdminStat label="Pending Payments" value={totals.pendingPayments} />
+          </div>
+
+          <div className="mt-7 border-t border-steel/50 pt-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
+                  Payment Operations
+                </p>
+                <p className="mt-2 font-plex text-sm leading-6 text-ash">
+                  Recover paid Razorpay orders, confirm receipt email status, and inspect recent payment events.
+                </p>
+              </div>
+              <CreditCard className="size-5 text-ember" />
+            </div>
+
+            <div className="mt-4 overflow-x-auto">
+              {paymentOrders.length ? (
+                <table className="admin-table w-full min-w-[72rem]">
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>Order</th>
+                      <th>Magazine</th>
+                      <th>Status</th>
+                      <th>Receipt Email</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paymentOrders.map((order) => (
+                      <tr key={`${order.user_id}-${order.razorpay_order_id}`}>
+                        <td>
+                          <b>{order.username || "Unnamed"}</b>
+                          <span>{order.email || "No email"}</span>
+                          <span>{order.phone_number || "No phone"}</span>
+                        </td>
+                        <td>
+                          <b>{order.razorpay_order_id}</b>
+                          <span>{order.razorpay_payment_id || "No payment id"}</span>
+                        </td>
+                        <td>
+                          <b>{order.magazine_titles || "Magazine"}</b>
+                          <span>
+                            {order.item_count || 1} item - {formatRupees(order.amount_paise || 0)}
+                          </span>
+                        </td>
+                        <td>
+                          <b>{order.status}</b>
+                          <span>{order.purchased_at || order.updated_at || "No date"}</span>
+                        </td>
+                        <td>
+                          <b>{order.receipt_number || "No receipt yet"}</b>
+                          <span>
+                            {order.email_sent_at
+                              ? `Sent ${order.email_sent_at}`
+                              : order.email_last_error
+                                ? `Failed: ${order.email_last_error}`
+                                : "Not sent yet"}
+                          </span>
+                        </td>
+                        <td>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            disabled={recoveringOrderId === order.razorpay_order_id}
+                            className="h-10 rounded-none border border-steel/70 px-4 font-rajdhani text-base font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk disabled:opacity-40"
+                            onClick={() => recoverPayment(order.razorpay_order_id)}
+                          >
+                            <RefreshCw className="size-4" />
+                            {recoveringOrderId === order.razorpay_order_id ? "Checking" : "Recover"}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="font-plex text-sm text-ash">No Razorpay orders found yet.</p>
+              )}
+            </div>
+
+            {paymentEvents.length ? (
+              <div className="mt-5 grid gap-2 md:grid-cols-2">
+                {paymentEvents.slice(0, 6).map((event) => (
+                  <div key={event.id} className="account-mini-row admin-event-row">
+                    <span>
+                      {event.source} - {event.event_type}
+                      <small>{event.razorpay_order_id || "No order"} - {event.created_at}</small>
+                    </span>
+                    <b>{event.status}</b>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-7 overflow-x-auto">

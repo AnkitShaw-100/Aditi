@@ -134,6 +134,78 @@ final class AdminRepository
         return $users;
     }
 
+    public function listPaymentOrders(): array
+    {
+        $statement = $this->pdo->query(
+            'SELECT
+                um.user_id,
+                u.username,
+                u.email,
+                u.phone_number,
+                um.razorpay_order_id,
+                MAX(um.razorpay_payment_id) AS razorpay_payment_id,
+                GROUP_CONCAT(DISTINCT m.title ORDER BY m.title SEPARATOR ", ") AS magazine_titles,
+                COUNT(*) AS item_count,
+                SUM(m.price_paise) AS amount_paise,
+                MIN(m.currency) AS currency,
+                CASE
+                    WHEN SUM(um.status = "paid") = COUNT(*) THEN "paid"
+                    WHEN SUM(um.status = "failed") = COUNT(*) THEN "failed"
+                    ELSE "pending"
+                END AS status,
+                MAX(um.purchased_at) AS purchased_at,
+                MAX(um.updated_at) AS updated_at,
+                r.receipt_number,
+                r.email_to,
+                r.email_sent_at,
+                r.email_last_error
+             FROM user_magazines um
+             INNER JOIN users u ON u.id = um.user_id
+             INNER JOIN magazines m ON m.id = um.magazine_id
+             LEFT JOIN receipts r ON r.razorpay_order_id = um.razorpay_order_id
+             WHERE um.razorpay_order_id IS NOT NULL
+               AND um.razorpay_order_id <> ""
+             GROUP BY
+                um.user_id, u.username, u.email, u.phone_number, um.razorpay_order_id,
+                r.receipt_number, r.email_to, r.email_sent_at, r.email_last_error
+             ORDER BY MAX(um.updated_at) DESC, MAX(um.created_at) DESC
+             LIMIT 100'
+        );
+
+        return $statement->fetchAll();
+    }
+
+    public function listPaymentEvents(?string $razorpayOrderId = null): array
+    {
+        try {
+            if ($razorpayOrderId !== null && $razorpayOrderId !== '') {
+                $statement = $this->pdo->prepare(
+                    'SELECT id, user_id, razorpay_order_id, razorpay_payment_id, source,
+                            event_type, status, message, created_at
+                     FROM payment_events
+                     WHERE razorpay_order_id = :razorpay_order_id
+                     ORDER BY created_at DESC, id DESC
+                     LIMIT 50'
+                );
+                $statement->execute(['razorpay_order_id' => $razorpayOrderId]);
+
+                return $statement->fetchAll();
+            }
+
+            $statement = $this->pdo->query(
+                'SELECT id, user_id, razorpay_order_id, razorpay_payment_id, source,
+                        event_type, status, message, created_at
+                 FROM payment_events
+                 ORDER BY created_at DESC, id DESC
+                 LIMIT 100'
+            );
+
+            return $statement->fetchAll();
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
     private function cartItemsForUser(int $userId): array
     {
         $statement = $this->pdo->prepare(

@@ -14,6 +14,8 @@ const emptyProfile = {
   profile_completed_at: "",
 };
 
+const todayIso = new Date().toISOString().slice(0, 10);
+
 const statusRank = {
   paid: 1,
   pending: 2,
@@ -36,6 +38,44 @@ function uniqueMagazinesByBestStatus(purchases = []) {
   });
 
   return Array.from(bestByMagazine.values());
+}
+
+function validateProfile(profile) {
+  const name = profile.username.trim();
+  const email = profile.email.trim();
+  const phoneDigits = profile.phone_number.replace(/\D/g, "");
+  const dob = profile.dob;
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const errors = {};
+
+  if (name.length < 2) {
+    errors.username = "Enter your name.";
+  }
+
+  if (!emailPattern.test(email)) {
+    errors.email = "Enter a valid email address.";
+  }
+
+  if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+    errors.phone_number = "Enter a valid phone number.";
+  }
+
+  if (!dob || Number.isNaN(new Date(dob).getTime()) || dob > todayIso) {
+    errors.dob = "Enter a valid date of birth.";
+  }
+
+  return errors;
+}
+
+function cleanProfile(profile) {
+  const phoneDigits = profile.phone_number.replace(/\D/g, "");
+
+  return {
+    ...profile,
+    username: profile.username.trim(),
+    email: profile.email.trim(),
+    phone_number: profile.phone_number.trim().startsWith("+") ? `+${phoneDigits}` : phoneDigits,
+  };
 }
 
 export default function ProfilePage() {
@@ -83,6 +123,7 @@ function ProfilePanel() {
   const [status, setStatus] = useState("loading");
   const [recoveryStatus, setRecoveryStatus] = useState("idle");
   const [autoRecoveryAttempted, setAutoRecoveryAttempted] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [message, setMessage] = useState("");
 
   const loadProfile = useCallback(async (shouldApply = () => true) => {
@@ -167,13 +208,23 @@ function ProfilePanel() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    const validationErrors = validateProfile(profile);
+
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
+      setMessage("Please fix the highlighted details.");
+      return;
+    }
+
+    const profilePayload = cleanProfile(profile);
     setStatus("saving");
     setMessage("");
+    setFieldErrors({});
 
     try {
       const data = await apiRequest(getToken, "/api/me", {
         method: "PUT",
-        body: JSON.stringify(profile),
+        body: JSON.stringify(profilePayload),
       });
 
       setProfile({
@@ -222,27 +273,54 @@ function ProfilePanel() {
             label="Name"
             value={profile.username}
             disabled={profileLocked}
-            onChange={(value) => setProfile((current) => ({ ...current, username: value }))}
+            error={fieldErrors.username}
+            minLength={2}
+            maxLength={80}
+            autoComplete="name"
+            onChange={(value) => {
+              setProfile((current) => ({ ...current, username: value }));
+              setFieldErrors((current) => ({ ...current, username: "" }));
+            }}
           />
           <ProfileField
             label="Email"
             type="email"
             value={profile.email}
             disabled={profileLocked}
-            onChange={(value) => setProfile((current) => ({ ...current, email: value }))}
+            error={fieldErrors.email}
+            maxLength={255}
+            autoComplete="email"
+            onChange={(value) => {
+              setProfile((current) => ({ ...current, email: value }));
+              setFieldErrors((current) => ({ ...current, email: "" }));
+            }}
           />
           <ProfileField
             label="Phone Number"
+            type="tel"
             value={profile.phone_number}
             disabled={profileLocked}
-            onChange={(value) => setProfile((current) => ({ ...current, phone_number: value }))}
+            error={fieldErrors.phone_number}
+            inputMode="tel"
+            minLength={10}
+            maxLength={20}
+            autoComplete="tel"
+            onChange={(value) => {
+              setProfile((current) => ({ ...current, phone_number: value }));
+              setFieldErrors((current) => ({ ...current, phone_number: "" }));
+            }}
           />
           <ProfileField
             label="Date of Birth"
             type="date"
             value={profile.dob}
             disabled={profileLocked}
-            onChange={(value) => setProfile((current) => ({ ...current, dob: value }))}
+            error={fieldErrors.dob}
+            max={todayIso}
+            onChange={(value) => {
+              setProfile((current) => ({ ...current, dob: value }));
+              setFieldErrors((current) => ({ ...current, dob: "" }));
+            }}
           />
         </div>
 
@@ -340,16 +418,19 @@ function ProfilePanel() {
   );
 }
 
-function ProfileField({ label, type = "text", value, disabled = false, onChange }) {
+function ProfileField({ label, type = "text", value, disabled = false, error = "", onChange, ...inputProps }) {
   return (
-    <label className="account-field">
+    <label className={`account-field${error ? " account-field-invalid" : ""}`}>
       <span>{label}</span>
       <input
         type={type}
         value={value}
         disabled={disabled}
+        aria-invalid={error ? "true" : "false"}
         onChange={(event) => onChange(event.target.value)}
+        {...inputProps}
       />
+      {error ? <small className="account-field-error">{error}</small> : null}
     </label>
   );
 }
