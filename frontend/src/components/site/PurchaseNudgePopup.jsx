@@ -94,7 +94,7 @@ export default function PurchaseNudgePopup() {
           <span>{featuredArticle.priceLabel}</span>
           <Button
             type="button"
-            className="purchase-popup__cta"
+            className="final-button purchase-popup__cta"
             disabled={status === "adding"}
             onClick={buyNow}
           >

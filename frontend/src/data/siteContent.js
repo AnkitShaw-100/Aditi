@@ -1,12 +1,12 @@
 import heroVideo from "../../media/aditi-hero-video.mp4";
-import westernTheatreImage from "../../media/image2.webp";
-import biotechnologyImage from "../../media/thumbnail_Serum-Institute-of-India-Pune--scaled.webp";
 import frameworkBg from "../../media/Terrain-w-scaled.webp";
 import logoMark from "../../media/logo.png";
 import bookPage1 from "../../media/book-image-1.png";
 import bookPage2 from "../../media/book-image-2.png";
 import bookPage3 from "../../media/book-image-3.png";
 import bookPage4 from "../../media/book-image-4.png";
+import bookPage5 from "../../media/book-image-5.png";
+import bookPage6 from "../../media/book-image-6.png";
 
 const contributorImages = import.meta.glob("../../media/contributors image/*", {
   eager: true,
@@ -121,14 +121,6 @@ export const AUTHORS = [
     image: contributorImage("rk narang"),
   },
   {
-    name: "AVM Anil Golani",
-    rank: "AVM (Retd.)",
-    specialty: "Aerospace power, air strategy, and defence studies.",
-    summary:
-      "Director General at the Centre for Aerospace Power and Strategic Studies, he brings an air-power view to strategic debate.",
-    image: contributorImage("avm anil golani"),
-  },
-  {
     name: "Brig. Brijesh Dhiman",
     rank: "Brigadier (Retd.)",
     specialty: "Counterinsurgency, internal security, and Northeast operations.",
@@ -145,36 +137,12 @@ export const AUTHORS = [
     image: contributorImage("rakesh sharma"),
   },
   {
-    name: "Maj. Gen. Neeraj Bali",
-    rank: "SM (Retd.)",
-    specialty: "Counter-terror operations, training, and China strategy.",
-    summary:
-      "A veteran of Rashtriya Rifles command and strategic advisory roles, he argues why India's China strategy needs a rethink.",
-    image: contributorImage("neeraj bali"),
-  },
-  {
     name: "Maj. Gen. Rajan Kochhar",
     rank: "VSM (Retd.)",
     specialty: "Army logistics, defence analysis, and higher defence management.",
     summary:
       "A prolific defence writer and former Army Ordnance Corps officer, he assesses future-ready logistics for the Indian Army.",
     image: contributorImage("rajan kochhar"),
-  },
-  {
-    name: "Maj. Gen. Bipin Bakshi",
-    rank: "AVSM, VSM (Retd.)",
-    specialty: "Land warfare studies, military modernisation, and strategic affairs.",
-    summary:
-      "A distinguished fellow at CLAWS, he adds a grounded military-modernisation lens to the contributor panel.",
-    image: contributorImage("bipin bakshi"),
-  },
-  {
-    name: "RAdm. Alok Bhatnagar",
-    rank: "NM, Legion of Merit (Retd.)",
-    specialty: "Maritime affairs, international engagement, and defence education.",
-    summary:
-      "A retired Rear Admiral and international affairs leader, he brings maritime and institutional depth to ADITI.",
-    image: contributorImage("alok bhatnagar"),
   },
 ];
 
@@ -241,48 +209,32 @@ export const DISPATCH_FILTERS = [
 export const DISPATCHES = [
   {
     type: "free",
-    href: "/articles/biotechnology-one-bet-several-wins",
-    slug: "biotechnology-one-bet-several-wins",
-    contentPath: "/articles/biotechnology-one-bet-several-wins.txt",
-    image: biotechnologyImage,
-    tag: "Initiative",
-    title: "Biotechnology - One Bet, Several Wins",
-    teaser:
-      "Kushal Johri on biotechnology as a strategic domain for healthcare, biodefence, exports, and geopolitical leverage.",
-    author: "Mr. Kushal Johri",
-    readTime: "14 min read",
-    cta: "Read",
-    priceLabel: "Free",
-    ariaLabel: "Read Biotechnology - One Bet, Several Wins",
-  },
-  {
-    type: "free",
     href: "/articles/builders-psyche-atmanirbharta-defence",
     slug: "builders-psyche-atmanirbharta-defence",
     contentPath: "/articles/builders-psyche-atmanirbharta-defence.txt",
-    image: "/article-banners/builders-psyche-atmanirbharta-defence.webp",
+    image: "/article-banners/builders-psyche-atmanirbharta-defence-banner.png",
     tag: "Initiative",
-    title: "The Need for a Builder's Psyche in Defence",
+    title: "The Need for a Builder's Psyche in the Pursuit of Atmanirbharta in Defence",
     teaser:
       "Dr. Indranil Roy argues that Atmanirbharta depends on building, testing, producing, deploying, and iterating domestic weapons.",
     author: "Dr. Indranil Roy",
-    readTime: "20 min read",
+    readTime: "10 min read",
     cta: "Read",
     priceLabel: "Free",
-    ariaLabel: "Read The Need for a Builder's Psyche in Defence",
+    ariaLabel: "Read The Need for a Builder's Psyche in the Pursuit of Atmanirbharta in Defence",
   },
   {
     type: "free",
     href: "/articles/china-western-theatre-command-evolving-posture",
     slug: "china-western-theatre-command-evolving-posture",
     contentPath: "/articles/china-western-theatre-command-evolving-posture.txt",
-    image: "/article-banners/china-western-theatre-command-evolving-posture.webp",
+    image: "/article-banners/china-western-theatre-command-evolving-posture-banner.png",
     tag: "Armament",
     title: "China's Western Theatre Command and PLA's Evolving Posture",
     teaser:
       "Jaidev Jamwal maps the Western Theatre Command's reforms, logistics, airpower, air defence, missiles, and multi-domain posture.",
     author: "Mr. Jaidev Jamwal",
-    readTime: "23 min read",
+    readTime: "12 min read",
     cta: "Read",
     priceLabel: "Free",
     ariaLabel: "Read China's Western Theatre Command and PLA's Evolving Posture",
@@ -292,13 +244,13 @@ export const DISPATCHES = [
     href: "/articles/challenges-of-atmanirbharta-in-naval-aviation",
     slug: "challenges-of-atmanirbharta-in-naval-aviation",
     contentPath: "/articles/challenges-of-atmanirbharta-in-naval-aviation.txt",
-    image: "/article-banners/challenges-of-atmanirbharta-in-naval-aviation.webp",
+    image: "/article-banners/challenges-of-atmanirbharta-in-naval-aviation-banner.png",
     tag: "Armament",
     title: "Challenges of Atmanirbharta in Naval Aviation",
     teaser:
       "Gp Capt Rajiv Kumar Narang examines why naval aviation has not followed the Navy's shipbuilding self-reliance trajectory.",
     author: "Gp Capt (Dr.) Rajiv Kumar Narang VM (Retd.)",
-    readTime: "18 min read",
+    readTime: "9 min read",
     cta: "Read",
     priceLabel: "Free",
     ariaLabel: "Read Challenges of Atmanirbharta in Naval Aviation",
@@ -308,61 +260,29 @@ export const DISPATCHES = [
     href: "/articles/followers-dilemma-cost-of-chasing-china-in-space",
     slug: "followers-dilemma-cost-of-chasing-china-in-space",
     contentPath: "/articles/followers-dilemma-cost-of-chasing-china-in-space.txt",
-    image: "/article-banners/followers-dilemma-cost-of-chasing-china-in-space.gif",
+    image: "/article-doc-assets/followers-dilemma-cost-of-chasing-china-in-space/image-2.png",
     tag: "Initiative",
     title: "The Follower's Dilemma: The Cost of Chasing China in Space",
     teaser:
       "Adithya Kothandhapani argues that India's space strategy must solve Indian constraints instead of validating Chinese metrics.",
-    author: "Adithya Kothandhapani",
-    readTime: "22 min read",
+    author: "Adithya Kothandhapani, Independent Space Analyst",
+    readTime: "12 min read",
     cta: "Read",
     priceLabel: "Free",
     ariaLabel: "Read The Follower's Dilemma: The Cost of Chasing China in Space",
   },
   {
     type: "free",
-    href: "/articles/inside-government-north-east-security-strategy",
-    slug: "inside-government-north-east-security-strategy",
-    contentPath: "/articles/inside-government-north-east-security-strategy.txt",
-    image: frameworkBg,
-    tag: "Terrain",
-    title: "Inside the Government's North East Security Strategy",
-    teaser:
-      "Brigadier Brijesh Dhiman studies how counter-terror operations, negotiations, and development changed the North East security landscape.",
-    author: "Brigadier Brijesh Dhiman (Retd.)",
-    readTime: "17 min read",
-    cta: "Read",
-    priceLabel: "Free",
-    ariaLabel: "Read Inside the Government's North East Security Strategy",
-  },
-  {
-    type: "free",
-    href: "/articles/chinas-cognitive-warfare-and-india",
-    slug: "chinas-cognitive-warfare-and-india",
-    contentPath: "/articles/chinas-cognitive-warfare-and-india.txt",
-    image: westernTheatreImage,
-    tag: "Geopolitics",
-    title: "China's Cognitive Warfare and India",
-    teaser:
-      "Prof. Srikanth Kondapalli maps China's grey-zone narrative operations and India's options for countering cognitive warfare.",
-    author: "Prof. Srikanth Kondapalli",
-    readTime: "10 min read",
-    cta: "Read",
-    priceLabel: "Free",
-    ariaLabel: "Read China's Cognitive Warfare and India",
-  },
-  {
-    type: "free",
     href: "/articles/control-of-air-future-regional-dynamics",
     slug: "control-of-air-future-regional-dynamics",
     contentPath: "/articles/control-of-air-future-regional-dynamics.txt",
-    image: "/article-banners/control-of-air-future-regional-dynamics.png",
+    image: "/article-banners/control-of-air-future-regional-dynamics-banner.png",
     tag: "Armament",
     title: "Control of Air: Future Regional Dynamics",
     teaser:
       "Air Marshal Diptendu Choudhury revisits control of air through contemporary conflicts, China, Pakistan, and India's future context.",
     author: "Air Marshal (Dr) Diptendu Choudhury (Retd)",
-    readTime: "13 min read",
+    readTime: "10 min read",
     cta: "Read",
     priceLabel: "Free",
     ariaLabel: "Read Control of Air: Future Regional Dynamics",
@@ -542,6 +462,14 @@ export const PAGEFLIP_PAGES = [
   {
     image: bookPage4,
     alt: "ADITI booklet page 4",
+  },
+  {
+    image: bookPage5,
+    alt: "ADITI booklet page 5",
+  },
+  {
+    image: bookPage6,
+    alt: "ADITI booklet page 6",
   },
 ];
 

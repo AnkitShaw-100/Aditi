@@ -17,6 +17,7 @@ export default function LandingPage() {
       <PurchaseNudgePopup />
       <HeroSection />
       <MissionSection />
+      <ReaderFeedbackSection />
       {/* <BrandSection /> */}
       <IssueContentsSection />
       <AuthorsSection />
@@ -24,10 +25,9 @@ export default function LandingPage() {
       <FrameworkSection />
       <DispatchesSection />
       <IssueOfferSection />
+      <FaqSection />
       {/* <EditionsSection /> */}
       {/* <OjasSection /> */}
-      <FaqSection />
-      <ReaderFeedbackSection />
     </>
   );
 }

@@ -185,8 +185,6 @@ function ReactPageFlipShowcase() {
                     />
                   ) : (
                     <>
-                      <div className="pageflip-corner-hint" aria-hidden="true" />
-
                       <HTMLFlipBook
                         key={`${bookWidth}x${bookHeight}`}
                         ref={bookRef}
