@@ -8,7 +8,6 @@ import { DISPATCHES } from "@/data/siteContent";
 import { addMagazineToCart } from "@/lib/cart";
 
 const SHOW_DELAY_MS = 2500;
-const VISIBLE_DURATION_MS = 8000;
 
 export default function PurchaseNudgePopup() {
   const { getToken, isSignedIn } = useAuth();
@@ -35,19 +34,6 @@ export default function PurchaseNudgePopup() {
 
     return () => window.clearTimeout(showTimer);
   }, [isDismissed]);
-
-  useEffect(() => {
-    if (!isVisible || status === "adding") {
-      return undefined;
-    }
-
-    const hideTimer = window.setTimeout(() => {
-      setIsVisible(false);
-      setIsDismissed(true);
-    }, VISIBLE_DURATION_MS);
-
-    return () => window.clearTimeout(hideTimer);
-  }, [isVisible, status]);
 
   if (!isVisible || !featuredArticle) {
     return null;

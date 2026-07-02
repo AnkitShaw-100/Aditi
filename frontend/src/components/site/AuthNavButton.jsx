@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import {
   SignedIn,
   SignedOut,
-  SignInButton,
   UserButton,
   useAuth,
+  useClerk,
   useUser,
 } from "@clerk/clerk-react";
 import { LogIn, ShoppingCart, UserRound } from "lucide-react";
@@ -39,19 +39,7 @@ export default function AuthNavButton({ mobile = false, compact = false }) {
   return (
     <div className={cn("auth-nav", mobile && "auth-nav--mobile", compact && "auth-nav--compact")}>
       <SignedOut>
-        <SignInButton mode="modal" forceRedirectUrl="/">
-          <Button
-            type="button"
-            className={cn(
-              "auth-nav-button h-10 rounded-none border border-ember/55 bg-ember px-4 font-rajdhani text-sm font-bold uppercase tracking-[0.16em] text-void shadow-none hover:border-chalk hover:bg-chalk hover:text-void",
-              compact && "h-9 px-3 text-xs tracking-[0.12em]",
-              mobile && "h-12 w-full justify-center text-base"
-            )}
-          >
-            <LogIn className={cn("size-4", compact && "hidden sm:block")} />
-            {compact ? "Sign Up" : "Sign In"}
-          </Button>
-        </SignInButton>
+        <AuthModalButton compact={compact} mobile={mobile} />
       </SignedOut>
 
       <SignedIn>
@@ -60,7 +48,7 @@ export default function AuthNavButton({ mobile = false, compact = false }) {
           className={cn(
             "auth-user-chip flex h-10 items-center gap-2 border-0 bg-transparent px-0",
             compact && "h-9 gap-2",
-            mobile && "h-auto w-full flex-wrap justify-center py-2"
+            mobile && "h-auto w-fit max-w-full flex-nowrap justify-center py-2"
           )}
         >
           <Button
@@ -99,6 +87,27 @@ export default function AuthNavButton({ mobile = false, compact = false }) {
         </div>
       </SignedIn>
     </div>
+  );
+}
+
+function AuthModalButton({ mobile = false, compact = false }) {
+  const { isLoaded } = useAuth();
+  const { openSignUp } = useClerk();
+
+  return (
+    <Button
+      type="button"
+      className={cn(
+        "auth-nav-button h-10 rounded-none border border-ember/55 bg-ember px-4 font-rajdhani text-sm font-bold uppercase tracking-[0.16em] text-void shadow-none hover:border-chalk hover:bg-chalk hover:text-void",
+        compact && "h-9 px-3 text-xs tracking-[0.12em]",
+        mobile && "h-12 w-full justify-center text-base"
+      )}
+      disabled={!isLoaded}
+      onClick={() => openSignUp({ forceRedirectUrl: "/" })}
+    >
+      <LogIn className={cn("size-4", compact && "hidden sm:block")} />
+      {isLoaded ? "Sign Up" : "Loading"}
+    </Button>
   );
 }
 

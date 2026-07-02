@@ -82,7 +82,6 @@ export default function HeroSection() {
       <div className="hero-panel absolute inset-x-0 bottom-0 z-20">
         <div className="mx-auto max-w-7xl px-5 pb-8 pt-8 sm:px-6 lg:px-10 md:pb-14">
           <div className="max-w-3xl">
-            <div className="mt-4 h-px w-12 bg-ember" id="heroRule" />
             <h1 className="mt-5 font-rajdhani text-[clamp(1.8rem,7vw,3.5rem)] font-bold leading-[1.1] text-chalk text-balance">
               For a century,
               <br />
@@ -98,7 +97,7 @@ export default function HeroSection() {
                 asChild
                 className="h-12 rounded-full bg-ember px-6 font-rajdhani text-base font-bold text-void hover:bg-[#ddb255]"
               >
-                <a href="#read">Read 3 free</a>
+                <a href="#read">Read for free</a>
               </Button>
               {premiumMagazine ? (
                 <AddToCartButton

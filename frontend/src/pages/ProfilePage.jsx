@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { SignInButton, SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
-import { ArrowRight, Download, RefreshCw, Save } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  useAuth,
+  useUser,
+} from "@clerk/clerk-react";
+import { ArrowRight, Clock, Download, RefreshCw, Save } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { apiRequest, downloadProtectedFile } from "@/lib/api";
@@ -14,7 +20,23 @@ const emptyProfile = {
   profile_completed_at: "",
 };
 
-const todayIso = new Date().toISOString().slice(0, 10);
+const minimumAgeYears = 12;
+
+function toDateInputValue(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function yearsAgo(years) {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - years);
+  return date;
+}
+
+const minimumDobIso = toDateInputValue(yearsAgo(minimumAgeYears));
 
 const statusRank = {
   paid: 1,
@@ -60,8 +82,10 @@ function validateProfile(profile) {
     errors.phone_number = "Enter a valid phone number.";
   }
 
-  if (!dob || Number.isNaN(new Date(dob).getTime()) || dob > todayIso) {
+  if (!dob || Number.isNaN(new Date(dob).getTime())) {
     errors.dob = "Enter a valid date of birth.";
+  } else if (dob > minimumDobIso) {
+    errors.dob = "Buyer must be at least 12 years old.";
   }
 
   return errors;
@@ -74,8 +98,18 @@ function cleanProfile(profile) {
     ...profile,
     username: profile.username.trim(),
     email: profile.email.trim(),
-    phone_number: profile.phone_number.trim().startsWith("+") ? `+${phoneDigits}` : phoneDigits,
+    phone_number: profile.phone_number.trim().startsWith("+")
+      ? `+${phoneDigits}`
+      : phoneDigits,
   };
+}
+
+function safeRedirectPath(value) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return "/checkout";
+  }
+
+  return value;
 }
 
 export default function ProfilePage() {
@@ -118,6 +152,8 @@ function AuthRequiredPanel() {
 function ProfilePanel() {
   const { getToken } = useAuth();
   const { user } = useUser();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState(emptyProfile);
   const [magazines, setMagazines] = useState([]);
   const [status, setStatus] = useState("loading");
@@ -125,89 +161,141 @@ function ProfilePanel() {
   const [autoRecoveryAttempted, setAutoRecoveryAttempted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [message, setMessage] = useState("");
+  const [redirectCountdown, setRedirectCountdown] = useState(null);
+  const checkoutRedirect = useMemo(
+    () => safeRedirectPath(searchParams.get("redirect")),
+    [searchParams]
+  );
 
-  const loadProfile = useCallback(async (shouldApply = () => true) => {
-    try {
-      await apiRequest(getToken, "/api/auth/sync-user", {
-        method: "POST",
-        body: JSON.stringify({
-          username: user?.fullName || user?.username,
-          email: user?.primaryEmailAddress?.emailAddress,
-          phone_number: user?.primaryPhoneNumber?.phoneNumber,
-        }),
-      });
-      const data = await apiRequest(getToken, "/api/me");
+  const loadProfile = useCallback(
+    async (shouldApply = () => true) => {
+      try {
+        await apiRequest(getToken, "/api/auth/sync-user", {
+          method: "POST",
+          body: JSON.stringify({
+            username: user?.fullName || user?.username,
+            email: user?.primaryEmailAddress?.emailAddress,
+            phone_number: user?.primaryPhoneNumber?.phoneNumber,
+          }),
+        });
+        const data = await apiRequest(getToken, "/api/me");
 
-      if (!shouldApply()) return;
+        if (!shouldApply()) return;
 
-      setProfile({
-        username: data.user?.username ?? "",
-        email: data.user?.email ?? "",
-        phone_number: data.user?.phone_number ?? "",
-        dob: data.user?.dob ?? "",
-        profile_completed_at: data.user?.profile_completed_at ?? "",
-      });
-      setMagazines(uniqueMagazinesByBestStatus(data.user?.magazines_bought ?? []));
-      setStatus("ready");
-    } catch (error) {
-      if (!shouldApply()) return;
-      setStatus("error");
-      setMessage(error.message);
-    }
-  }, [getToken, user]);
+        setProfile({
+          username: data.user?.username ?? "",
+          email: data.user?.email ?? "",
+          phone_number: data.user?.phone_number ?? "",
+          dob: data.user?.dob ?? "",
+          profile_completed_at: data.user?.profile_completed_at ?? "",
+        });
+        setMagazines(
+          uniqueMagazinesByBestStatus(data.user?.magazines_bought ?? [])
+        );
+        setStatus("ready");
+      } catch (error) {
+        if (!shouldApply()) return;
+        setStatus("error");
+        setMessage(error.message);
+      }
+    },
+    [getToken, user]
+  );
 
   useEffect(() => {
     let active = true;
-
-    loadProfile(() => active);
+    const timerId = window.setTimeout(() => {
+      loadProfile(() => active);
+    }, 0);
 
     return () => {
       active = false;
+      window.clearTimeout(timerId);
     };
   }, [loadProfile]);
 
   const isComplete = useMemo(
-    () => profile.username && profile.email && profile.phone_number && profile.dob,
+    () =>
+      profile.username && profile.email && profile.phone_number && profile.dob,
     [profile]
   );
-  const profileLocked = status === "ready" && Boolean(profile.profile_completed_at);
-  const hasPendingPurchase = magazines.some((magazine) => magazine.status === "pending");
+  const profileLocked =
+    status === "ready" && Boolean(profile.profile_completed_at);
+  const hasPendingPurchase = magazines.some(
+    (magazine) => magazine.status === "pending"
+  );
 
-  const recoverPendingPayments = useCallback(async ({ automatic = false } = {}) => {
-    setRecoveryStatus("checking");
-
-    if (!automatic) {
-      setMessage("");
-    }
-
-    try {
-      const data = await apiRequest(getToken, "/api/payments/razorpay/recover", {
-        method: "POST",
-      });
-
-      setMagazines(uniqueMagazinesByBestStatus(data.user?.magazines_bought ?? []));
-      setRecoveryStatus("idle");
-      setMessage(data.message || "Payment check completed.");
-    } catch (error) {
-      setRecoveryStatus("error");
+  const recoverPendingPayments = useCallback(
+    async ({ automatic = false } = {}) => {
+      setRecoveryStatus("checking");
 
       if (!automatic) {
-        setMessage(error.message);
+        setMessage("");
       }
-    }
-  }, [getToken]);
+
+      try {
+        const data = await apiRequest(
+          getToken,
+          "/api/payments/razorpay/recover",
+          {
+            method: "POST",
+          }
+        );
+
+        setMagazines(
+          uniqueMagazinesByBestStatus(data.user?.magazines_bought ?? [])
+        );
+        setRecoveryStatus("idle");
+        setMessage(data.message || "Payment check completed.");
+      } catch (error) {
+        setRecoveryStatus("error");
+
+        if (!automatic) {
+          setMessage(error.message);
+        }
+      }
+    },
+    [getToken]
+  );
 
   useEffect(() => {
     if (status !== "ready" || !hasPendingPurchase || autoRecoveryAttempted) {
       return;
     }
 
-    setAutoRecoveryAttempted(true);
-    recoverPendingPayments({ automatic: true });
-  }, [autoRecoveryAttempted, hasPendingPurchase, recoverPendingPayments, status]);
+    const timerId = window.setTimeout(() => {
+      setAutoRecoveryAttempted(true);
+      recoverPendingPayments({ automatic: true });
+    }, 0);
+
+    return () => window.clearTimeout(timerId);
+  }, [
+    autoRecoveryAttempted,
+    hasPendingPurchase,
+    recoverPendingPayments,
+    status,
+  ]);
+
+  useEffect(() => {
+    if (redirectCountdown === null) {
+      return undefined;
+    }
+
+    if (redirectCountdown <= 0) {
+      navigate(checkoutRedirect, { replace: true });
+      return undefined;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setRedirectCountdown((current) => (current === null ? null : current - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timerId);
+  }, [checkoutRedirect, navigate, redirectCountdown]);
 
   async function handleSubmit(event) {
     event.preventDefault();
+    setRedirectCountdown(null);
     const validationErrors = validateProfile(profile);
 
     if (Object.keys(validationErrors).length > 0) {
@@ -226,17 +314,25 @@ function ProfilePanel() {
         method: "PUT",
         body: JSON.stringify(profilePayload),
       });
+      const completedAt = data.user?.profile_completed_at ?? "";
 
       setProfile({
         username: data.user?.username ?? "",
         email: data.user?.email ?? "",
         phone_number: data.user?.phone_number ?? "",
         dob: data.user?.dob ?? "",
-        profile_completed_at: data.user?.profile_completed_at ?? "",
+        profile_completed_at: completedAt,
       });
-      setMagazines(uniqueMagazinesByBestStatus(data.user?.magazines_bought ?? []));
+      setMagazines(
+        uniqueMagazinesByBestStatus(data.user?.magazines_bought ?? [])
+      );
       setStatus("ready");
-      setMessage("Profile saved.");
+      if (completedAt) {
+        setRedirectCountdown(3);
+        setMessage("Profile saved. Redirecting you to the payment page in 3 seconds.");
+      } else {
+        setMessage("Profile saved.");
+      }
     } catch (error) {
       setStatus("error");
       setMessage(error.message);
@@ -265,7 +361,8 @@ function ProfilePanel() {
           Complete your access details.
         </h1>
         <p className="mt-4 max-w-2xl font-plex text-sm leading-7 text-ash">
-          These details stay in the PHP/MySQL backend and will be used for checkout, receipt email, and magazine access.
+          These details stay in the PHP/MySQL backend and will be used for
+          checkout, receipt email, and magazine access.
         </p>
 
         <div className="mt-7 grid gap-4 sm:grid-cols-2">
@@ -316,7 +413,7 @@ function ProfilePanel() {
             value={profile.dob}
             disabled={profileLocked}
             error={fieldErrors.dob}
-            max={todayIso}
+            max={minimumDobIso}
             onChange={(value) => {
               setProfile((current) => ({ ...current, dob: value }));
               setFieldErrors((current) => ({ ...current, dob: "" }));
@@ -331,18 +428,27 @@ function ProfilePanel() {
             className="final-button h-11 rounded-none px-6 font-rajdhani text-base font-bold"
           >
             <Save className="size-4" />
-            {profileLocked ? "Profile Locked" : status === "saving" ? "Saving" : "Save Profile"}
+            {profileLocked
+              ? "Profile Locked"
+              : status === "saving"
+                ? "Saving"
+                : "Save Profile"}
           </Button>
           <Button
             asChild
             variant="ghost"
             className="h-11 rounded-none border border-steel/70 px-5 font-rajdhani text-base font-bold text-chalk hover:border-ember hover:bg-plate hover:text-chalk"
           >
-            <Link to="/checkout">
+            <Link to={checkoutRedirect}>
               Go to Cart <ArrowRight className="size-4" />
             </Link>
           </Button>
-          {message ? (
+          {redirectCountdown !== null ? (
+            <span className="profile-redirect-notice" role="status" aria-live="polite">
+              <Clock className="size-4" />
+              Redirecting you to the payment page in {redirectCountdown}
+            </span>
+          ) : message ? (
             <span className="font-plex text-sm text-ember">{message}</span>
           ) : null}
         </div>
@@ -389,8 +495,13 @@ function ProfilePanel() {
           <div className="mt-3 grid gap-3">
             {magazines.length ? (
               magazines.map((magazine) => (
-                <div key={`${magazine.id}-${magazine.razorpay_order_id}`} className="account-mini-row account-purchase-row">
-                  <span className="account-purchase-title">{magazine.title}</span>
+                <div
+                  key={`${magazine.id}-${magazine.razorpay_order_id}`}
+                  className="account-mini-row account-purchase-row"
+                >
+                  <span className="account-purchase-title">
+                    {magazine.title}
+                  </span>
                   {magazine.status === "paid" ? (
                     <div className="account-download-actions">
                       <Button
@@ -409,7 +520,9 @@ function ProfilePanel() {
                 </div>
               ))
             ) : (
-              <p className="font-plex text-sm text-ash">No paid magazines yet.</p>
+              <p className="font-plex text-sm text-ash">
+                No paid magazines yet.
+              </p>
             )}
           </div>
         </div>
@@ -418,7 +531,15 @@ function ProfilePanel() {
   );
 }
 
-function ProfileField({ label, type = "text", value, disabled = false, error = "", onChange, ...inputProps }) {
+function ProfileField({
+  label,
+  type = "text",
+  value,
+  disabled = false,
+  error = "",
+  onChange,
+  ...inputProps
+}) {
   return (
     <label className={`account-field${error ? " account-field-invalid" : ""}`}>
       <span>{label}</span>

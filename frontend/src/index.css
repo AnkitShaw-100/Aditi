@@ -331,8 +331,10 @@
 
 .purchase-popup {
   position: fixed;
-  right: clamp(1rem, 3vw, 2rem);
-  bottom: clamp(1rem, 3vw, 2rem);
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: 50%;
   z-index: 70;
   display: grid;
   grid-template-columns: 12rem minmax(0, 1fr);
@@ -390,6 +392,7 @@
   flex-direction: column;
   justify-content: center;
   padding: 1.35rem 1.35rem 1.35rem 1.45rem;
+  text-align: left;
 }
 
 .purchase-popup__eyebrow {
@@ -458,21 +461,17 @@
 @keyframes purchase-popup-in {
   from {
     opacity: 0;
-    transform: translateY(0.75rem) scale(0.98);
+    transform: translate(-50%, calc(-50% + 0.75rem)) scale(0.98);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
 @media (max-width: 640px) {
   .purchase-popup {
-    top: 50%;
-    right: auto;
-    bottom: auto;
-    left: 50%;
     grid-template-columns: 1fr;
     width: min(calc(100vw - 1.5rem), 24rem);
     min-height: 0;
@@ -509,7 +508,11 @@
   }
 
   .purchase-popup__footer {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     margin-top: 0.85rem;
+    text-align: center;
   }
 
   .purchase-popup__footer span {
@@ -520,6 +523,7 @@
     min-height: 2.45rem;
     padding-inline: 0.85rem;
     font-size: 0.88rem;
+    margin-inline: auto;
   }
 }
 
@@ -697,6 +701,28 @@ body.menu-open {
   display: grid;
   align-content: center;
   padding: clamp(5rem, 10vh, 7rem) 0 2rem;
+}
+
+.menu-panel .auth-nav--mobile {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.menu-panel .auth-nav--mobile .auth-user-chip {
+  width: fit-content !important;
+  max-width: min(100%, 20rem);
+  margin-inline: auto;
+  justify-content: center;
+}
+
+.menu-panel .auth-nav--mobile .cl-rootBox {
+  flex: 0 0 auto;
+  width: auto !important;
+}
+
+.menu-panel .auth-nav--mobile .auth-user-chip > span {
+  max-width: min(8rem, 34vw);
 }
 
 .overlay-row {
@@ -1147,7 +1173,6 @@ body.menu-open {
 
 .issue-contents-title span {
   font-family: "Lora", serif;
-  font-style: italic;
   font-weight: 600;
   color: #d9bd79;
 }
@@ -1159,7 +1184,6 @@ body.menu-open {
   padding-left: 1.4rem;
   font-family: "Lora", serif;
   font-size: clamp(0.98rem, 1.55vw, 1.12rem);
-  font-style: italic;
   line-height: 1.7;
   color: #f2eada;
 }
@@ -1297,9 +1321,14 @@ body.menu-open {
     letter-spacing: 0.18em;
   }
 
-  .issue-contents-actions,
-  .issue-contents-primary {
+  .issue-contents-actions {
     width: 100%;
+    justify-content: center;
+  }
+
+  .issue-contents-primary {
+    width: min(100%, 18rem);
+    justify-content: center;
   }
 
   .issue-contents-link {
@@ -3951,6 +3980,39 @@ body.menu-open {
   overflow-y: auto !important;
 }
 
+@media (max-width: 640px) {
+  .cl-modalBackdrop {
+    align-items: start !important;
+    place-items: start center !important;
+    min-height: 100dvh !important;
+    overflow-y: auto !important;
+    padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem max(6rem, env(safe-area-inset-bottom)) !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cl-modalContent:not(:has(.cl-userProfile-root)) {
+    width: min(100%, 23rem) !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 5rem !important;
+  }
+
+  .cl-modalContent:not(:has(.cl-userProfile-root)) :where(.cl-cardBox, .cl-card) {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .cl-modalContent:not(:has(.cl-userProfile-root)) :where(.cl-main, .cl-form, .cl-footer) {
+    overflow: visible !important;
+  }
+
+  .cl-modalContent:not(:has(.cl-userProfile-root)) :where(.cl-formButtonPrimary) {
+    position: relative !important;
+    z-index: 2 !important;
+    min-height: 3.1rem !important;
+  }
+}
+
 .cl-modalContent :where(
   .cl-card,
   .cl-cardBox,
@@ -4248,6 +4310,148 @@ body.menu-open {
   justify-content: center;
 }
 
+.checkout-payment-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.checkout-payment-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 3px solid rgba(201, 154, 74, 0.72);
+  pointer-events: none;
+}
+
+.checkout-payment-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.checkout-summary-stack .account-mini-row {
+  background: rgba(9, 11, 8, 0.34);
+}
+
+.checkout-total-row {
+  border-color: rgba(201, 154, 74, 0.44);
+  background:
+    linear-gradient(135deg, rgba(201, 154, 74, 0.15), rgba(242, 234, 218, 0.035)),
+    rgba(9, 11, 8, 0.52) !important;
+}
+
+.checkout-total-row b {
+  color: #f2eada;
+  font-size: 1.42rem;
+}
+
+.checkout-profile-gate,
+.checkout-payment-ready {
+  border: 1px solid rgba(201, 154, 74, 0.44);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(201, 154, 74, 0.15), transparent 14rem),
+    rgba(201, 154, 74, 0.08);
+  padding: clamp(1rem, 3vw, 1.25rem);
+}
+
+.checkout-profile-gate {
+  position: relative;
+  border-width: 2px;
+  border-color: rgba(221, 178, 85, 0.82);
+  box-shadow:
+    0 0 0 1px rgba(201, 154, 74, 0.18),
+    0 1.1rem 2.6rem rgba(201, 154, 74, 0.18);
+  animation: checkout-attention 1.8s ease-in-out infinite;
+}
+
+.checkout-payment-ready {
+  border-color: rgba(129, 173, 121, 0.44);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(129, 173, 121, 0.15), transparent 14rem),
+    rgba(129, 173, 121, 0.08);
+}
+
+.checkout-status-icon {
+  display: grid;
+  width: 2.3rem;
+  height: 2.3rem;
+  margin-bottom: 0.75rem;
+  place-items: center;
+  border: 1px solid rgba(242, 234, 218, 0.18);
+  background: rgba(9, 11, 8, 0.48);
+  color: #c99a4a;
+}
+
+.checkout-gate-label {
+  width: fit-content;
+  margin-bottom: 0.45rem;
+  border: 1px solid rgba(221, 178, 85, 0.56);
+  background: rgba(221, 178, 85, 0.16);
+  padding: 0.26rem 0.5rem;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #f2eada;
+}
+
+.checkout-payment-ready .checkout-status-icon {
+  color: #9eca94;
+}
+
+.checkout-profile-button,
+.checkout-pay-button {
+  box-shadow: 0 0.85rem 2rem rgba(201, 154, 74, 0.18);
+}
+
+.checkout-secure-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  border-left: 2px solid rgba(201, 154, 74, 0.55);
+  padding-left: 0.8rem;
+}
+
+.checkout-secure-note svg {
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+  color: #c99a4a;
+}
+
+.profile-redirect-notice {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid rgba(201, 154, 74, 0.42);
+  background: rgba(201, 154, 74, 0.1);
+  padding: 0.65rem 0.85rem;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: #f2eada;
+}
+
+.profile-redirect-notice svg {
+  flex: 0 0 auto;
+  color: #c99a4a;
+}
+
+@keyframes checkout-attention {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(201, 154, 74, 0.16),
+      0 1.1rem 2.6rem rgba(201, 154, 74, 0.14);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(201, 154, 74, 0.18),
+      0 1.35rem 3rem rgba(201, 154, 74, 0.26);
+  }
+}
+
 .admin-table {
   border-collapse: collapse;
   font-family: "IBM Plex Sans", sans-serif;
@@ -4521,7 +4725,6 @@ body.menu-open {
   margin-top: 1.2rem;
   font-family: "Lora", serif;
   font-size: 0.9rem;
-  font-style: italic;
   line-height: 1.7;
   text-align: center;
   color: #a8aa9d;

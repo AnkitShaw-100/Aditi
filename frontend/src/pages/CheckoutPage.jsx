@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { SignInButton, SignedIn, SignedOut, useAuth, useUser } from "@clerk/clerk-react";
-import { CreditCard, Trash2, UserRound } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { AlertTriangle, ArrowRight, CheckCircle2, CreditCard, ShieldCheck, Trash2 } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { apiRequest, formatRupees } from "@/lib/api";
@@ -44,11 +44,14 @@ function CheckoutPanel() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [cart, setCart] = useState([]);
   const [profile, setProfile] = useState(null);
   const [status, setStatus] = useState("loading");
   const [paymentStatus, setPaymentStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const autoPaymentStartedRef = useRef(false);
+  const autoPayRequested = searchParams.get("pay") === "1";
 
   const loadCheckout = useCallback(async () => {
     setStatus("loading");
@@ -96,7 +99,20 @@ function CheckoutPanel() {
     }
   }
 
-  async function continueToPayment() {
+  const totalPaise = useMemo(
+    () => cart.reduce((total, item) => total + Number(item.price_paise || 0), 0),
+    [cart]
+  );
+
+  const profileComplete = Boolean(
+    profile?.username &&
+      profile?.email &&
+      profile?.phone_number &&
+      profile?.dob &&
+      profile?.profile_completed_at
+  );
+
+  const continueToPayment = useCallback(async () => {
     setPaymentStatus("creating");
     setMessage("");
 
@@ -165,20 +181,35 @@ function CheckoutPanel() {
       setPaymentStatus("error");
       setMessage(error.message);
     }
-  }
+  }, [getToken, navigate, profile, user]);
 
-  const totalPaise = useMemo(
-    () => cart.reduce((total, item) => total + Number(item.price_paise || 0), 0),
-    [cart]
-  );
+  useEffect(() => {
+    if (
+      !autoPayRequested ||
+      autoPaymentStartedRef.current ||
+      status !== "ready" ||
+      !profileComplete ||
+      !cart.length ||
+      paymentStatus !== "idle"
+    ) {
+      return;
+    }
 
-  const profileComplete = Boolean(
-    profile?.username &&
-      profile?.email &&
-      profile?.phone_number &&
-      profile?.dob &&
-      profile?.profile_completed_at
-  );
+    autoPaymentStartedRef.current = true;
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("pay");
+    setSearchParams(nextParams, { replace: true });
+    continueToPayment();
+  }, [
+    autoPayRequested,
+    cart.length,
+    continueToPayment,
+    paymentStatus,
+    profileComplete,
+    searchParams,
+    setSearchParams,
+    status,
+  ]);
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)]">
@@ -234,56 +265,70 @@ function CheckoutPanel() {
         </div>
       </div>
 
-      <aside className="account-panel p-5 md:p-7">
+      <aside className="account-panel checkout-payment-panel p-5 md:p-7">
         <p className="font-plex text-xs font-medium uppercase tracking-[0.18em] text-ember">
           Payment Summary
         </p>
-        <div className="mt-5 grid gap-3 border-t border-steel/50 pt-5">
+        <div className="checkout-summary-stack mt-5 grid gap-3 border-t border-steel/50 pt-5">
           <div className="account-mini-row">
             <span>Items</span>
             <b>{cart.length}</b>
           </div>
-          <div className="account-mini-row">
+          <div className="account-mini-row checkout-total-row">
             <span>Total</span>
             <b>{formatRupees(totalPaise)}</b>
           </div>
         </div>
 
         {!profileComplete ? (
-          <div className="mt-5 border border-ember/40 bg-ember/10 p-4">
-            <p className="font-rajdhani text-xl font-bold text-chalk">
-              Complete profile first
+          <div className="checkout-profile-gate mt-5">
+            <div className="checkout-status-icon" aria-hidden="true">
+              <AlertTriangle className="size-5" />
+            </div>
+            <p className="checkout-gate-label">Profile required</p>
+            <p className="font-rajdhani text-2xl font-bold leading-tight text-chalk">
+              Complete profile to unlock payment
             </p>
             <p className="mt-2 font-plex text-sm leading-6 text-ash">
-              Save your profile with phone number and date of birth before payment and receipt email generation.
+              Payment opens right after your saved profile is confirmed.
             </p>
             <Button
               asChild
-              variant="ghost"
-              className="mt-4 h-10 rounded-none border border-ember/50 px-4 font-rajdhani text-base font-bold text-chalk hover:bg-plate hover:text-chalk"
+              className="final-button checkout-profile-button mt-4 h-11 w-full rounded-none px-4 font-rajdhani text-base font-bold"
             >
-              <Link to="/profile">
-                <UserRound className="size-4" />
-                Open Profile
+              <Link to={`/profile?redirect=${encodeURIComponent("/checkout?pay=1")}`}>
+                <CreditCard className="size-4" />
+                Continue to Payment
+                <ArrowRight className="size-4" />
               </Link>
             </Button>
           </div>
-        ) : null}
-
-        <Button
-          type="button"
-          disabled={!cart.length || !profileComplete || paymentStatus === "creating" || paymentStatus === "verifying"}
-          onClick={continueToPayment}
-          className="final-button checkout-pay-button mt-5 h-11 w-full rounded-none px-6 font-rajdhani text-base font-bold"
-        >
-          <CreditCard className="size-4" />
-          {paymentStatus === "creating"
-            ? "Creating Order"
-            : paymentStatus === "verifying"
-              ? "Verifying"
-              : "Continue to Payment"}
-        </Button>
-        <p className="mt-3 font-plex text-xs leading-5 text-fog">
+        ) : (
+          <div className="checkout-payment-ready mt-5">
+            <div className="checkout-status-icon" aria-hidden="true">
+              <CheckCircle2 className="size-5" />
+            </div>
+            <p className="font-rajdhani text-xl font-bold text-chalk">Payment is ready</p>
+            <p className="mt-2 font-plex text-sm leading-6 text-ash">
+              Your saved profile will be used for Razorpay, order records, and the receipt email.
+            </p>
+            <Button
+              type="button"
+              disabled={!cart.length || paymentStatus === "creating" || paymentStatus === "verifying"}
+              onClick={continueToPayment}
+              className="final-button checkout-pay-button mt-4 h-11 w-full rounded-none px-6 font-rajdhani text-base font-bold"
+            >
+              <CreditCard className="size-4" />
+              {paymentStatus === "creating"
+                ? "Creating Order"
+                : paymentStatus === "verifying"
+                  ? "Verifying"
+                  : "Continue to Payment"}
+            </Button>
+          </div>
+        )}
+        <p className="checkout-secure-note mt-3 font-plex text-xs leading-5 text-fog">
+          <ShieldCheck className="size-4" />
           Secure payment opens through Razorpay. After successful verification, you will be taken to your download page and the receipt will be emailed.
         </p>
       </aside>
